@@ -3,7 +3,16 @@ import { api } from '../api.js'
 import { useApi } from '../useApi.js'
 import { useUser } from '../UserContext.jsx'
 import { DifficultyBadge, LockedTag } from '../components/Badges.jsx'
-import { ErrorBox, Loading } from '../components/Status.jsx'
+import { EmptyState, ErrorBox, PageHeader } from '../components/Status.jsx'
+import Select from '../components/Select.jsx'
+import { IconChevronRight, IconFilter } from '../components/Icons.jsx'
+
+const DIFFICULTIES = [
+  { value: '', label: 'All' },
+  { value: 'EASY', label: 'Easy' },
+  { value: 'MEDIUM', label: 'Medium' },
+  { value: 'HARD', label: 'Hard' },
+]
 
 // Filters live in the URL (?topicId=&difficulty=) so the topic map can link straight to a filtered list.
 export default function Problems() {
@@ -23,54 +32,60 @@ export default function Problems() {
     setParams(next)
   }
 
-  return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-semibold">Problems</h1>
+  const topicOptions = [{ value: '', label: 'All' }, ...(graph.data?.nodes.map((n) => ({ value: String(n.id), label: n.name })) ?? [])]
 
-      <div className="flex flex-wrap gap-4 text-sm">
-        <label className="flex items-center gap-2">
-          Topic
-          <select value={topicId} onChange={(e) => setFilter('topicId', e.target.value)}
-            className="border border-line rounded px-2 py-1 bg-white">
-            <option value="">All</option>
-            {graph.data?.nodes.map((n) => <option key={n.id} value={n.id}>{n.name}</option>)}
-          </select>
-        </label>
-        <label className="flex items-center gap-2">
-          Difficulty
-          <select value={difficulty} onChange={(e) => setFilter('difficulty', e.target.value)}
-            className="border border-line rounded px-2 py-1 bg-white">
-            <option value="">All</option>
-            <option value="EASY">Easy</option>
-            <option value="MEDIUM">Medium</option>
-            <option value="HARD">Hard</option>
-          </select>
-        </label>
+  return (
+    <div className="space-y-8">
+      <PageHeader eyebrow="Practice" title="Problems">
+        Java problems across every topic. Locked topics stay open for practice; the tag is information only.
+      </PageHeader>
+
+      <div className="glass rounded-2xl p-2 flex flex-col sm:flex-row sm:items-center gap-2 relative z-20">
+        <span className="hidden sm:flex items-center gap-2 pl-2 pr-1 text-faint"><IconFilter size={16} /></span>
+        <Select className="sm:w-60" label="Topic" value={topicId} onChange={(v) => setFilter('topicId', v)} options={topicOptions} />
+        <Select className="sm:w-52" label="Difficulty" value={difficulty} onChange={(v) => setFilter('difficulty', v)} options={DIFFICULTIES} />
+        {problems.data && (
+          <span className="sm:ml-auto px-3 text-xs text-faint tabular-nums">
+            {problems.data.length} {problems.data.length === 1 ? 'problem' : 'problems'}
+          </span>
+        )}
       </div>
 
       {problems.error && <ErrorBox error={problems.error} onRetry={problems.reload} />}
-      {problems.loading && !problems.data && <Loading />}
+      {problems.loading && !problems.data && <div className="skeleton h-96" />}
       {problems.data && (problems.data.length === 0 ? (
-        <p className="text-muted">No problems match these filters.</p>
+        <EmptyState icon={<IconFilter />}>No problems match these filters.</EmptyState>
       ) : (
-        <table className="w-full text-sm bg-white border border-line">
-          <thead className="text-left text-muted border-b border-line">
-            <tr><th className="p-3 font-medium">Title</th><th className="p-3 font-medium">Topic</th><th className="p-3 font-medium">Difficulty</th></tr>
-          </thead>
-          <tbody>
-            {problems.data.map((p) => (
-              <tr key={p.id} className="border-b border-line last:border-0">
-                <td className="p-3"><Link to={`/problems/${p.id}`} className="text-moss hover:underline">{p.title}</Link></td>
-                <td className="p-3">
-                  <span className="mr-2">{p.topicName}</span>
-                  {/* Locked topics are still open for manual practice (CONTRACT.md 2.3); the tag is information only. */}
-                  {locked.has(p.topicId) && <LockedTag />}
-                </td>
-                <td className="p-3"><DifficultyBadge difficulty={p.difficulty} /></td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <div className={`glass rounded-2xl overflow-x-auto transition-opacity duration-200 ${problems.loading ? 'opacity-60' : ''}`}>
+          <table className="data-table min-w-[560px]">
+            <thead>
+              <tr><th>Title</th><th>Topic</th><th>Difficulty</th><th className="w-10"><span className="sr-only">Open</span></th></tr>
+            </thead>
+            <tbody className="stagger">
+              {problems.data.map((p) => (
+                <tr key={p.id} className="group">
+                  <td>
+                    <Link to={`/problems/${p.id}`} className="font-medium text-ink group-hover:text-accent transition-colors">{p.title}</Link>
+                  </td>
+                  <td>
+                    <span className="inline-flex flex-wrap items-center gap-2">
+                      <span className="text-muted">{p.topicName}</span>
+                      {/* Locked topics are still open for manual practice (CONTRACT.md 2.3); the tag is information only. */}
+                      {locked.has(p.topicId) && <LockedTag />}
+                    </span>
+                  </td>
+                  <td><DifficultyBadge difficulty={p.difficulty} /></td>
+                  <td className="text-right">
+                    <Link to={`/problems/${p.id}`} aria-label={`Open ${p.title}`} tabIndex={-1}
+                      className="inline-flex text-faint group-hover:text-accent group-hover:translate-x-0.5 transition-all">
+                      <IconChevronRight size={18} />
+                    </Link>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       ))}
     </div>
   )
