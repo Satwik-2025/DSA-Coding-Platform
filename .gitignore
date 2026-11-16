@@ -16,3 +16,8 @@ Thumbs.db
 /backend/data/
 *.mv.db
 *.trace.db
+
+# Python caches and locally trained weights
+__pycache__/
+*.pyc
+hlr_weights.new.json
