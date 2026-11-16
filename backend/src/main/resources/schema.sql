@@ -86,6 +86,9 @@ CREATE TABLE IF NOT EXISTS attempts (
     CONSTRAINT ck_attempts_counts CHECK (passed_count >= 0 AND passed_count <= total_count),
     CONSTRAINT ck_attempts_time   CHECK (time_spent_seconds >= 0)
 );
+
+-- Added with multi-language support. Separate statement so existing databases get the column too.
+ALTER TABLE attempts ADD COLUMN IF NOT EXISTS language VARCHAR(10) DEFAULT 'JAVA' NOT NULL;
 CREATE INDEX IF NOT EXISTS ix_attempts_user_time ON attempts (user_id, submitted_at);
 
 CREATE TABLE IF NOT EXISTS error_events (

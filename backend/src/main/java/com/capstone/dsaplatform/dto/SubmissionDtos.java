@@ -13,7 +13,8 @@ public final class SubmissionDtos {
     private SubmissionDtos() {
     }
 
-    public record SubmissionRequest(Long userId, Long problemId, String code, Integer timeSpentSeconds) {
+    // language: JAVA (default when omitted), PYTHON or CPP.
+    public record SubmissionRequest(Long userId, Long problemId, String code, Integer timeSpentSeconds, String language) {
     }
 
     // input / expectedOutput / actualOutput are null for hidden tags so hidden tests never leak.
@@ -21,7 +22,8 @@ public final class SubmissionDtos {
                                  String input, String expectedOutput, String actualOutput) {
     }
 
-    public record TestResultView(Integer ordinal, TestTag tag, Verdict verdict, long runtimeMs) {
+    // memoryKb is null unless the sandbox can measure it (Docker sandbox).
+    public record TestResultView(Integer ordinal, TestTag tag, Verdict verdict, long runtimeMs, Integer memoryKb) {
     }
 
     public record SubmissionResponse(Long attemptId,
@@ -38,6 +40,17 @@ public final class SubmissionDtos {
                                      Integer optimalRuntimeMs,
                                      List<TestResultView> testResults,
                                      List<ResourceLink> resources,
-                                     Instant submittedAt) {
+                                     Instant submittedAt,
+                                     String language,
+                                     // Ordered from a gentle nudge to a concrete pointer; empty when accepted.
+                                     List<String> hints,
+                                     // "Faster than X% of accepted submissions in this language"; null without peers.
+                                     Integer runtimePercentile,
+                                     Integer maxMemoryKb) {
+    }
+
+    /** One past attempt, newest first, for the problem page's Submissions tab. */
+    public record HistoryItem(Long attemptId, Verdict verdict, int passedCount, int totalCount, String language,
+                              Integer largeRuntimeMs, Instant submittedAt, String code) {
     }
 }

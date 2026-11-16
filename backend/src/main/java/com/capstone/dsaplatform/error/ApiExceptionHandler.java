@@ -28,6 +28,18 @@ public class ApiExceptionHandler {
         return badRequest(ex.getMessage());
     }
 
+    @ExceptionHandler(TooManyRequestsException.class)
+    public ResponseEntity<ApiError> tooMany(TooManyRequestsException ex) {
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).header("Retry-After", "10")
+                .body(new ApiError("TOO_MANY_REQUESTS", ex.getMessage()));
+    }
+
+    @ExceptionHandler(ServiceUnavailableException.class)
+    public ResponseEntity<ApiError> unavailable(ServiceUnavailableException ex) {
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).header("Retry-After", "5")
+                .body(new ApiError("SERVICE_UNAVAILABLE", ex.getMessage()));
+    }
+
     // e.g. GET /api/topics/graph without ?userId
     @ExceptionHandler(MissingServletRequestParameterException.class)
     public ResponseEntity<ApiError> missingParam(MissingServletRequestParameterException ex) {

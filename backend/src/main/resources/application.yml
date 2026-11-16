@@ -2,7 +2,8 @@ spring:
   application:
     name: dsa-platform
   profiles:
-    # H2 by default so the backend starts with zero setup; use -Dspring-boot.run.profiles=postgres for the real DB.
+    # H2 in a local file by default, so the backend starts with zero setup AND keeps progress across restarts.
+    # Use the "postgres" profile for a real server, or "h2mem" for a throw-away in-memory database.
     default: h2
   jpa:
     hibernate:
@@ -21,11 +22,11 @@ spring:
       mode: always
 
 server:
-  port: 8081
+  port: ${PORT:8081}
 
 app:
   cors:
-    allowed-origin: http://localhost:5173
+    allowed-origin: ${CORS_ORIGIN:http://localhost:5173}
   unlock:
     # A topic unlocks when EVERY prerequisite meets both thresholds (CONTRACT.md section 2.3).
     # Kept here, not in the DB, so they can be tuned without a migration.
@@ -37,6 +38,31 @@ app:
   hlr:
     # Trained offline in Python (CONTRACT.md section 6); loaded and validated once at startup by HlrPredictor.
     weights-path: classpath:ml/hlr_weights.json
+  runner:
+    # "local": hardened child processes (Java security manager, Python audit-hook guard, empty env).
+    # "docker": one locked-down container per run (no network, read-only fs, CPU/memory/pids limits).
+    sandbox: ${RUNNER_SANDBOX:local}
+    # Empty = auto-detect python3 / python (3.8+ needed).
+    python-command: ${RUNNER_PYTHON:}
+    cpp-command: ${RUNNER_CPP:g++}
+    # Native C++ cannot be contained by the local sandbox; only enable this for trusted, single-user use.
+    allow-unsandboxed-native: ${RUNNER_ALLOW_UNSANDBOXED_NATIVE:false}
+    docker:
+      java-image: eclipse-temurin:21-jre
+      python-image: python:3.12-slim
+      cpp-image: gcc:13
+      memory: 256m
+      cpus: 1
+      pids-limit: 64
+  judge:
+    # 0 = half the CPU cores, at most 4.
+    workers: ${JUDGE_WORKERS:0}
+    max-queued: 50
+  rate-limit:
+    submissions-per-minute: 10
+    runs-per-minute: 20
+  limits:
+    max-code-chars: 65535
 
 ---
 spring:
@@ -44,16 +70,27 @@ spring:
     activate:
       on-profile: h2
   datasource:
+    # File database under ./data (relative to where the backend starts, i.e. backend/data).
     # MODE=PostgreSQL + DATABASE_TO_LOWER so the same schema.sql/data.sql run unchanged on both databases.
-    # DB_CLOSE_DELAY=-1 keeps the in-memory DB alive for the whole app lifetime.
-    url: jdbc:h2:mem:dsa_platform;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH;DB_CLOSE_DELAY=-1
+    url: jdbc:h2:file:${DATA_DIR:./data}/dsa_platform;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH
     username: sa
     password:
   h2:
     console:
-      # Lets you inspect seeded rows at http://localhost:8081/h2-console during development/viva.
+      # Lets you inspect stored rows at http://localhost:8081/h2-console during development/viva.
       enabled: true
       path: /h2-console
+
+---
+spring:
+  config:
+    activate:
+      on-profile: h2mem
+  datasource:
+    # Throw-away in-memory database (used by the tests). DB_CLOSE_DELAY=-1 keeps it alive for the app's lifetime.
+    url: jdbc:h2:mem:dsa_platform;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH;DB_CLOSE_DELAY=-1
+    username: sa
+    password:
 
 ---
 spring:
@@ -62,6 +99,6 @@ spring:
       on-profile: postgres
   datasource:
     # DB_PORT matches docker-compose.yml, so moving to 5433 is one environment variable.
-    url: jdbc:postgresql://localhost:${DB_PORT:5432}/dsa_platform
-    username: dsa
-    password: dsa
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:dsa_platform}
+    username: ${DB_USER:dsa}
+    password: ${DB_PASSWORD:dsa}

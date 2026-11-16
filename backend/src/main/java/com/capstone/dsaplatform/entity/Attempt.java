@@ -59,6 +59,10 @@ public class Attempt {
     @Column(name = "submitted_at", nullable = false)
     private LocalDateTime submittedAt;
 
+    // JAVA, PYTHON or CPP; rows from before languages existed default to JAVA.
+    @Column(nullable = false, length = 10)
+    private String language = "JAVA";
+
     // Public because the submission service creates attempts (JPA also needs a no-arg constructor).
     public Attempt() {
     }
@@ -91,4 +95,8 @@ public class Attempt {
 
     public LocalDateTime getSubmittedAt() { return submittedAt; }
     public void setSubmittedAt(LocalDateTime submittedAt) { this.submittedAt = submittedAt; }
+
+    public String getLanguage() { return language; }
+
+    public void setLanguage(String language) { this.language = language; }
 }

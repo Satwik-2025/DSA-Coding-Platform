@@ -32,6 +32,8 @@ public final class ProblemDtos {
                                 Integer timeLimitMs,
                                 Integer targetSolveSeconds,
                                 List<SampleTestView> sampleTests,
-                                long testCount) {
+                                long testCount,
+                                // Starter code per language id (JAVA, PYTHON, CPP); JAVA equals starterCode.
+                                java.util.Map<String, String> starters) {
     }
 }

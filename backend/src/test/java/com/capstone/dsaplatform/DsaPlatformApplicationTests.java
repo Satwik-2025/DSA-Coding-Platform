@@ -9,7 +9,7 @@ import org.springframework.test.context.ActiveProfiles;
  * ddl-auto=validate, so this one test proves the entities and the SQL agree.
  */
 @SpringBootTest
-@ActiveProfiles("h2")
+@ActiveProfiles("h2mem") // in-memory: never touches (or locks) the developer's backend/data file
 class DsaPlatformApplicationTests {
 
     @Test

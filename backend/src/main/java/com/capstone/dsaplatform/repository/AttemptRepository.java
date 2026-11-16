@@ -23,6 +23,22 @@ public interface AttemptRepository extends JpaRepository<Attempt, Long> {
     @Query("select a.submittedAt from Attempt a where a.user.id = :userId and a.submittedAt >= :since")
     List<LocalDateTime> findSubmissionTimesSince(@Param("userId") Long userId, @Param("since") LocalDateTime since);
 
+    // Submissions tab on the problem page, newest first.
+    List<Attempt> findTop50ByUserIdAndProblemIdOrderBySubmittedAtDescIdDesc(Long userId, Long problemId);
+
+    // Runtime percentile: other accepted attempts on the same problem and language with a LARGE runtime...
+    @Query("select count(a) from Attempt a where a.problem.id = :problemId and a.language = :language "
+            + "and a.verdict = :verdict and a.largeRuntimeMs is not null and a.id <> :self")
+    long countRuntimePeers(@Param("problemId") Long problemId, @Param("language") String language,
+                           @Param("verdict") Verdict verdict, @Param("self") Long self);
+
+    // ...and how many of those were slower than this one.
+    @Query("select count(a) from Attempt a where a.problem.id = :problemId and a.language = :language "
+            + "and a.verdict = :verdict and a.largeRuntimeMs > :runtimeMs and a.id <> :self")
+    long countSlowerPeers(@Param("problemId") Long problemId, @Param("language") String language,
+                          @Param("verdict") Verdict verdict, @Param("runtimeMs") Integer runtimeMs,
+                          @Param("self") Long self);
+
     // Used to skip already-solved problems in recommendations.
     @Query("select distinct a.problem.id from Attempt a where a.user.id = :userId and a.verdict = :verdict")
     List<Long> findProblemIdsWithVerdict(@Param("userId") Long userId, @Param("verdict") Verdict verdict);

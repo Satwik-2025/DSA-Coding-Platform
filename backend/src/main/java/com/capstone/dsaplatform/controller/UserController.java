@@ -1,5 +1,8 @@
 package com.capstone.dsaplatform.controller;
 
+import com.capstone.dsaplatform.dto.SubmissionDtos.HistoryItem;
+import com.capstone.dsaplatform.service.SubmissionService;
+
 import com.capstone.dsaplatform.dto.ReadinessDtos.ReadinessResponse;
 import com.capstone.dsaplatform.dto.ReadinessDtos.SelfRatingRequest;
 import com.capstone.dsaplatform.dto.ReadinessDtos.SelfRatingResponse;
@@ -32,10 +35,12 @@ public class UserController {
     private final RecommendationService recommendationService;
     private final WeaknessService weaknessService;
     private final ReadinessService readinessService;
+    private final SubmissionService submissionService;
 
     public UserController(UserService userService, TopicStatusService topicStatusService,
                           RecommendationService recommendationService, WeaknessService weaknessService,
-                          ReadinessService readinessService) {
+                          ReadinessService readinessService, SubmissionService submissionService) {
+        this.submissionService = submissionService;
         this.userService = userService;
         this.topicStatusService = topicStatusService;
         this.recommendationService = recommendationService;
@@ -68,6 +73,12 @@ public class UserController {
     @GetMapping("/{id}/readiness")
     public ReadinessResponse readiness(@PathVariable Long id) {
         return readinessService.report(id);
+    }
+
+    // Submissions tab on the problem page: this learner's attempts on one problem, newest first (max 50).
+    @GetMapping("/{id}/problems/{problemId}/submissions")
+    public List<HistoryItem> submissions(@PathVariable Long id, @PathVariable Long problemId) {
+        return submissionService.history(id, problemId);
     }
 
     @PostMapping("/{id}/self-rating")
