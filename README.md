@@ -16,6 +16,7 @@ are for interviews.
 |---|---|
 | Problems | 15 seeded problems over a 10-topic prerequisite graph, with statements, samples and starter code |
 | Code runner | Compiles and runs Java submissions against sample, edge, boundary and large tests, each in its own process with time and memory limits |
+| Solve timer | Optional stopwatch or countdown timer on each problem (pause, reset, chime when time is up); a personal aid that doesn't affect the time recorded with a submission |
 | Mistake analysis | Classifies every failed submission (wrong algorithm, missed edge case, off-by-one, bad complexity, and so on) and links study resources |
 | Retention (ML) | Predicts how well each topic is remembered using the trained HLR model |
 | Topic map | Prerequisite graph; a topic unlocks when its prerequisites are retained and solved |

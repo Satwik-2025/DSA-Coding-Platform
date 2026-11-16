@@ -7,6 +7,7 @@ import { useUser } from '../UserContext.jsx'
 import { ERROR_CATEGORY } from '../format.js'
 import { DifficultyBadge, VerdictBadge } from '../components/Badges.jsx'
 import ResourceList from '../components/ResourceList.jsx'
+import SolveTimer from '../components/SolveTimer.jsx'
 import { ErrorBox, Loading, Spinner } from '../components/Status.jsx'
 import { IconChevronRight, IconClock, IconPlay, IconRefresh, IconTarget } from '../components/Icons.jsx'
 
@@ -59,11 +60,15 @@ export default function ProblemSolve() {
 
   return (
     <div className="space-y-6">
-      <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-xs text-faint">
-        <Link to="/problems" className="hover:text-ink transition-colors">Problems</Link>
-        <IconChevronRight size={13} />
-        <span className="text-muted truncate">{p.title}</span>
-      </nav>
+      {/* z-30 keeps the timer panel above the glass cards below it. */}
+      <div className="relative z-30 flex items-center justify-between gap-3">
+        <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-xs text-faint min-w-0">
+          <Link to="/problems" className="hover:text-ink transition-colors shrink-0">Problems</Link>
+          <IconChevronRight size={13} className="shrink-0" />
+          <span className="text-muted truncate">{p.title}</span>
+        </nav>
+        <SolveTimer key={p.id} problemId={p.id} />
+      </div>
 
       {/* Editor column is the wider one (55% on laptops, 60% on large screens). */}
       <div className="grid gap-6 lg:grid-cols-[minmax(0,9fr)_minmax(0,11fr)] xl:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] items-start">

@@ -59,7 +59,16 @@ export const IconClock = (p) => <Icon {...p}><circle cx="12" cy="12" r="8" /><pa
 export const IconTarget = (p) => (
   <Icon {...p}><circle cx="12" cy="12" r="8" /><circle cx="12" cy="12" r="4" /><circle cx="12" cy="12" r="0.6" /></Icon>
 )
-export const IconFilter =(p) => <Icon {...p}><path d="M4 6h16M7 12h10M10 18h4" /></Icon>
+export const IconStopwatch = (p) => (
+  <Icon {...p}><circle cx="12" cy="13.5" r="7" /><path d="M12 13.5V10" /><path d="M10 3.5h4" /><path d="m18 7.5 1.3-1.3" /></Icon>
+)
+export const IconHourglass = (p) => (
+  <Icon {...p}><path d="M7 3.5h10M7 20.5h10" /><path d="M8 3.5c0 4.5 8 5 8 8.5s-8 4-8 8.5" /><path d="M16 3.5c0 4.5-8 5-8 8.5s8 4 8 8.5" /></Icon>
+)
+export const IconPause = (p) => <Icon {...p}><path d="M9 6v12M15 6v12" /></Icon>
+export const IconMinus = (p) => <Icon {...p}><path d="M6 12h12" /></Icon>
+export const IconPlus = (p) => <Icon {...p}><path d="M12 6v12M6 12h12" /></Icon>
+export const IconFilter = (p) => <Icon {...p}><path d="M4 6h16M7 12h10M10 18h4" /></Icon>
 export const IconBook = (p) => (
   <Icon {...p}><path d="M4.5 5.5A1.5 1.5 0 0 1 6 4h13.5v14H6a1.5 1.5 0 0 0-1.5 1.5v-14Z" /><path d="M4.5 19.5A1.5 1.5 0 0 0 6 21h13.5v-3" /></Icon>
 )

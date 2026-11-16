@@ -26,7 +26,7 @@ Default is `http://localhost:8081`, which is what `application.yml` sets today.
 | `/` | Overall readiness, recommended problems | 5.6, 5.4 |
 | `/topics` | Prerequisite graph with lock state and retention | 5.8, 5.3 |
 | `/problems` | Problem list with topic / difficulty filters | 5.9, 5.8 |
-| `/problems/:id` | Statement, samples, code box, submission result | 5.10, 5.1 |
+| `/problems/:id` | Statement, samples, code box, submission result, stopwatch / countdown timer | 5.10, 5.1 |
 | `/readiness` | Readiness history chart, per-topic scores, self-rating | 5.6, 5.7 |
 | `/mistakes` | Recurring mistake types with study links | 5.5 |
 
@@ -57,6 +57,7 @@ The learner switcher in the sidebar (or the mobile menu) uses `GET /api/users` (
     src/components/Layout.jsx        sidebar, mobile top bar and menu
     src/components/AnimatedRoutes.jsx  sliding page transitions around the routes
     src/components/Select.jsx        styled, keyboard-accessible dropdown
+    src/components/SolveTimer.jsx    stopwatch and countdown timer on the solve page (kept per problem in sessionStorage)
     src/components/ThemeToggle.jsx   dark/light switch
     src/components/Icons.jsx         inline SVG icons
     src/components/                  also badges, status (loading / error / empty), study-link list
