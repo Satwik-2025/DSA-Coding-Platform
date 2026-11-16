@@ -2194,3 +2194,117 @@ SELECT p.id, 'LARGE', 7, '5000
 FROM problems p WHERE p.slug = 'house-robber'
 AND NOT EXISTS (SELECT 1 FROM test_cases t WHERE t.problem_id = p.id AND t.ordinal = 7);
 
+-- ===== Study plans (curated problem sequences) =====
+-- Idempotent like the rest of this file: plans by id, items by (plan_id, problem_id).
+INSERT INTO study_plans (id, slug, title, description, ordinal) VALUES
+    (1, 'foundations', 'Foundations', 'Six warm-up problems on arrays, strings, stacks and linked lists. Start here if you are new.', 1),
+    (2, 'pointers-and-windows', 'Pointers & Windows', 'Two-pointer and sliding-window patterns, from sorted pairs to the longest repeat-free substring.', 2),
+    (3, 'interview-core', 'Interview Core 10', 'Ten problems covering the patterns interviews ask most: hashing, pointers, windows, stacks, lists, trees, graphs and DP.', 3),
+    (4, 'full-path', 'The Full Path', 'Every problem in prerequisite order, easiest first within each topic.', 4)
+ON CONFLICT DO NOTHING;
+
+INSERT INTO study_plan_items (plan_id, problem_id, ordinal)
+SELECT 1, p.id, 1 FROM problems p WHERE p.slug = 'rotate-array'
+  AND NOT EXISTS (SELECT 1 FROM study_plan_items i WHERE i.plan_id = 1 AND i.problem_id = p.id);
+INSERT INTO study_plan_items (plan_id, problem_id, ordinal)
+SELECT 1, p.id, 2 FROM problems p WHERE p.slug = 'valid-anagram'
+  AND NOT EXISTS (SELECT 1 FROM study_plan_items i WHERE i.plan_id = 1 AND i.problem_id = p.id);
+INSERT INTO study_plan_items (plan_id, problem_id, ordinal)
+SELECT 1, p.id, 3 FROM problems p WHERE p.slug = 'longest-common-prefix'
+  AND NOT EXISTS (SELECT 1 FROM study_plan_items i WHERE i.plan_id = 1 AND i.problem_id = p.id);
+INSERT INTO study_plan_items (plan_id, problem_id, ordinal)
+SELECT 1, p.id, 4 FROM problems p WHERE p.slug = 'max-subarray-sum'
+  AND NOT EXISTS (SELECT 1 FROM study_plan_items i WHERE i.plan_id = 1 AND i.problem_id = p.id);
+INSERT INTO study_plan_items (plan_id, problem_id, ordinal)
+SELECT 1, p.id, 5 FROM problems p WHERE p.slug = 'valid-parentheses'
+  AND NOT EXISTS (SELECT 1 FROM study_plan_items i WHERE i.plan_id = 1 AND i.problem_id = p.id);
+INSERT INTO study_plan_items (plan_id, problem_id, ordinal)
+SELECT 1, p.id, 6 FROM problems p WHERE p.slug = 'reverse-linked-list'
+  AND NOT EXISTS (SELECT 1 FROM study_plan_items i WHERE i.plan_id = 1 AND i.problem_id = p.id);
+INSERT INTO study_plan_items (plan_id, problem_id, ordinal)
+SELECT 2, p.id, 1 FROM problems p WHERE p.slug = 'pair-target-sum-sorted'
+  AND NOT EXISTS (SELECT 1 FROM study_plan_items i WHERE i.plan_id = 2 AND i.problem_id = p.id);
+INSERT INTO study_plan_items (plan_id, problem_id, ordinal)
+SELECT 2, p.id, 2 FROM problems p WHERE p.slug = 'container-most-water'
+  AND NOT EXISTS (SELECT 1 FROM study_plan_items i WHERE i.plan_id = 2 AND i.problem_id = p.id);
+INSERT INTO study_plan_items (plan_id, problem_id, ordinal)
+SELECT 2, p.id, 3 FROM problems p WHERE p.slug = 'max-sum-subarray-size-k'
+  AND NOT EXISTS (SELECT 1 FROM study_plan_items i WHERE i.plan_id = 2 AND i.problem_id = p.id);
+INSERT INTO study_plan_items (plan_id, problem_id, ordinal)
+SELECT 2, p.id, 4 FROM problems p WHERE p.slug = 'longest-substring-no-repeat'
+  AND NOT EXISTS (SELECT 1 FROM study_plan_items i WHERE i.plan_id = 2 AND i.problem_id = p.id);
+INSERT INTO study_plan_items (plan_id, problem_id, ordinal)
+SELECT 3, p.id, 1 FROM problems p WHERE p.slug = 'two-sum'
+  AND NOT EXISTS (SELECT 1 FROM study_plan_items i WHERE i.plan_id = 3 AND i.problem_id = p.id);
+INSERT INTO study_plan_items (plan_id, problem_id, ordinal)
+SELECT 3, p.id, 2 FROM problems p WHERE p.slug = 'max-subarray-sum'
+  AND NOT EXISTS (SELECT 1 FROM study_plan_items i WHERE i.plan_id = 3 AND i.problem_id = p.id);
+INSERT INTO study_plan_items (plan_id, problem_id, ordinal)
+SELECT 3, p.id, 3 FROM problems p WHERE p.slug = 'valid-parentheses'
+  AND NOT EXISTS (SELECT 1 FROM study_plan_items i WHERE i.plan_id = 3 AND i.problem_id = p.id);
+INSERT INTO study_plan_items (plan_id, problem_id, ordinal)
+SELECT 3, p.id, 4 FROM problems p WHERE p.slug = 'reverse-linked-list'
+  AND NOT EXISTS (SELECT 1 FROM study_plan_items i WHERE i.plan_id = 3 AND i.problem_id = p.id);
+INSERT INTO study_plan_items (plan_id, problem_id, ordinal)
+SELECT 3, p.id, 5 FROM problems p WHERE p.slug = 'container-most-water'
+  AND NOT EXISTS (SELECT 1 FROM study_plan_items i WHERE i.plan_id = 3 AND i.problem_id = p.id);
+INSERT INTO study_plan_items (plan_id, problem_id, ordinal)
+SELECT 3, p.id, 6 FROM problems p WHERE p.slug = 'longest-substring-no-repeat'
+  AND NOT EXISTS (SELECT 1 FROM study_plan_items i WHERE i.plan_id = 3 AND i.problem_id = p.id);
+INSERT INTO study_plan_items (plan_id, problem_id, ordinal)
+SELECT 3, p.id, 7 FROM problems p WHERE p.slug = 'count-subarrays-sum-k'
+  AND NOT EXISTS (SELECT 1 FROM study_plan_items i WHERE i.plan_id = 3 AND i.problem_id = p.id);
+INSERT INTO study_plan_items (plan_id, problem_id, ordinal)
+SELECT 3, p.id, 8 FROM problems p WHERE p.slug = 'max-depth-binary-tree'
+  AND NOT EXISTS (SELECT 1 FROM study_plan_items i WHERE i.plan_id = 3 AND i.problem_id = p.id);
+INSERT INTO study_plan_items (plan_id, problem_id, ordinal)
+SELECT 3, p.id, 9 FROM problems p WHERE p.slug = 'number-of-islands'
+  AND NOT EXISTS (SELECT 1 FROM study_plan_items i WHERE i.plan_id = 3 AND i.problem_id = p.id);
+INSERT INTO study_plan_items (plan_id, problem_id, ordinal)
+SELECT 3, p.id, 10 FROM problems p WHERE p.slug = 'house-robber'
+  AND NOT EXISTS (SELECT 1 FROM study_plan_items i WHERE i.plan_id = 3 AND i.problem_id = p.id);
+INSERT INTO study_plan_items (plan_id, problem_id, ordinal)
+SELECT 4, p.id, 1 FROM problems p WHERE p.slug = 'rotate-array'
+  AND NOT EXISTS (SELECT 1 FROM study_plan_items i WHERE i.plan_id = 4 AND i.problem_id = p.id);
+INSERT INTO study_plan_items (plan_id, problem_id, ordinal)
+SELECT 4, p.id, 2 FROM problems p WHERE p.slug = 'max-subarray-sum'
+  AND NOT EXISTS (SELECT 1 FROM study_plan_items i WHERE i.plan_id = 4 AND i.problem_id = p.id);
+INSERT INTO study_plan_items (plan_id, problem_id, ordinal)
+SELECT 4, p.id, 3 FROM problems p WHERE p.slug = 'valid-anagram'
+  AND NOT EXISTS (SELECT 1 FROM study_plan_items i WHERE i.plan_id = 4 AND i.problem_id = p.id);
+INSERT INTO study_plan_items (plan_id, problem_id, ordinal)
+SELECT 4, p.id, 4 FROM problems p WHERE p.slug = 'longest-common-prefix'
+  AND NOT EXISTS (SELECT 1 FROM study_plan_items i WHERE i.plan_id = 4 AND i.problem_id = p.id);
+INSERT INTO study_plan_items (plan_id, problem_id, ordinal)
+SELECT 4, p.id, 5 FROM problems p WHERE p.slug = 'pair-target-sum-sorted'
+  AND NOT EXISTS (SELECT 1 FROM study_plan_items i WHERE i.plan_id = 4 AND i.problem_id = p.id);
+INSERT INTO study_plan_items (plan_id, problem_id, ordinal)
+SELECT 4, p.id, 6 FROM problems p WHERE p.slug = 'container-most-water'
+  AND NOT EXISTS (SELECT 1 FROM study_plan_items i WHERE i.plan_id = 4 AND i.problem_id = p.id);
+INSERT INTO study_plan_items (plan_id, problem_id, ordinal)
+SELECT 4, p.id, 7 FROM problems p WHERE p.slug = 'max-sum-subarray-size-k'
+  AND NOT EXISTS (SELECT 1 FROM study_plan_items i WHERE i.plan_id = 4 AND i.problem_id = p.id);
+INSERT INTO study_plan_items (plan_id, problem_id, ordinal)
+SELECT 4, p.id, 8 FROM problems p WHERE p.slug = 'longest-substring-no-repeat'
+  AND NOT EXISTS (SELECT 1 FROM study_plan_items i WHERE i.plan_id = 4 AND i.problem_id = p.id);
+INSERT INTO study_plan_items (plan_id, problem_id, ordinal)
+SELECT 4, p.id, 9 FROM problems p WHERE p.slug = 'two-sum'
+  AND NOT EXISTS (SELECT 1 FROM study_plan_items i WHERE i.plan_id = 4 AND i.problem_id = p.id);
+INSERT INTO study_plan_items (plan_id, problem_id, ordinal)
+SELECT 4, p.id, 10 FROM problems p WHERE p.slug = 'count-subarrays-sum-k'
+  AND NOT EXISTS (SELECT 1 FROM study_plan_items i WHERE i.plan_id = 4 AND i.problem_id = p.id);
+INSERT INTO study_plan_items (plan_id, problem_id, ordinal)
+SELECT 4, p.id, 11 FROM problems p WHERE p.slug = 'reverse-linked-list'
+  AND NOT EXISTS (SELECT 1 FROM study_plan_items i WHERE i.plan_id = 4 AND i.problem_id = p.id);
+INSERT INTO study_plan_items (plan_id, problem_id, ordinal)
+SELECT 4, p.id, 12 FROM problems p WHERE p.slug = 'valid-parentheses'
+  AND NOT EXISTS (SELECT 1 FROM study_plan_items i WHERE i.plan_id = 4 AND i.problem_id = p.id);
+INSERT INTO study_plan_items (plan_id, problem_id, ordinal)
+SELECT 4, p.id, 13 FROM problems p WHERE p.slug = 'max-depth-binary-tree'
+  AND NOT EXISTS (SELECT 1 FROM study_plan_items i WHERE i.plan_id = 4 AND i.problem_id = p.id);
+INSERT INTO study_plan_items (plan_id, problem_id, ordinal)
+SELECT 4, p.id, 14 FROM problems p WHERE p.slug = 'number-of-islands'
+  AND NOT EXISTS (SELECT 1 FROM study_plan_items i WHERE i.plan_id = 4 AND i.problem_id = p.id);
+INSERT INTO study_plan_items (plan_id, problem_id, ordinal)
+SELECT 4, p.id, 15 FROM problems p WHERE p.slug = 'house-robber'
+  AND NOT EXISTS (SELECT 1 FROM study_plan_items i WHERE i.plan_id = 4 AND i.problem_id = p.id);

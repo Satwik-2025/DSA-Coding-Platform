@@ -135,7 +135,8 @@ public class TopicStatusService {
                         st.attempted() ? Times.toInstant(st.state().getLastPracticedAt()) : null,
                         Rounding.twoDecimals(st.daysSinceLastPractice()),
                         Rounding.twoDecimals(st.halfLifeDays()),
-                        Rounding.twoDecimals(st.predictedRetention())))
+                        Rounding.twoDecimals(st.predictedRetention()),
+                        HlrPredictor.confidence(st.correctCount(), st.wrongCount())))
                 .toList();
         return new RetentionResponse(userId, Times.toInstant(now), views);
     }

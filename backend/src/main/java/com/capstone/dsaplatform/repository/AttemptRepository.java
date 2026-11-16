@@ -39,6 +39,20 @@ public interface AttemptRepository extends JpaRepository<Attempt, Long> {
                           @Param("verdict") Verdict verdict, @Param("runtimeMs") Integer runtimeMs,
                           @Param("self") Long self);
 
+    // Activity heatmap and streaks: when each attempt happened and whether it was accepted.
+    @Query("select a.submittedAt, a.verdict from Attempt a where a.user.id = :userId")
+    List<Object[]> findSubmissionTimesAndVerdicts(@Param("userId") Long userId);
+
+    // Per-problem status for study plans and mock interviews: attempts, accepted attempts, last attempt.
+    @Query("select a.problem.id, count(a), sum(case when a.verdict = :accepted then 1 else 0 end), max(a.submittedAt) "
+            + "from Attempt a where a.user.id = :userId group by a.problem.id")
+    List<Object[]> summarizeByProblem(@Param("userId") Long userId, @Param("accepted") Verdict accepted);
+
+    // Retraining export: every attempt with what the HLR features need, grouped by learner and topic in time order.
+    @Query("select a.user.id, p.topic.id, p.difficulty, a.verdict, a.submittedAt from Attempt a join a.problem p "
+            + "order by a.user.id, p.topic.id, a.submittedAt, a.id")
+    List<Object[]> findAllForTraining();
+
     // Used to skip already-solved problems in recommendations.
     @Query("select distinct a.problem.id from Attempt a where a.user.id = :userId and a.verdict = :verdict")
     List<Long> findProblemIdsWithVerdict(@Param("userId") Long userId, @Param("verdict") Verdict verdict);

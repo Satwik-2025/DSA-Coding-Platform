@@ -160,3 +160,19 @@ CREATE TABLE IF NOT EXISTS resources (
     CONSTRAINT ck_resources_rank   CHECK (rank >= 1)
 );
 CREATE INDEX IF NOT EXISTS ix_resources_lookup ON resources (error_category, topic_id);
+
+-- Curated problem sequences (study plans). Items reference problems; order within a plan by ordinal.
+CREATE TABLE IF NOT EXISTS study_plans (
+    id           BIGINT        PRIMARY KEY,
+    slug         VARCHAR(60)   NOT NULL UNIQUE,
+    title        VARCHAR(120)  NOT NULL,
+    description  VARCHAR(1000) NOT NULL,
+    ordinal      INTEGER       NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS study_plan_items (
+    plan_id     BIGINT  NOT NULL REFERENCES study_plans (id),
+    problem_id  BIGINT  NOT NULL REFERENCES problems (id),
+    ordinal     INTEGER NOT NULL,
+    PRIMARY KEY (plan_id, problem_id)
+);

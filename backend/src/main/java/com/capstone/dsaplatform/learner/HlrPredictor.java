@@ -107,6 +107,19 @@ public class HlrPredictor {
         return Math.max(0, Duration.between(from, to).toMillis() / MILLIS_PER_DAY);
     }
 
+    /**
+     * How much evidence a prediction rests on, from the number of attempts in the topic:
+     * fewer than 3 = LOW, fewer than 8 = MEDIUM, otherwise HIGH. A simple, explainable proxy:
+     * HLR has no per-prediction variance, and its error shrinks as a topic's history grows.
+     */
+    public static String confidence(int correctCount, int wrongCount) {
+        int n = correctCount + wrongCount;
+        if (n == 0) {
+            return null;
+        }
+        return n < 3 ? "LOW" : n < 8 ? "MEDIUM" : "HIGH";
+    }
+
     public boolean isPlaceholder() {
         return Boolean.TRUE.equals(weights.placeholder());
     }

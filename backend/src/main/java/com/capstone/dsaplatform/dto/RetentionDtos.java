@@ -21,6 +21,8 @@ public final class RetentionDtos {
                                      Instant lastPracticedAt,
                                      Double daysSinceLastPractice,
                                      Double halfLifeDays,
-                                     Double predictedRetention) {
+                                     Double predictedRetention,
+                                     // LOW / MEDIUM / HIGH from the number of attempts; null when not attempted.
+                                     String confidence) {
     }
 }
