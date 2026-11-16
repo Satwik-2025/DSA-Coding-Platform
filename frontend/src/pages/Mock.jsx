@@ -24,7 +24,7 @@ export default function Mock() {
   return (
     <div className="space-y-8">
       <PageHeader eyebrow="Practice" title="Mock interview">
-        A timed set of problems that ramps from easy to harder, like a real interview round.
+        A timed set of problems, like a real interview round. Pick the time, how many problems and how hard.
         Solve them on their problem pages; every submission during the interview is counted here.
       </PageHeader>
       {!session ? <Setup userId={userId} problems={problems.data} />
@@ -39,20 +39,36 @@ function Setup({ userId, problems }) {
   const status = useApi(() => api.problemStatus(userId), [userId])
   const [duration, setDuration] = useState(45)
   const [count, setCount] = useState(2)
+  const [difficulty, setDifficulty] = useState('MIXED')
 
   if (graph.error || status.error) return <ErrorBox error={graph.error || status.error} />
   if (!graph.data || !status.data) return <div className="skeleton h-64" />
 
   const unlocked = new Set(graph.data.nodes.filter((n) => n.unlocked).map((n) => n.id))
   const statusById = Object.fromEntries(status.data.map((s) => [s.problemId, s.status]))
-  const start = () => startMock(userId, pickProblems(problems, unlocked, statusById, count), duration)
+  const available = (d) => problems.filter((p) => p.difficulty === d).length
+  const short = difficulty !== 'MIXED' && available(difficulty) < count
+  const start = () => startMock(userId, pickProblems(problems, unlocked, statusById, count, difficulty), duration, difficulty)
 
   return (
     <div className="glass rounded-2xl p-6 sm:p-8 max-w-2xl space-y-7">
       <Choice label="Time limit" value={duration} onChange={setDuration} options={[30, 45, 60, 90]} format={(m) => `${m} min`} />
       <Choice label="Problems" value={count} onChange={setCount} options={[2, 3]} format={(n) => `${n} problems`} />
+      <div className="space-y-2">
+        <Choice label="Difficulty" value={difficulty} onChange={setDifficulty} options={['MIXED', 'EASY', 'MEDIUM', 'HARD']}
+          format={(d) => (d === 'MIXED' ? 'Mixed' : DIFFICULTY_NAME[d])}
+          disabled={(d) => d !== 'MIXED' && available(d) === 0}
+          title={(d) => (d === 'MIXED' ? 'Starts easy and gets harder' : available(d) === 0 ? 'No problems at this level yet' : `${available(d)} problems at this level`)} />
+        <p className="text-xs text-muted">
+          {difficulty === 'MIXED'
+            ? 'Mixed starts with an easy problem and gets harder, like a real interview round.'
+            : `Every problem will be ${DIFFICULTY_NAME[difficulty].toLowerCase()}.`}
+          {available('HARD') === 0 && ' There are no hard problems yet.'}
+          {short && ` Only ${available(difficulty)} ${DIFFICULTY_NAME[difficulty].toLowerCase()} problem${available(difficulty) === 1 ? ' exists' : 's exist'}, so you will get ${available(difficulty)}.`}
+        </p>
+      </div>
       <ul className="text-sm text-muted space-y-1.5 list-disc pl-5">
-        <li>Problems come from topics you have unlocked, unsolved ones first.</li>
+        <li>Problems come from topics you have unlocked, unsolved ones first{difficulty !== 'MIXED' && ' (other topics fill in if there are not enough at that level)'}.</li>
         <li>The clock keeps running if you switch pages or refresh; a banner shows the time left.</li>
         <li>The interview ends when time is up, when everything is solved, or when you end it.</li>
       </ul>
@@ -63,15 +79,22 @@ function Setup({ userId, problems }) {
   )
 }
 
-function Choice({ label, value, onChange, options, format }) {
+const DIFFICULTY_NAME = { EASY: 'Easy', MEDIUM: 'Medium', HARD: 'Hard' }
+
+// Sessions started before difficulty existed have none, which means Mixed.
+const difficultyLabel = (session) =>
+  !session.difficulty || session.difficulty === 'MIXED' ? 'mixed difficulty' : `${DIFFICULTY_NAME[session.difficulty].toLowerCase()} only`
+
+function Choice({ label, value, onChange, options, format, disabled = () => false, title = () => undefined }) {
   return (
     <div className="space-y-2">
       <p className="eyebrow">{label}</p>
       <div className="inline-flex flex-wrap gap-1 p-1 rounded-xl bg-sunken border border-line" role="radiogroup" aria-label={label}>
         {options.map((o) => (
           <button key={o} role="radio" aria-checked={value === o} onClick={() => onChange(o)}
-            className={`h-9 px-4 rounded-lg text-sm transition-colors
-              ${value === o ? 'bg-accent text-accent-ink font-medium' : 'text-muted hover:text-ink'}`}>
+            disabled={disabled(o)} title={title(o)}
+            className={`h-9 px-4 rounded-lg text-sm transition-colors disabled:opacity-40 disabled:cursor-not-allowed
+              ${value === o ? 'bg-accent text-accent-ink font-medium' : 'text-muted hover:text-ink disabled:hover:text-muted'}`}>
             {format(o)}
           </button>
         ))}
@@ -92,7 +115,7 @@ function Live({ userId, session, byId, now }) {
           <p role="timer" className={`font-mono text-6xl tabular-nums tracking-tight ${urgent ? 'text-brick' : 'text-ink'}`}>
             {formatClock(left, true)}
           </p>
-          <p className="text-sm text-muted mt-2">{solved} of {session.problemIds.length} solved</p>
+          <p className="text-sm text-muted mt-2">{solved} of {session.problemIds.length} solved · {difficultyLabel(session)}</p>
         </div>
         <button onClick={() => endMock(userId)} className="btn btn-ghost self-start sm:self-center">End interview</button>
       </div>
@@ -142,7 +165,7 @@ function Summary({ userId, session, byId }) {
           <div>
             <h2 className="text-lg font-semibold text-ink">{all ? 'All problems solved' : session.endedAt ? 'Interview ended' : "Time's up"}</h2>
             <p className="text-sm text-muted">
-              {solved} of {session.problemIds.length} solved in {formatClock(used)} of {session.durationMin} minutes.
+              {solved} of {session.problemIds.length} solved in {formatClock(used)} of {session.durationMin} minutes · {difficultyLabel(session)}.
             </p>
           </div>
         </div>

@@ -28,7 +28,7 @@ Default is `http://localhost:8081`, which is what `application.yml` sets today.
 | `/problems` | Problem list with topic / difficulty filters | 5.9, 5.8 |
 | `/problems/:id` | Statement, code editor (Java / Python / C++), Run console, live judging, result with hints, submission history, stopwatch / timer | 5.10, 5.11-5.14 |
 | `/plans` | Study plans with progress | 5.18 |
-| `/mock` | Mock interviews: setup, countdown, summary | 5.9, 5.8, 5.17 |
+| `/mock` | Mock interviews: time, number of problems and difficulty (mixed / easy / medium / hard), countdown, summary | 5.9, 5.8, 5.17 |
 | `/readiness` | Readiness history chart, per-topic scores, self-rating | 5.6, 5.7 |
 | `/mistakes` | Recurring mistake types with study links | 5.5 |
 

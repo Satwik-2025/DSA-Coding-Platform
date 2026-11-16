@@ -47,6 +47,21 @@ describe('mock interviews', () => {
     const ids = pickProblems(problems, new Set([1, 2]), { 1: 'SOLVED' }, 2)
     expect(ids).toEqual([3, 2])
   })
+
+  it('keeps to a chosen difficulty, filling from locked topics when needed', () => {
+    const problems = [
+      { id: 1, topicId: 1, difficulty: 'EASY' },
+      { id: 2, topicId: 1, difficulty: 'MEDIUM' },
+      { id: 3, topicId: 2, difficulty: 'MEDIUM' },
+      { id: 4, topicId: 9, difficulty: 'MEDIUM' }, // locked topic
+    ]
+    const unlocked = new Set([1, 2])
+    const two = pickProblems(problems, unlocked, { 2: 'SOLVED' }, 2, 'MEDIUM')
+    expect(two).toEqual([3, 2]) // unlocked first, unsolved before solved
+    const three = pickProblems(problems, unlocked, {}, 3, 'MEDIUM')
+    expect(three.sort()).toEqual([2, 3, 4]) // the locked-topic one fills the gap
+    expect(pickProblems(problems, unlocked, {}, 2, 'HARD')).toEqual([])
+  })
 })
 
 describe('drafts', () => {

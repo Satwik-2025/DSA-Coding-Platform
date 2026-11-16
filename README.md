@@ -26,7 +26,7 @@ for review, and how ready they are for interviews.
 | Topic map | Prerequisite graph; a topic unlocks when its prerequisites are retained and solved |
 | Recommendations | Ranked next problems from unlocked topics, with a reason for each |
 | Study plans | Four curated sequences with progress |
-| Mock interviews | Timed sets of 2-3 problems ramping in difficulty, counting real submissions |
+| Mock interviews | Timed sets of 2-3 problems; pick mixed (easy to harder) or one difficulty; counts real submissions |
 | Activity | Calendar heatmap, day streak and longest streak |
 | Readiness | Accuracy, retention, consistency and speed combined into a 0-100 score, compared with the learner's self-rating |
 | Solve timer | Optional stopwatch or countdown on each problem |

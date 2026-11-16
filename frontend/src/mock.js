@@ -66,11 +66,12 @@ export function isActive(session, now = Date.now()) {
   return !!session && !session.endedAt && now < endsAt(session)
 }
 
-export function startMock(userId, problemIds, durationMin) {
+export function startMock(userId, problemIds, durationMin, difficulty = 'MIXED') {
   const session = {
     id: Date.now(),
     problemIds,
     durationMin,
+    difficulty,
     startedAt: Date.now(),
     endedAt: null,
     results: Object.fromEntries(problemIds.map((id) => [id, { attempts: 0, solved: false, solvedAt: null, lastVerdict: null }])),
@@ -107,12 +108,25 @@ export function recordSubmission(userId, problemId, verdict) {
 }
 
 /**
- * Picks problems for a new interview: from unlocked topics, unsolved first, one per difficulty
- * step (Easy, then Medium, then Hard/Medium) so the set ramps up like a real interview.
+ * Picks problems for a new interview. difficulty 'MIXED' (default): from unlocked topics, unsolved
+ * first, one per difficulty step (Easy, then Medium, then Hard/Medium) so the set ramps up like a
+ * real interview. 'EASY' / 'MEDIUM' / 'HARD': only that level (may return fewer than count).
  */
-export function pickProblems(problems, unlockedTopicIds, statusById, count) {
+export function pickProblems(problems, unlockedTopicIds, statusById, count, difficulty = 'MIXED') {
   const shuffle = (a) => a.map((x) => [Math.random(), x]).sort((p, q) => p[0] - q[0]).map((p) => p[1])
   const rank = (p) => (statusById[p.id] === 'SOLVED' ? 2 : statusById[p.id] === 'ATTEMPTED' ? 1 : 0)
+
+  // A chosen difficulty: only problems of that level. Unlocked topics come first, but locked ones
+  // (still open for practice) fill in when there are not enough; unsolved before solved in each group.
+  if (difficulty !== 'MIXED') {
+    const unlocked = (p) => (unlockedTopicIds.has(p.topicId) ? 0 : 1)
+    return shuffle(problems.filter((p) => p.difficulty === difficulty))
+      .sort((a, b) => unlocked(a) - unlocked(b) || rank(a) - rank(b))
+      .slice(0, count)
+      .map((p) => p.id)
+  }
+
+  // Mixed: ramps up like a real interview round.
   const pool = shuffle(problems.filter((p) => unlockedTopicIds.has(p.topicId)))
     .sort((a, b) => rank(a) - rank(b))
   const wanted = count === 3 ? ['EASY', 'MEDIUM', 'HARD'] : ['EASY', 'MEDIUM']
