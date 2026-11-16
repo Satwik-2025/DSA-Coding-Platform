@@ -5,13 +5,16 @@ import { useUser } from '../UserContext.jsx'
 import { pct, score, signed } from '../format.js'
 import { DifficultyBadge } from '../components/Badges.jsx'
 import { EmptyState, ErrorBox, Loading, PageHeader } from '../components/Status.jsx'
-import { IconArrowRight, IconSpark } from '../components/Icons.jsx'
+import { IconArrowRight, IconRefresh, IconSpark } from '../components/Icons.jsx'
+import ActivityHeatmap from '../components/ActivityHeatmap.jsx'
 
 // Landing page: "where do I stand?" and "what should I solve next?" (CONTRACT.md 5.6 overall + 5.4).
 export default function Dashboard() {
   const { userId, users } = useUser()
   const readiness = useApi(() => api.readiness(userId), [userId])
   const recs = useApi(() => api.recommendations(userId, 5), [userId])
+  const review = useApi(() => api.review(userId, 3), [userId])
+  const activity = useApi(() => api.activity(userId, 182), [userId])
   const name = users?.find((u) => u.id === userId)?.displayName
   const today = new Date().toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' })
 
@@ -23,6 +26,8 @@ export default function Dashboard() {
         {readiness.data && <Overall overall={readiness.data.overall} />}
         {readiness.loading && !readiness.data && <Loading />}
       </section>
+
+      {review.data && review.data.items.length > 0 && <ReviewQueue review={review.data} />}
 
       <section>
         <div className="flex items-end justify-between gap-4 mb-4">
@@ -68,7 +73,64 @@ export default function Dashboard() {
           </ol>
         ))}
       </section>
+
+      <section>
+        <div className="mb-4">
+          <h2 className="text-lg font-semibold text-ink">Activity</h2>
+          <p className="text-sm text-muted mt-1">Every day with at least one submission keeps your streak going.</p>
+        </div>
+        {activity.error && <ErrorBox error={activity.error} onRetry={activity.reload} />}
+        {activity.loading && !activity.data && <div className="skeleton h-44" />}
+        {activity.data && <ActivityHeatmap activity={activity.data} />}
+      </section>
     </div>
+  )
+}
+
+// Spaced repetition: topics the model says are being forgotten, with a problem to refresh each one.
+function ReviewQueue({ review }) {
+  return (
+    <section>
+      <div className="mb-4">
+        <h2 className="text-lg font-semibold text-ink flex items-center gap-2">
+          <IconRefresh size={18} className="text-accent" /> Due for review
+        </h2>
+        <p className="text-sm text-muted mt-1">
+          Predicted retention is below {Math.round(review.minRetention * 100)}% (or will be within {review.horizonDays} days).
+          A quick re-solve resets the forgetting curve.
+        </p>
+      </div>
+      <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 stagger">
+        {review.items.map((it) => (
+          <li key={it.topicId} className="glass rounded-2xl p-4 flex flex-col gap-3">
+            <div className="flex items-start justify-between gap-2">
+              <div>
+                <p className="font-medium text-ink">{it.name}</p>
+                <p className="text-xs text-muted mt-0.5">
+                  {it.status === 'DUE' ? 'Due now' : `Due in ${it.dueInDays < 1 ? 'under a day' : `${Math.round(it.dueInDays)} day${Math.round(it.dueInDays) === 1 ? '' : 's'}`}`}
+                  {' · '}retention {pct(it.predictedRetention)}
+                </p>
+              </div>
+              <span className={`shrink-0 inline-flex items-center h-6 px-2.5 rounded-full border text-[11px] font-medium
+                ${it.status === 'DUE' ? 'bg-amber-soft text-amber border-amber/25' : 'bg-sunken text-muted border-line'}`}>
+                {it.status === 'DUE' ? 'Due' : 'Soon'}
+              </span>
+            </div>
+            <div className="h-1 rounded-full bg-sunken overflow-hidden" aria-hidden="true">
+              <div className={`h-full rounded-full animate-grow-x ${it.status === 'DUE' ? 'bg-amber' : 'bg-accent'}`}
+                style={{ width: `${Math.round((it.predictedRetention ?? 0) * 100)}%` }} />
+            </div>
+            {it.suggestedProblem && (
+              <Link to={`/problems/${it.suggestedProblem.id}`}
+                className="group mt-auto flex items-center justify-between gap-2 text-sm rounded-xl px-3 py-2 bg-sunken border border-line hover:border-line-strong transition-colors">
+                <span className="truncate text-ink group-hover:text-accent transition-colors">{it.suggestedProblem.title}</span>
+                <IconArrowRight size={15} className="text-faint group-hover:text-accent group-hover:translate-x-0.5 transition-all" />
+              </Link>
+            )}
+          </li>
+        ))}
+      </ul>
+    </section>
   )
 }
 

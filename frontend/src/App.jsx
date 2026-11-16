@@ -8,6 +8,8 @@ import Problems from './pages/Problems.jsx'
 import ProblemSolve from './pages/ProblemSolve.jsx'
 import Readiness from './pages/Readiness.jsx'
 import Mistakes from './pages/Mistakes.jsx'
+import Plans from './pages/Plans.jsx'
+import Mock from './pages/Mock.jsx'
 
 export default function App() {
   return (
@@ -17,6 +19,8 @@ export default function App() {
         <Route path="/topics" element={<TopicMap />} />
         <Route path="/problems" element={<Problems />} />
         <Route path="/problems/:id" element={<ProblemSolve />} />
+        <Route path="/plans" element={<Plans />} />
+        <Route path="/mock" element={<Mock />} />
         <Route path="/readiness" element={<Readiness />} />
         <Route path="/mistakes" element={<Mistakes />} />
         <Route path="*" element={<EmptyState>Page not found.</EmptyState>} />

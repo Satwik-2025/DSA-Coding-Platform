@@ -6,13 +6,16 @@ import Select from './Select.jsx'
 import ThemeToggle from './ThemeToggle.jsx'
 import { sectionIndex } from './AnimatedRoutes.jsx'
 import {
-  IconAlert, IconClose, IconCode, IconGauge, IconMap, IconMenu, IconSidebar, IconToday, IconUser,
+  IconAlert, IconBook, IconClose, IconCode, IconGauge, IconMap, IconMenu, IconSidebar, IconStopwatch, IconToday, IconUser,
 } from './Icons.jsx'
+import MockBanner from './MockBanner.jsx'
 
 const LINKS = [
   { to: '/', label: 'Today', icon: IconToday },
   { to: '/topics', label: 'Topic map', icon: IconMap },
   { to: '/problems', label: 'Problems', icon: IconCode },
+  { to: '/plans', label: 'Study plans', icon: IconBook },
+  { to: '/mock', label: 'Mock interview', icon: IconStopwatch },
   { to: '/readiness', label: 'Readiness', icon: IconGauge },
   { to: '/mistakes', label: 'Mistakes', icon: IconAlert },
 ]
@@ -150,6 +153,7 @@ export default function Layout({ children }) {
       {/* The solve page gets a wider canvas so the code editor has room; other pages keep a readable width. */}
       <main className={`mx-auto ${/^\/problems\/[^/]+/.test(location.pathname) ? 'max-w-[96rem]' : 'max-w-6xl'} px-4 sm:px-6 lg:px-10 pt-6 pb-16 lg:pt-12`}>
         {/* Pages assume a learner is selected, so nothing renders until /api/users has answered. */}
+        {userId && !error && <MockBanner userId={userId} />}
         {error ? <ErrorBox error={error} onRetry={reload} /> : userId ? children : <Loading />}
       </main>
     </div>

@@ -4,7 +4,7 @@ import { prefersReducedMotion } from '../theme.jsx'
 
 // Main sections in navigation order. Moving right in this list slides the new page in from the
 // right; moving left slides it in from the left. Sub-pages (a problem) fade up instead.
-export const SECTIONS = ['/', '/topics', '/problems', '/readiness', '/mistakes']
+export const SECTIONS = ['/', '/topics', '/problems', '/plans', '/mock', '/readiness', '/mistakes']
 
 export function sectionIndex(pathname) {
   if (pathname === '/') return 0

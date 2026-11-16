@@ -6,6 +6,7 @@ import { useApi } from '../useApi.js'
 import { useUser } from '../UserContext.jsx'
 import { ERROR_CATEGORY, dateTime } from '../format.js'
 import { clearDraft, loadDraft, preferredLanguage, saveDraft, setPreferredLanguage } from '../drafts.js'
+import { recordSubmission } from '../mock.js'
 import { DifficultyBadge, VerdictBadge } from '../components/Badges.jsx'
 import CodeEditor from '../components/CodeEditor.jsx'
 import ResourceList from '../components/ResourceList.jsx'
@@ -106,8 +107,10 @@ export default function ProblemSolve() {
     setProgress({ status: 'QUEUED' })
     try {
       const seconds = Math.round((Date.now() - openedAt.current) / 1000)
-      setResult(await submitAndWait(userId, p.id, code, seconds, language, setProgress))
+      const r = await submitAndWait(userId, p.id, code, seconds, language, setProgress)
+      setResult(r)
       setHistoryVersion((v) => v + 1)
+      recordSubmission(userId, p.id, r.verdict) // counts toward a running mock interview, if any
     } catch (e) {
       setSubmitError(e)
     } finally {

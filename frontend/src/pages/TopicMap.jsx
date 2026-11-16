@@ -32,6 +32,7 @@ export default function TopicMap() {
   const { userId } = useUser()
   const graph = useApi(() => api.topicGraph(userId), [userId])
   const retention = useApi(() => api.retention(userId), [userId])
+  const model = useApi(api.model, [])
   const [selected, setSelected] = useState(1)
 
   const error = graph.error || retention.error
@@ -106,6 +107,7 @@ export default function TopicMap() {
           detail={retention.data.topics.find((t) => t.topicId === selected)}
           prerequisites={edges.filter((e) => e.to === selected).map((e) => byId[e.from])}
           thresholds={thresholds}
+          model={model.data}
         />
       </div>
     </div>
@@ -131,7 +133,7 @@ function Legend() {
   )
 }
 
-function TopicDetail({ node, detail, prerequisites, thresholds }) {
+function TopicDetail({ node, detail, prerequisites, thresholds, model }) {
   // Explains the backend's unlocked flag; the backend stays the authority on the actual decision.
   const passes = (p) => (p.predictedRetention ?? 0) >= thresholds.minRetention && p.correctCount >= thresholds.minCorrectCount
 
@@ -164,7 +166,9 @@ function TopicDetail({ node, detail, prerequisites, thresholds }) {
 
       {detail.attempted ? (
         <dl className="grid grid-cols-2 gap-2">
-          <Stat label="Predicted retention" value={pct(detail.predictedRetention)} />
+          <Stat label="Predicted retention" value={pct(detail.predictedRetention)}
+            note={detail.confidence && `${detail.confidence.toLowerCase()} confidence`}
+            title="Confidence grows with the number of attempts in this topic: under 3 is low, under 8 medium." />
           <Stat label="Half-life" value={`${detail.halfLifeDays?.toFixed(1)} days`} />
           <Stat label="Correct / wrong" value={`${detail.correctCount} / ${detail.wrongCount}`} />
           <Stat label="Mean difficulty" value={`${detail.meanDifficulty?.toFixed(2)} of 3`} />
@@ -178,15 +182,23 @@ function TopicDetail({ node, detail, prerequisites, thresholds }) {
       <Link to={`/problems?topicId=${node.id}`} className="btn btn-primary w-full">
         Practise {node.name} <IconArrowRight size={16} />
       </Link>
+
+      {model && (
+        <p className="text-[11px] text-faint leading-relaxed border-t border-line pt-4">
+          Predictions come from a half-life regression model ({model.modelVersion}) trained on {model.dataSource} data
+          {model.metrics?.auc != null && <> · AUC {Number(model.metrics.auc).toFixed(3)} on held-out learners</>}.
+        </p>
+      )}
     </aside>
   )
 }
 
-function Stat({ label, value, wide = false }) {
+function Stat({ label, value, note, title, wide = false }) {
   return (
-    <div className={`rounded-xl px-3 py-2.5 bg-sunken border border-line ${wide ? 'col-span-2' : ''}`}>
+    <div className={`rounded-xl px-3 py-2.5 bg-sunken border border-line ${wide ? 'col-span-2' : ''}`} title={title}>
       <dt className="text-[11px] text-faint">{label}</dt>
       <dd className="mt-0.5 font-medium text-ink tabular-nums">{value}</dd>
+      {note && <dd className="text-[11px] text-muted mt-0.5">{note}</dd>}
     </div>
   )
 }

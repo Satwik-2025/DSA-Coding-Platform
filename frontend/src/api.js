@@ -49,6 +49,11 @@ export const api = {
     request('/run', post({ userId, problemId, code, language, input })),             // 5.12
   languages: () => request('/languages'),                                            // 5.13
   history: (userId, problemId) => request(`/users/${userId}/problems/${problemId}/submissions`), // 5.14
+  review: (userId, horizonDays = 3) => request(`/users/${userId}/review?horizonDays=${horizonDays}`), // 5.15
+  activity: (userId, days = 182) => request(`/users/${userId}/activity?days=${days}`),  // 5.16
+  problemStatus: (userId) => request(`/users/${userId}/problem-status`),             // 5.17
+  studyPlans: (userId) => request(`/study-plans?userId=${userId}`),                  // 5.18
+  model: () => request('/ml/model'),                                                 // 5.19
 }
 
 // Submits through the judge queue and polls until the verdict is ready.
