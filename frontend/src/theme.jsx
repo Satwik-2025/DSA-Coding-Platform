@@ -1,10 +1,10 @@
 import { createContext, useCallback, useContext, useState } from 'react'
 import { flushSync } from 'react-dom'
 
-// Dark is the default. index.html applies the saved theme before first paint, so this just reads it back.
+// Light is the default. index.html applies the saved theme before first paint, so this just reads it back.
 const ThemeContext = createContext(null)
 
-const current = () => (document.documentElement.dataset.theme === 'light' ? 'light' : 'dark')
+const current = () => (document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light')
 export const prefersReducedMotion = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
 
 export function ThemeProvider({ children }) {

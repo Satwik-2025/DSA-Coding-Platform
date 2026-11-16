@@ -34,8 +34,8 @@ The learner switcher in the sidebar (or the mobile menu) uses `GET /api/users` (
 
 ## Design
 
-- **Themes:** dark (default, warm black with champagne accents) and light (soft off-white with
-  bronze accents). The toggle sits at the bottom of the sidebar or in the mobile top bar. The
+- **Themes:** light (default, soft off-white with bronze accents) and dark (warm black with
+  champagne accents). The toggle sits at the bottom of the sidebar or in the mobile top bar. The
   choice is saved in `localStorage` (`theme`) and applied in `index.html` before first paint, so
   there is no flash. Every colour is a CSS variable in `src/index.css`.
 - **Glass surfaces:** `glass` / `glass-strong` utilities (translucent fill, blur, hairline border,
