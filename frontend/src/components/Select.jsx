@@ -4,7 +4,7 @@ import { IconCheck, IconChevronDown } from './Icons.jsx'
 // Styled, animated replacement for <select>. Same contract as before: a value and an onChange
 // that receives the chosen option's value. Keyboard: Up/Down/Home/End to move, Enter/Space to
 // pick, Escape to close. Options are { value, label }.
-export default function Select({ value, onChange, options, label, icon, className = '', align = 'left', placement = 'down' }) {
+export default function Select({ value, onChange, options, label, ariaLabel, icon, className = '', align = 'left', placement = 'down' }) {
   const [open, setOpen] = useState(false)
   const [active, setActiveState] = useState(0)
   // Mirrors `active` synchronously, so Enter right after fast arrow presses picks the highlighted option.
@@ -57,7 +57,7 @@ export default function Select({ value, onChange, options, label, icon, classNam
         type="button"
         aria-haspopup="listbox"
         aria-expanded={open}
-        aria-label={label ? `${label}: ${selected?.label ?? ''}` : undefined}
+        aria-label={(label || ariaLabel) ? `${label || ariaLabel}: ${selected?.label ?? ''}` : undefined}
         onClick={() => (open ? setOpen(false) : openList())}
         onKeyDown={(e) => { if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); openList() } }}
         className="field w-full h-10 pl-3 pr-2.5 flex items-center gap-2 text-sm text-left cursor-pointer"

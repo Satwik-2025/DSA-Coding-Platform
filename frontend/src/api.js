@@ -15,7 +15,9 @@ async function request(path, options = {}) {
       // No JSON body: the Vite proxy itself answered, which means Spring Boot is not reachable.
       message = `Could not reach the backend (HTTP ${res.status}). Is Spring Boot running?`
     }
-    throw new Error(message || `HTTP ${res.status}`)
+    const error = new Error(message || `HTTP ${res.status}`)
+    error.status = res.status
+    throw error
   }
   return res.json()
 }
@@ -38,6 +40,30 @@ export const api = {
     return request(`/problems${query ? `?${query}` : ''}`)
   },
   problem: (id) => request(`/problems/${id}`),                                       // 5.10
-  submit: (userId, problemId, code, timeSpentSeconds) =>
-    request('/submissions', post({ userId, problemId, code, timeSpentSeconds })),    // 5.1
+  submit: (userId, problemId, code, timeSpentSeconds, language) =>
+    request('/submissions', post({ userId, problemId, code, timeSpentSeconds, language })), // 5.1
+  submitJob: (userId, problemId, code, timeSpentSeconds, language) =>
+    request('/submissions/jobs', post({ userId, problemId, code, timeSpentSeconds, language })), // 5.11
+  job: (jobId) => request(`/submissions/jobs/${jobId}`),                             // 5.11
+  run: (userId, problemId, code, language, input) =>
+    request('/run', post({ userId, problemId, code, language, input })),             // 5.12
+  languages: () => request('/languages'),                                            // 5.13
+  history: (userId, problemId) => request(`/users/${userId}/problems/${problemId}/submissions`), // 5.14
+}
+
+// Submits through the judge queue and polls until the verdict is ready.
+// onProgress receives { status: 'QUEUED' | 'RUNNING', position, testsDone, testsTotal }.
+export async function submitAndWait(userId, problemId, code, timeSpentSeconds, language, onProgress) {
+  let job = await api.submitJob(userId, problemId, code, timeSpentSeconds, language)
+  while (job.status === 'QUEUED' || job.status === 'RUNNING') {
+    onProgress?.(job)
+    await new Promise((r) => setTimeout(r, 350))
+    job = await api.job(job.jobId)
+  }
+  if (job.status === 'FAILED') {
+    const error = new Error(job.error?.message || 'Judging failed')
+    error.status = job.error?.error === 'TOO_MANY_REQUESTS' ? 429 : 500
+    throw error
+  }
+  return job.result
 }
