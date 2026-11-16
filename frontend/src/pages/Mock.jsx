@@ -1,22 +1,13 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../api.js'
 import { useApi } from '../useApi.js'
 import { useUser } from '../UserContext.jsx'
-import { clearMock, endMock, endsAt, isActive, pickProblems, startMock, useMock } from '../mock.js'
+import { clearMock, endMock, endsAt, isActive, pickProblems, startMock, useMock, useNow } from '../mock.js'
 import { formatClock } from '../components/SolveTimer.jsx'
 import { DifficultyBadge } from '../components/Badges.jsx'
 import { ErrorBox, Loading, PageHeader } from '../components/Status.jsx'
 import { IconArrowRight, IconCheck, IconPlay, IconRefresh, IconStopwatch } from '../components/Icons.jsx'
-
-export function useNow(intervalMs = 1000) {
-  const [now, setNow] = useState(Date.now())
-  useEffect(() => {
-    const id = setInterval(() => setNow(Date.now()), intervalMs)
-    return () => clearInterval(id)
-  }, [intervalMs])
-  return now
-}
 
 // Timed interview practice: 2-3 problems from unlocked topics, one countdown, and a summary at the end.
 // Submissions made on the problem pages during the interview are counted automatically.

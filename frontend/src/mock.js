@@ -1,4 +1,4 @@
-import { useSyncExternalStore } from 'react'
+import { useEffect, useState, useSyncExternalStore } from 'react'
 
 // Mock interview sessions live in localStorage (one per learner), so a refresh or switching pages
 // never ends one. Components subscribe through useMock(); changes in other tabs are picked up too.
@@ -124,4 +124,14 @@ export function pickProblems(problems, unlockedTopicIds, statusById, count) {
     if (pick) chosen.push(pick)
   }
   return chosen.map((p) => p.id)
+}
+
+/** Current time, re-rendering every intervalMs (for countdowns). */
+export function useNow(intervalMs = 1000) {
+  const [now, setNow] = useState(Date.now())
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), intervalMs)
+    return () => clearInterval(id)
+  }, [intervalMs])
+  return now
 }

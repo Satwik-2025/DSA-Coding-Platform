@@ -1,6 +1,5 @@
 import { Link, useLocation } from 'react-router-dom'
-import { endsAt, isActive, useMock } from '../mock.js'
-import { useNow } from '../pages/Mock.jsx'
+import { endsAt, isActive, useMock, useNow } from '../mock.js'
 import { formatClock } from './SolveTimer.jsx'
 import { IconArrowRight, IconStopwatch } from './Icons.jsx'
 

@@ -1,15 +1,19 @@
+import { lazy } from 'react'
 import { Route } from 'react-router-dom'
 import Layout from './components/Layout.jsx'
 import AnimatedRoutes from './components/AnimatedRoutes.jsx'
 import { EmptyState } from './components/Status.jsx'
 import Dashboard from './pages/Dashboard.jsx'
-import TopicMap from './pages/TopicMap.jsx'
-import Problems from './pages/Problems.jsx'
-import ProblemSolve from './pages/ProblemSolve.jsx'
-import Readiness from './pages/Readiness.jsx'
-import Mistakes from './pages/Mistakes.jsx'
-import Plans from './pages/Plans.jsx'
-import Mock from './pages/Mock.jsx'
+
+// The landing page ships in the main bundle; every other page (and its heavy libraries: the code
+// editor, charts, Markdown) is downloaded only when first opened.
+const TopicMap = lazy(() => import('./pages/TopicMap.jsx'))
+const Problems = lazy(() => import('./pages/Problems.jsx'))
+const ProblemSolve = lazy(() => import('./pages/ProblemSolve.jsx'))
+const Readiness = lazy(() => import('./pages/Readiness.jsx'))
+const Mistakes = lazy(() => import('./pages/Mistakes.jsx'))
+const Plans = lazy(() => import('./pages/Plans.jsx'))
+const Mock = lazy(() => import('./pages/Mock.jsx'))
 
 export default function App() {
   return (

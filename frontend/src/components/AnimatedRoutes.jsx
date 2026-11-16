@@ -1,6 +1,7 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { Suspense, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Routes, useLocation } from 'react-router-dom'
 import { prefersReducedMotion } from '../theme.jsx'
+import { Loading } from './Status.jsx'
 
 // Main sections in navigation order. Moving right in this list slides the new page in from the
 // right; moving left slides it in from the left. Sub-pages (a problem) fade up instead.
@@ -69,11 +70,12 @@ export default function AnimatedRoutes({ children }) {
             inert=""
             onAnimationEnd={(e) => e.target === e.currentTarget && removeOld(p.id)}
           >
-            <Routes location={p.location}>{children}</Routes>
+            <Suspense fallback={null}><Routes location={p.location}>{children}</Routes></Suspense>
           </div>
         ) : (
           <div key={p.id} className="page-in" style={{ '--dir': p.dir }}>
-            <Routes location={location}>{children}</Routes>
+            {/* Pages are lazy-loaded: the skeleton shows while a page's code downloads. */}
+            <Suspense fallback={<Loading />}><Routes location={location}>{children}</Routes></Suspense>
           </div>
         ),
       )}
