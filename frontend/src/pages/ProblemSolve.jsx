@@ -65,7 +65,8 @@ export default function ProblemSolve() {
         <span className="text-muted truncate">{p.title}</span>
       </nav>
 
-      <div className="grid gap-6 lg:grid-cols-2 items-start">
+      {/* Editor column is the wider one (55% on laptops, 60% on large screens). */}
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,9fr)_minmax(0,11fr)] xl:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] items-start">
         <section className="glass rounded-2xl p-5 sm:p-7 space-y-6 min-w-0">
           <div className="space-y-4">
             <h1 className="display text-4xl sm:text-[2.75rem] text-ink">{p.title}</h1>
@@ -115,7 +116,7 @@ export default function ProblemSolve() {
               onChange={(e) => setCode(e.target.value)}
               onKeyDown={onKeyDown}
               spellCheck={false}
-              className="block w-full h-[480px] font-mono text-[13px] leading-6 px-4 py-3 text-ink resize-y outline-none border-0 focus:shadow-[inset_0_0_0_1px_var(--accent)] transition-shadow"
+              className="block w-full h-[520px] lg:h-[max(560px,calc(100dvh-14rem))] font-mono text-[13px] leading-6 px-4 py-3 text-ink resize-y outline-none border-0 focus:shadow-[inset_0_0_0_1px_var(--accent)] transition-shadow"
               style={{ background: 'var(--code-bg)', tabSize: 4, caretColor: 'var(--accent)' }}
               aria-label="Code editor"
             />

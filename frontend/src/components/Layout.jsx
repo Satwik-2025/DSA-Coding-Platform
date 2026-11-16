@@ -147,7 +147,8 @@ export default function Layout({ children }) {
         </aside>
       </div>
 
-      <main className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-10 pt-6 pb-16 lg:pt-12">
+      {/* The solve page gets a wider canvas so the code editor has room; other pages keep a readable width. */}
+      <main className={`mx-auto ${/^\/problems\/[^/]+/.test(location.pathname) ? 'max-w-[96rem]' : 'max-w-6xl'} px-4 sm:px-6 lg:px-10 pt-6 pb-16 lg:pt-12`}>
         {/* Pages assume a learner is selected, so nothing renders until /api/users has answered. */}
         {error ? <ErrorBox error={error} onRetry={reload} /> : userId ? children : <Loading />}
       </main>
