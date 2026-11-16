@@ -1,6 +1,9 @@
-# PostgreSQL for the "postgres" Spring profile.
-# DB_PORT lets you move the host port (e.g. 5433) if 5432 is already taken,
-# without editing this file:  DB_PORT=5433 docker compose up -d
+# The whole platform in one command:   docker compose up --build
+# Then open http://localhost:8080 (APP_PORT changes the port).
+#
+# Only the database (for running the backend yourself with the postgres profile):
+#   docker compose up -d postgres
+# DB_PORT moves the database's host port (e.g. 5433) if 5432 is already taken.
 services:
   postgres:
     image: postgres:16-alpine
@@ -19,6 +22,30 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
+
+  backend:
+    build: ./backend
+    environment:
+      SPRING_PROFILES_ACTIVE: postgres
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_USER: dsa
+      DB_PASSWORD: dsa
+      # Submissions run in the hardened local sandbox inside this container (Java security manager,
+      # Python guard). C++ needs the Docker sandbox, which requires the host's Docker daemon; see README.
+      RUNNER_SANDBOX: local
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "${APP_PORT:-8080}:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
 
 volumes:
   dsa_pgdata:
