@@ -1,0 +1,30 @@
+@import "tailwindcss";
+
+/* One small palette, named by meaning, so colours read the same on every page:
+   moss = retained / passed, amber = fading / warning, brick = failed, line = borders. */
+@theme {
+  --color-paper: #f3f5f2;
+  --color-ink: #1e2a33;
+  --color-muted: #5d6b73;
+  --color-line: #d3dad6;
+  --color-moss: #2f5d50;
+  --color-moss-soft: #dce8e2;
+  --color-amber: #9a6512;
+  --color-amber-soft: #f5e8cf;
+  --color-brick: #a63d2f;
+  --color-brick-soft: #f4ddd8;
+  --font-sans: "IBM Plex Sans", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+}
+
+body {
+  @apply bg-paper text-ink font-sans antialiased;
+}
+
+/* Statement text comes from the DB as Markdown; give it readable defaults without a typography plugin. */
+.markdown p { @apply mb-3 leading-relaxed; }
+.markdown code { @apply font-mono text-[0.9em] bg-moss-soft px-1 rounded; }
+.markdown strong { @apply font-semibold; }
+.markdown ul { @apply list-disc pl-5 mb-3; }
+
+:focus-visible { @apply outline-2 outline-offset-2 outline-moss; }

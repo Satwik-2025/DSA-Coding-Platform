@@ -1,0 +1,57 @@
+{
+  "feature_order": [
+    "bias",
+    "sqrt_correct",
+    "sqrt_wrong",
+    "mean_difficulty",
+    "topic_arrays",
+    "topic_strings",
+    "topic_two_pointers",
+    "topic_sliding_window",
+    "topic_hashmap",
+    "topic_linkedlist",
+    "topic_stack",
+    "topic_trees",
+    "topic_graphs",
+    "topic_dp"
+  ],
+  "theta": [
+    4.944368,
+    0.421099,
+    -0.465498,
+    -0.10664,
+    0.0,
+    0.77895,
+    0.054597,
+    0.0,
+    0.214116,
+    0.0,
+    0.0,
+    -0.000637,
+    -0.047743,
+    -1.000692
+  ],
+  "min_h": 0.25,
+  "max_h": 180.0,
+  "placeholder": false,
+  "model_version": "hlr-20261016-183648",
+  "data_source": "codeforces",
+  "data_sha256": "5109a0b50b33c444",
+  "split": "by learner, 20% held-out",
+  "warm_started_from": null,
+  "frozen_indexes": [],
+  "metrics": {
+    "mae_recall": 0.4563,
+    "auc": 0.5559,
+    "n_train": 108596,
+    "n_test": 26855,
+    "baseline_fixed_7day": {
+      "mae_recall": 0.5016,
+      "auc": 0.5118
+    },
+    "baseline_avg_recall": {
+      "mae_recall": 0.4916,
+      "auc": 0.5
+    }
+  }
+}
