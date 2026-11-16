@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -18,7 +19,7 @@ import org.junit.jupiter.api.Test;
  * protected constructors and no setters, so Mockito stands in for them and for the repository.
  * Requires a JDK, exactly like the runner itself.
  */
-class JavaProcessCodeRunnerTest {
+class ProcessCodeRunnerTest {
 
     private static final long PROBLEM_ID = 1L;
 
@@ -168,12 +169,142 @@ class JavaProcessCodeRunnerTest {
         assertEquals("NonZeroExit", o.exceptionType());
     }
 
+    // ---- sandbox ----
+
+    @Test
+    void javaSandboxBlocksFilesNetworkAndProcesses() {
+        String escapes = """
+                import java.io.*;
+                import java.net.*;
+
+                public class Main {
+                    public static void main(String[] args) throws Exception {
+                        String[] attempts = {"write", "read", "socket", "exec"};
+                        for (String a : attempts) {
+                            try {
+                                switch (a) {
+                                    case "write" -> new FileWriter("leak.txt").close();
+                                    case "read" -> new FileReader(System.getProperty("user.home") + "/x").close();
+                                    case "socket" -> new Socket("127.0.0.1", 9).close();
+                                    default -> Runtime.getRuntime().exec(new String[]{"whoami"});
+                                }
+                                System.out.println(a + " allowed");
+                            } catch (SecurityException e) {
+                                System.out.println(a + " blocked");
+                            } catch (Exception e) {
+                                System.out.println(a + " failed");
+                            }
+                        }
+                    }
+                }
+                """;
+        RunResult result = runner(test(10L, TestTag.SAMPLE, 1, "", "")).run(problem(5000), escapes);
+
+        String out = result.outcomes().get(0).actualOutput();
+        assertEquals("write blocked\nread blocked\nsocket blocked\nexec blocked",
+                ProcessCodeRunner.normalize(out));
+    }
+
+    @Test
+    void pythonSolutionRunsAndIsGraded() {
+        assumeTrue(python(), "Python 3.8+ not installed");
+        String sum = """
+                import sys
+                data = sys.stdin.read().split()
+                n = int(data[0])
+                print(sum(int(x) for x in data[1:1 + n]))
+                """;
+        RunResult result = runner().run(Language.PYTHON, sum,
+                List.of(input(10L, TestTag.SAMPLE, "3\\n1 2 3\\n", "6\\n"), input(11L, TestTag.EDGE, "1\\n-5\\n", "-4\\n")),
+                2000, RunListener.NONE);
+
+        assertTrue(result.compiled());
+        assertTrue(result.outcomes().get(0).passed());
+        assertFalse(result.outcomes().get(1).passed());
+    }
+
+    @Test
+    void pythonSandboxBlocksFilesNetworkAndProcesses() {
+        assumeTrue(python(), "Python 3.8+ not installed");
+        String escapes = """
+                tries = {
+                    "write": lambda: open("leak.txt", "w"),
+                    "socket": lambda: __import__("socket"),
+                    "subprocess": lambda: __import__("subprocess"),
+                    "system": lambda: __import__("os").system("whoami"),
+                }
+                for name, fn in tries.items():
+                    try:
+                        fn()
+                        print(name, "allowed")
+                    except (PermissionError, ImportError):
+                        print(name, "blocked")
+                """;
+        RunResult result = runner().run(Language.PYTHON, escapes, List.of(RunInput.custom("")), 5000, RunListener.NONE);
+
+        assertEquals("write blocked\nsocket blocked\nsubprocess blocked\nsystem blocked",
+                ProcessCodeRunner.normalize(result.outcomes().get(0).actualOutput()));
+    }
+
+    @Test
+    void pythonSyntaxErrorIsACompileErrorWithLineNumber() {
+        assumeTrue(python(), "Python 3.8+ not installed");
+        RunResult result = runner().run(Language.PYTHON, "x = 1\nprint(x +)\n", List.of(RunInput.custom("")),
+                2000, RunListener.NONE);
+
+        assertFalse(result.compiled());
+        assertTrue(result.compileError().startsWith("Main.py:2: error: SyntaxError"), result.compileError());
+    }
+
+    @Test
+    void pythonIndexErrorIsReportedAndTracebackHidesTheSandbox() {
+        assumeTrue(python(), "Python 3.8+ not installed");
+        RunResult result = runner().run(Language.PYTHON, "a = [1]\nprint(a[3])\n", List.of(RunInput.custom("")),
+                2000, RunListener.NONE);
+
+        TestOutcome o = result.outcomes().get(0);
+        assertEquals("IndexError", o.exceptionType());
+        assertTrue(o.stderr().contains("File \"Main.py\", line 2"), o.stderr());
+        assertFalse(o.stderr().contains("guard.py"), o.stderr());
+        assertFalse(o.stderr().contains("dsa-run-"), o.stderr());
+    }
+
+    @Test
+    void cppIsNotOfferedByTheLocalSandboxByDefault() {
+        assertFalse(runner().availableLanguages().contains(Language.CPP));
+        assertTrue(runner().availableLanguages().contains(Language.JAVA));
+    }
+
+    @Test
+    void progressIsReportedPerTest() {
+        List<String> events = new java.util.ArrayList<>();
+        RunListener listener = new RunListener() {
+            @Override
+            public void compiled(int total) { events.add("compiled " + total); }
+
+            @Override
+            public void testFinished(int done, int total) { events.add(done + "/" + total); }
+        };
+        runner().run(Language.JAVA, SUM_SOLUTION,
+                List.of(input(1L, TestTag.SAMPLE, "1\n1\n", "1\n"), input(2L, TestTag.EDGE, "1\n2\n", "2\n")), 2000, listener);
+
+        assertEquals(List.of("compiled 2", "1/2", "2/2"), events);
+    }
+
     // ---- helpers ----
 
-    private static JavaProcessCodeRunner runner(TestCase... tests) {
+    private static boolean python() {
+        return new LocalSandbox(RunnerSettings.defaults()).supports(Language.PYTHON);
+    }
+
+    private static RunInput input(Long id, TestTag tag, String in, String expected) {
+        return new RunInput(id, tag, 1, in.replace("\\n", "\n"), expected.replace("\\n", "\n"));
+    }
+
+    private static ProcessCodeRunner runner(TestCase... tests) {
         RunnerTestCaseRepository repo = mock(RunnerTestCaseRepository.class);
         when(repo.findByProblemId(PROBLEM_ID)).thenReturn(List.of(tests));
-        return new JavaProcessCodeRunner(repo);
+        return new ProcessCodeRunner(repo);
     }
 
     private static Problem problem(int timeLimitMs) {

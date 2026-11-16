@@ -20,9 +20,12 @@ import java.util.stream.Collectors;
  */
 public final class SubmissionEvaluator {
 
-    /** Index exceptions are the runtime signature of an off-by-one (precedence step 3). */
+    /**
+     * Index exceptions are the runtime signature of an off-by-one (precedence step 3):
+     * Java's two out-of-bounds exceptions, Python's IndexError and C++'s std::out_of_range.
+     */
     private static final Set<String> INDEX_EXCEPTIONS =
-            Set.of("ArrayIndexOutOfBoundsException", "StringIndexOutOfBoundsException");
+            Set.of("ArrayIndexOutOfBoundsException", "StringIndexOutOfBoundsException", "IndexError", "out_of_range");
 
     /** SAMPLE -> EDGE -> BOUNDARY -> LARGE (enum declaration order), then ordinal. */
     public static final Comparator<TestInfo> RUN_ORDER =

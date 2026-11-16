@@ -1,0 +1,6 @@
+// Security-manager policy for Java submissions in the local sandbox.
+// Grants only reading system properties (some solutions check e.g. ONLINE_JUDGE).
+// Everything else is denied: file reads/writes, network, exec, reflection on JDK internals.
+grant {
+    permission java.util.PropertyPermission "*", "read";
+};
