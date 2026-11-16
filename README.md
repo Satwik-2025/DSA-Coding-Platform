@@ -14,7 +14,7 @@ for review, and how ready they are for interviews.
 
 | Area | What it does |
 |---|---|
-| Problems | 15 problems over a 10-topic prerequisite graph, with statements, samples and starter code in Java, Python and C++ |
+| Problems | 25 problems (easy, medium and one hard per topic) over a 10-topic prerequisite graph, with statements, samples and starter code in Java, Python and C++ |
 | Code editor | CodeMirror with syntax highlighting, line numbers, bracket matching, search and auto-indent; drafts are auto-saved per problem and language |
 | Run | Try code on the examples or your own input, with output, stderr and time per case, without it counting as an attempt |
 | Judging | Every test in its own process inside a sandbox; a bounded judge queue shows "In queue #2" then "Running test 3 of 7" |
