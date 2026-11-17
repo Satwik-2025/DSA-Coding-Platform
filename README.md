@@ -62,15 +62,29 @@ start.sh, start.ps1           one-command local start
 
 ### One command (local, no Docker)
 
-Needs Java 17+, Maven 3.9+ and Node.js 22+. Python 3.8+ enables Python submissions.
+**Install once:** a JDK 17 or newer (https://adoptium.net), Maven (https://maven.apache.org) and
+Node.js 20 or newer (https://nodejs.org). Python 3.8+ is optional (adds Python solutions).
+
+**Windows:** open the project folder (the one with `start.cmd` in it) and **double-click `start.cmd`**,
+or run it from a terminal in that folder:
 
 ```bash
-./start.sh          # macOS / Linux / Git Bash
-.\start.ps1         # Windows PowerShell
+.\start.cmd
 ```
 
-The script builds and starts the backend on http://localhost:8081, waits until it answers, then
-starts the frontend. Open http://localhost:5173. Ctrl+C stops both. Data is kept in `backend/data`.
+**macOS / Linux:**
+
+```bash
+bash start.sh
+```
+
+The first start downloads libraries and takes a few minutes; later starts take about 20 seconds.
+The script checks the tools, builds and starts the backend (http://localhost:8081), then starts the
+frontend and opens http://localhost:5173. Keep the window open while using the site; Ctrl+C (or
+closing the window) stops it. Your data is kept in `backend/data`.
+
+If something is wrong the script says what, e.g. a missing tool, or that port 5173 is already in use
+because the site is already running in another window.
 
 ### Docker (everything, with PostgreSQL)
 
