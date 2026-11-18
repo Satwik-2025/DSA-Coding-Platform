@@ -49,10 +49,6 @@ public class Problem {
     @Column(name = "output_format", nullable = false, length = 4000)
     private String outputFormat;
 
-    // Includes the stdin parsing boilerplate and an empty solve(), so the learner writes only the algorithm.
-    @Column(name = "starter_code", nullable = false, length = 20000)
-    private String starterCode;
-
     @Column(name = "time_limit_ms", nullable = false)
     private Integer timeLimitMs;
 
@@ -75,7 +71,6 @@ public class Problem {
     public String getStatement() { return statement; }
     public String getInputFormat() { return inputFormat; }
     public String getOutputFormat() { return outputFormat; }
-    public String getStarterCode() { return starterCode; }
     public Integer getTimeLimitMs() { return timeLimitMs; }
     public Integer getOptimalRuntimeMs() { return optimalRuntimeMs; }
     public Integer getTargetSolveSeconds() { return targetSolveSeconds; }

@@ -9,6 +9,7 @@ import { clearDraft, loadDraft, preferredLanguage, saveDraft, setPreferredLangua
 import { recordSubmission } from '../mock.js'
 import { DifficultyBadge, VerdictBadge } from '../components/Badges.jsx'
 import CodeEditor from '../components/CodeEditor.jsx'
+import LockedGate from '../components/LockedGate.jsx'
 import ResourceList from '../components/ResourceList.jsx'
 import Select from '../components/Select.jsx'
 import SolveTimer from '../components/SolveTimer.jsx'
@@ -20,17 +21,30 @@ import {
 const FILE = { JAVA: 'Main.java', PYTHON: 'Main.py', CPP: 'main.cpp' }
 const LANG_NAME = { JAVA: 'Java', PYTHON: 'Python', CPP: 'C++' }
 
+// Grey hint text shown while the editor is empty. It is not code and disappears as soon as you type.
+const PLACEHOLDER = {
+  JAVA: 'Write your complete Java program here.\nRead the input from System.in.\nPrint the answer with System.out.\nYour class must be called Main.',
+  PYTHON: 'Write your complete Python program here.\nRead the input with input() or sys.stdin.\nPrint the answer with print().',
+  CPP: 'Write your complete C++ program here.\nRead the input with cin.\nPrint the answer with cout.',
+}
+
 export default function ProblemSolve() {
   const { id } = useParams()
   const { userId } = useUser()
   const problem = useApi(() => api.problem(id), [id])
   const languages = useApi(api.languages, [])
+  // Lock state is per learner; a locked topic shows a recommendation before the problem opens.
+  const graph = useApi(() => api.topicGraph(userId), [userId])
+  // Problem id the learner chose to open despite the lock. Only for this visit: it is never saved,
+  // so the topic stays locked and the recommendation shows again next time.
+  const [proceededWith, setProceededWith] = useState(null)
 
   const [preferred, setPreferred] = useState(preferredLanguage)
   const [code, setCode] = useState('')
   const [savedAt, setSavedAt] = useState(null)
   const [leftTab, setLeftTab] = useState('description')
   const [historyVersion, setHistoryVersion] = useState(0)
+  const [notice, setNotice] = useState(null)
 
   const [submitting, setSubmitting] = useState(false)
   const [progress, setProgress] = useState(null)
@@ -46,15 +60,23 @@ export default function ProblemSolve() {
 
   // Contract: timeSpentSeconds is measured "from problem open to submit" (feeds speed_vs_target).
   const openedAt = useRef(Date.now())
+  // State updates are not instant, so a quick double click could start two runs. This ref is.
+  const busy = useRef(false)
+  // The problem currently on screen; a result that arrives after switching problems is dropped.
+  const shownId = useRef(null)
+  const consoleRef = useRef(null)
+  const resultRef = useRef(null)
 
   const available = languages.data?.languages.filter((l) => l.available) ?? [{ id: 'JAVA', name: 'Java' }]
   const language = available.some((l) => l.id === preferred) ? preferred : 'JAVA'
   const p = problem.data
-  const starter = p ? (p.starters?.[language] ?? p.starterCode) : ''
+  shownId.current = p?.id ?? null
+  const topicNode = p && graph.data?.nodes.find((n) => n.id === p.topic.id)
+  const gated = Boolean(topicNode && !topicNode.unlocked && proceededWith !== p.id)
 
-  // New problem or language: restore the saved draft, otherwise the starter code.
+  // New problem or language: restore the saved draft, otherwise start with an empty editor.
   useEffect(() => {
-    if (p) setCode(loadDraft(userId, p.id, language) ?? starter)
+    if (p) setCode(loadDraft(userId, p.id, language) ?? '')
   }, [p?.id, language, userId]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // New problem: clear old results and restart the clock.
@@ -62,6 +84,10 @@ export default function ProblemSolve() {
     if (!p) return
     setResult(null)
     setRunResult(null)
+    setRunError(null)
+    setSubmitError(null)
+    setNotice(null)
+    setConsoleTab('tests')
     setCustomInput(p.sampleTests[0]?.input ?? '')
     openedAt.current = Date.now()
   }, [p?.id]) // eslint-disable-line react-hooks/exhaustive-deps
@@ -71,7 +97,7 @@ export default function ProblemSolve() {
   useEffect(() => {
     if (!p) return undefined
     const t = setTimeout(() => {
-      if (code === starter) clearDraft(userId, p.id, language)
+      if (!code.trim()) clearDraft(userId, p.id, language)
       else if (saveDraft(userId, p.id, language, code)) setSavedAt(Date.now())
     }, 500)
     return () => clearTimeout(t)
@@ -84,36 +110,68 @@ export default function ProblemSolve() {
   const stableSubmit = useRef(() => submitRef.current?.()).current
 
   if (problem.error) return <ErrorBox error={problem.error} onRetry={problem.reload} />
-  if (!p) return <Loading />
+  // Wait for the lock state too (unless it failed to load), so a locked problem never flashes open.
+  if (!p || (graph.loading && !graph.data)) return <Loading />
+  if (gated) {
+    return (
+      <LockedGate problem={p} graph={graph.data} userId={userId}
+        onProceed={() => { setProceededWith(p.id); openedAt.current = Date.now() }} />
+    )
+  }
+
+  // Runs or submits only when nothing else is running and the editor has code in it.
+  function start(what) {
+    if (busy.current) return false
+    if (!code.trim()) {
+      setNotice(`Your editor is empty. Write your program first, then press ${what}.`)
+      return false
+    }
+    busy.current = true
+    setNotice(null)
+    return true
+  }
 
   async function run() {
-    if (running || submitting || !code.trim()) return
+    if (!start('Run')) return
+    const pid = p.id
     setRunning(true)
     setRunError(null)
     setConsoleTab('result')
+    consoleRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
     try {
-      setRunResult(await api.run(userId, p.id, code, language, customOn ? customInput : undefined))
+      const r = await api.run(userId, pid, code, language, customOn ? customInput : undefined)
+      if (shownId.current === pid) setRunResult(r)
     } catch (e) {
-      setRunError(e)
+      if (shownId.current === pid) setRunError(e)
     } finally {
+      busy.current = false
       setRunning(false)
     }
   }
 
   async function submit() {
-    if (running || submitting || !code.trim()) return
+    if (!start('Submit')) return
+    const pid = p.id
     setSubmitting(true)
     setSubmitError(null)
     setProgress({ status: 'QUEUED' })
     try {
       const seconds = Math.round((Date.now() - openedAt.current) / 1000)
-      const r = await submitAndWait(userId, p.id, code, seconds, language, setProgress)
-      setResult(r)
-      setHistoryVersion((v) => v + 1)
-      recordSubmission(userId, p.id, r.verdict) // counts toward a running mock interview, if any
+      const r = await submitAndWait(userId, pid, code, seconds, language, setProgress)
+      recordSubmission(userId, pid, r.verdict) // counts toward a running mock interview, if any
+      if (shownId.current === pid) {
+        setResult(r)
+        setHistoryVersion((v) => v + 1)
+        // The verdict appears below the console; bring it on screen.
+        requestAnimationFrame(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }))
+      }
     } catch (e) {
-      setSubmitError(e)
+      if (shownId.current === pid) {
+        setSubmitError(e)
+        requestAnimationFrame(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }))
+      }
     } finally {
+      busy.current = false
       setSubmitting(false)
       setProgress(null)
     }
@@ -126,6 +184,11 @@ export default function ProblemSolve() {
     setPreferredLanguage(next)
   }
 
+  function editCode(next) {
+    setCode(next)
+    if (notice) setNotice(null)
+  }
+
   function loadFromHistory(item) {
     changeLanguage(item.language)
     // The draft effect would load the stored draft for that language; write this code there first.
@@ -133,10 +196,13 @@ export default function ProblemSolve() {
     if (item.language === language) setCode(item.code)
   }
 
-  function resetCode() {
+  function clearCode() {
+    if (code.trim() && !window.confirm('Clear the editor? Your code for this problem will be deleted.')) return
     clearDraft(userId, p.id, language)
-    setCode(starter)
+    setCode('')
   }
+
+  const busyNow = running || submitting
 
   return (
     <div className="space-y-6">
@@ -169,45 +235,54 @@ export default function ProblemSolve() {
 
         <section className="space-y-4 min-w-0">
           <div className="glass rounded-2xl overflow-hidden relative z-20">
-            <div className="flex items-center justify-between gap-2 px-3 h-12 border-b border-line">
+            {/* Run and Submit live in the top bar, so they are on screen at every screen size. */}
+            <div className="flex flex-wrap items-center justify-between gap-2 px-3 py-2 min-h-12 border-b border-line">
               <div className="flex items-center gap-2 min-w-0">
-                <Select className="w-36" value={language} onChange={changeLanguage} ariaLabel="Language"
+                <Select className="w-32 sm:w-36" value={language} onChange={changeLanguage} ariaLabel="Language"
                   options={available.map((l) => ({ value: l.id, label: l.name }))} />
                 <span className="hidden sm:inline-flex items-center h-7 px-3 rounded-lg bg-sunken border border-line font-mono text-xs text-ink">
                   {FILE[language]}
                 </span>
-                {savedAt && <span className="hidden md:inline text-[11px] text-faint">Draft saved</span>}
+                {savedAt && code.trim() && <span className="hidden xl:inline text-[11px] text-faint">Draft saved</span>}
               </div>
-              <button onClick={resetCode} className="btn btn-ghost h-8 px-2.5 text-xs shrink-0" title="Discard changes and restore the starter code">
-                <IconRefresh size={13} /> Reset
-              </button>
-            </div>
-            <div className="h-[520px] lg:h-[max(560px,calc(100dvh-14rem))]">
-              <CodeEditor value={code} onChange={setCode} language={language} onRun={stableRun} onSubmit={stableSubmit} />
-            </div>
-            <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 border-t border-line">
-              <span className="text-xs text-faint hidden sm:inline">
-                <kbd className="font-mono">Ctrl+'</kbd> Run · <kbd className="font-mono">Ctrl+Enter</kbd> Submit
-              </span>
-              <div className="flex items-center gap-2 ml-auto">
-                <button onClick={run} disabled={running || submitting || !code.trim()} className="btn btn-ghost min-w-24">
+              <div className="flex flex-wrap items-center justify-end gap-2 ml-auto">
+                <button type="button" onClick={clearCode} disabled={busyNow || !code}
+                  className="btn btn-ghost h-9 px-2.5 text-xs" title="Clear the editor">
+                  <IconRefresh size={13} /> <span className="hidden sm:inline">Clear</span>
+                </button>
+                <button type="button" onClick={run} disabled={busyNow} aria-busy={running}
+                  className="btn btn-ghost h-9 px-3.5 min-w-[5.5rem]" title="Run on the examples (Ctrl+')">
                   {running ? <><Spinner /> Running…</> : <><IconPlay size={14} /> Run</>}
                 </button>
-                <button onClick={submit} disabled={submitting || running || !code.trim()} className="btn btn-primary min-w-40">
-                  {submitting ? <><Spinner /> {progressLabel(progress)}</> : <><IconCheck size={15} /> Submit</>}
+                <button type="button" onClick={submit} disabled={busyNow} aria-busy={submitting}
+                  className="btn btn-primary h-9 px-4 min-w-[6.5rem] 2xl:min-w-40 max-w-full" title="Submit for judging (Ctrl+Enter)">
+                  {submitting
+                    ? <><Spinner /> <span className="truncate">{progressLabel(progress)}</span></>
+                    : <><IconCheck size={15} /> Submit</>}
                 </button>
               </div>
+            </div>
+            {notice && (
+              <p role="alert" className="px-4 py-2 text-sm text-amber bg-amber-soft border-b border-amber/20">{notice}</p>
+            )}
+            <div className="h-[420px] sm:h-[480px] lg:h-[clamp(420px,calc(100dvh-15rem),900px)]">
+              <CodeEditor value={code} onChange={editCode} language={language} onRun={stableRun} onSubmit={stableSubmit}
+                placeholder={PLACEHOLDER[language]} />
             </div>
           </div>
 
-          <Console
-            tab={consoleTab} setTab={setConsoleTab} samples={p.sampleTests}
-            customOn={customOn} setCustomOn={setCustomOn} customInput={customInput} setCustomInput={setCustomInput}
-            running={running} runResult={runResult} runError={runError}
-          />
+          <div ref={consoleRef} className="scroll-mt-6">
+            <Console
+              tab={consoleTab} setTab={setConsoleTab} samples={p.sampleTests}
+              customOn={customOn} setCustomOn={setCustomOn} customInput={customInput} setCustomInput={setCustomInput}
+              running={running} runResult={runResult} runError={runError}
+            />
+          </div>
 
-          {submitError && <ErrorBox error={submitError} />}
-          {result && <SubmissionResult key={result.attemptId} r={result} />}
+          <div ref={resultRef} className="scroll-mt-6 space-y-4">
+            {submitError && <ErrorBox error={submitError} />}
+            {result && <SubmissionResult key={result.attemptId} r={result} />}
+          </div>
         </section>
       </div>
     </div>
@@ -254,6 +329,13 @@ function Description({ p }) {
             </div>
           ))}
         </div>
+      </div>
+      <div className="rounded-xl px-4 py-3 bg-accent-soft border border-accent/15 text-sm text-ink space-y-1">
+        <p className="font-medium">How to answer</p>
+        <p className="text-muted">
+          Write a complete program. Read the input exactly as described above, and print only the answer.
+          In Java, your class must be called <code className="font-mono text-[13px] text-ink">Main</code>.
+        </p>
       </div>
       <p className="text-xs text-faint">Python gets 3× the time limit, because limits are set for Java.</p>
     </div>
@@ -322,7 +404,9 @@ function Console({ tab, setTab, samples, customOn, setCustomOn, customInput, set
             {label}
           </button>
         ))}
-        <span className="ml-auto text-[11px] text-faint pr-1">Runs are not recorded</span>
+        <span className="ml-auto text-[11px] text-faint pr-1 text-right">
+          Runs are not saved<span className="hidden md:inline"> · <kbd className="font-mono">Ctrl+'</kbd> run · <kbd className="font-mono">Ctrl+Enter</kbd> submit</span>
+        </span>
       </div>
       <div className="p-4 max-h-96 overflow-auto">
         {tab === 'tests' ? (
@@ -349,17 +433,23 @@ function Console({ tab, setTab, samples, customOn, setCustomOn, customInput, set
         ) : !runResult ? (
           <p className="text-sm text-muted">Press Run to try your code without submitting it.</p>
         ) : !runResult.compiled ? (
+          <div className="space-y-2">
+          <p className="text-sm font-medium text-brick">Your code did not compile. The compiler says:</p>
           <pre className="font-mono text-[13px] whitespace-pre-wrap bg-brick-soft border border-brick/20 text-ink px-3 py-2.5 rounded-xl overflow-x-auto">
             {runResult.compileError}
           </pre>
+          </div>
+        ) : runResult.cases.length === 0 ? (
+          <p className="text-sm text-muted">Nothing ran: this problem has no example tests. Tick "Use my own input" to try your code.</p>
         ) : (
           <div className="space-y-4">
             {runResult.cases.map((c) => (
               <div key={c.ordinal} className="space-y-2">
                 <div className="flex items-center gap-2">
-                  <span className={`inline-flex items-center h-6 px-2.5 rounded-full border text-xs font-medium ${STATUS_STYLE[c.status]}`}>
-                    {c.kind === 'CUSTOM' ? 'Your input' : `Example ${c.ordinal}`}: {STATUS_TEXT[c.status]}
+                  <span className={`inline-flex items-center h-6 px-2.5 rounded-full border text-xs font-medium ${STATUS_STYLE[c.status] ?? 'border-line text-muted'}`}>
+                    {c.kind === 'CUSTOM' ? 'Your input' : `Example ${c.ordinal}`}: {STATUS_TEXT[c.status] ?? c.status}
                   </span>
+                  {c.exceptionType && <span className="text-xs text-brick font-mono">{c.exceptionType}</span>}
                   <span className="text-xs text-faint tabular-nums">{c.runtimeMs} ms</span>
                   {c.memoryKb != null && <span className="text-xs text-faint tabular-nums">{(c.memoryKb / 1024).toFixed(1)} MB</span>}
                 </div>

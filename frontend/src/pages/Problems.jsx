@@ -37,7 +37,8 @@ export default function Problems() {
   return (
     <div className="space-y-8">
       <PageHeader eyebrow="Practice" title="Problems">
-        Java problems across every topic. Locked topics stay open for practice; the tag is information only.
+        Problems in every topic, in Java, Python or C++. If a problem is locked, we first suggest an easier
+        question to practise, but you can still choose to open it.
       </PageHeader>
 
       <div className="glass rounded-2xl p-2 flex flex-col sm:flex-row sm:items-center gap-2 relative z-20">
@@ -70,7 +71,7 @@ export default function Problems() {
                   <td>
                     <span className="inline-flex flex-wrap items-center gap-2">
                       <span className="text-muted">{p.topicName}</span>
-                      {/* Locked topics are still open for manual practice (CONTRACT.md 2.3); the tag is information only. */}
+                      {/* Opening a problem in a locked topic first shows what to practise (LockedGate), with a way through. */}
                       {locked.has(p.topicId) && <LockedTag />}
                     </span>
                   </td>

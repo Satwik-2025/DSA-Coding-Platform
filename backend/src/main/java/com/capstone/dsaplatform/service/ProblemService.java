@@ -23,12 +23,9 @@ public class ProblemService {
 
     private final ProblemRepository problems;
     private final TestCaseRepository testCases;
-    private final StarterCatalog starters;
-
-    public ProblemService(ProblemRepository problems, TestCaseRepository testCases, StarterCatalog starters) {
+    public ProblemService(ProblemRepository problems, TestCaseRepository testCases) {
         this.problems = problems;
         this.testCases = testCases;
-        this.starters = starters;
     }
 
     /** Both filters optional; ordered by topic id, then difficulty (EASY first), then id. */
@@ -57,8 +54,7 @@ public class ProblemService {
                 .toList();
         return new ProblemDetail(p.getId(), p.getTitle(), p.getSlug(),
                 new TopicRef(p.getTopic().getId(), p.getTopic().getName()), p.getDifficulty(),
-                p.getStatement(), p.getInputFormat(), p.getOutputFormat(), p.getStarterCode(),
-                p.getTimeLimitMs(), p.getTargetSolveSeconds(), samples, tests.size(),
-                starters.startersFor(p.getSlug(), p.getStarterCode()));
+                p.getStatement(), p.getInputFormat(), p.getOutputFormat(),
+                p.getTimeLimitMs(), p.getTargetSolveSeconds(), samples, tests.size());
     }
 }

@@ -28,12 +28,9 @@ public final class ProblemDtos {
                                 String statement,
                                 String inputFormat,
                                 String outputFormat,
-                                String starterCode,
                                 Integer timeLimitMs,
                                 Integer targetSolveSeconds,
                                 List<SampleTestView> sampleTests,
-                                long testCount,
-                                // Starter code per language id (JAVA, PYTHON, CPP); JAVA equals starterCode.
-                                java.util.Map<String, String> starters) {
+                                long testCount) {
     }
 }

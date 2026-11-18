@@ -33,10 +33,16 @@ INSERT INTO topic_prerequisites (topic_id, prerequisite_id) VALUES
     (10, 8)    -- Trees        -> DP
 ON CONFLICT DO NOTHING;
 
--- Demo users for the user switcher (no real login). Both start with no attempt history.
+-- Demo learners for the user switcher (no real login). They used to be called Alex (id 1) and Sam (id 2).
+-- Renaming in place keeps the ids, so every attempt, mistake, self-rating and readiness snapshot stays
+-- with the same learner: Alex -> Rahul, Sam -> Ananya. On a new database the INSERT creates them.
+UPDATE users SET display_name = 'Rahul'
+WHERE display_name = 'Alex' AND NOT EXISTS (SELECT 1 FROM users WHERE display_name = 'Rahul');
+UPDATE users SET display_name = 'Ananya'
+WHERE display_name = 'Sam' AND NOT EXISTS (SELECT 1 FROM users WHERE display_name = 'Ananya');
 INSERT INTO users (display_name) VALUES
-    ('Alex'),
-    ('Sam')
+    ('Rahul'),
+    ('Ananya')
 ON CONFLICT DO NOTHING;
 -- Problems and their test cases. Expected outputs come from reference solutions written when the
 -- problems were authored; keep the inputs and outputs in sync when editing a test by hand.
@@ -45,7 +51,7 @@ ON CONFLICT DO NOTHING;
 
 -- ===== 1. Maximum Subarray Sum (topic 1, MEDIUM) =====
 INSERT INTO problems (topic_id, title, slug, difficulty, statement, input_format, output_format,
-                      starter_code, time_limit_ms, optimal_runtime_ms, target_solve_seconds)
+                      time_limit_ms, optimal_runtime_ms, target_solve_seconds)
 SELECT 1, 'Maximum Subarray Sum', 'max-subarray-sum', 'MEDIUM',
 'You are given an array of integers that may contain negative numbers. Choose a contiguous, **non-empty** block of elements so that their total is as large as possible, and print that total.
 
@@ -55,30 +61,6 @@ A block of one element is allowed, so the answer is never smaller than the large
 'Line 1: n
 Line 2: n space-separated integers',
 'A single integer: the largest possible block sum',
-'import java.io.*;
-import java.util.*;
-
-public class Main {
-    // Return the largest sum of any non-empty contiguous subarray of nums.
-    static long solve(int[] nums) {
-        // TODO: write your algorithm here
-        return 0;
-    }
-
-    public static void main(String[] args) throws IOException {
-        StreamTokenizer in = new StreamTokenizer(new BufferedReader(new InputStreamReader(System.in)));
-        int n = nextInt(in);
-        int[] nums = new int[n];
-        for (int i = 0; i < n; i++) nums[i] = nextInt(in);
-        System.out.println(solve(nums));
-    }
-
-    static int nextInt(StreamTokenizer in) throws IOException {
-        in.nextToken();
-        return (int) in.nval;
-    }
-}
-',
 2000, 500, 1500
 WHERE NOT EXISTS (SELECT 1 FROM problems WHERE slug = 'max-subarray-sum');
 
@@ -147,7 +129,7 @@ AND NOT EXISTS (SELECT 1 FROM test_cases t WHERE t.problem_id = p.id AND t.ordin
 
 -- ===== 2. Rotate Array by k (topic 1, EASY) =====
 INSERT INTO problems (topic_id, title, slug, difficulty, statement, input_format, output_format,
-                      starter_code, time_limit_ms, optimal_runtime_ms, target_solve_seconds)
+                      time_limit_ms, optimal_runtime_ms, target_solve_seconds)
 SELECT 1, 'Rotate Array by k', 'rotate-array', 'EASY',
 'Shift every element of an array `k` places to the **right**. An element pushed past the last position wraps around to the front. Print the array after the shift.
 
@@ -157,37 +139,6 @@ SELECT 1, 'Rotate Array by k', 'rotate-array', 'EASY',
 'Line 1: n and k separated by a space
 Line 2: n space-separated integers',
 'The n rotated values on one line, separated by single spaces',
-'import java.io.*;
-import java.util.*;
-
-public class Main {
-    // Return nums rotated k places to the right (you may return a new array).
-    static int[] solve(int[] nums, int k) {
-        // TODO: write your algorithm here
-        return nums;
-    }
-
-    public static void main(String[] args) throws IOException {
-        StreamTokenizer in = new StreamTokenizer(new BufferedReader(new InputStreamReader(System.in)));
-        int n = nextInt(in);
-        int k = nextInt(in);
-        int[] nums = new int[n];
-        for (int i = 0; i < n; i++) nums[i] = nextInt(in);
-        int[] ans = solve(nums, k);
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < ans.length; i++) {
-            if (i > 0) sb.append('' '');
-            sb.append(ans[i]);
-        }
-        System.out.println(sb);
-    }
-
-    static int nextInt(StreamTokenizer in) throws IOException {
-        in.nextToken();
-        return (int) in.nval;
-    }
-}
-',
 2000, 500, 900
 WHERE NOT EXISTS (SELECT 1 FROM problems WHERE slug = 'rotate-array');
 
@@ -256,7 +207,7 @@ AND NOT EXISTS (SELECT 1 FROM test_cases t WHERE t.problem_id = p.id AND t.ordin
 
 -- ===== 3. Valid Anagram (topic 2, EASY) =====
 INSERT INTO problems (topic_id, title, slug, difficulty, statement, input_format, output_format,
-                      starter_code, time_limit_ms, optimal_runtime_ms, target_solve_seconds)
+                      time_limit_ms, optimal_runtime_ms, target_solve_seconds)
 SELECT 2, 'Valid Anagram', 'valid-anagram', 'EASY',
 'Two words are anagrams when one can be turned into the other by reordering its letters, using every letter exactly as many times as it appears. Decide whether `s` and `t` are anagrams.
 
@@ -266,27 +217,6 @@ Two empty strings count as anagrams of each other.
 'Line 1: s (may be empty)
 Line 2: t (may be empty)',
 'true or false',
-'import java.io.*;
-import java.util.*;
-
-public class Main {
-    // Return true if t is a rearrangement of s.
-    static boolean solve(String s, String t) {
-        // TODO: write your algorithm here
-        return false;
-    }
-
-    public static void main(String[] args) throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        String s = br.readLine();
-        String t = br.readLine();
-        // An empty line can arrive as null at end of input; treat it as an empty string.
-        if (s == null) s = "";
-        if (t == null) t = "";
-        System.out.println(solve(s, t));
-    }
-}
-',
 2000, 500, 600
 WHERE NOT EXISTS (SELECT 1 FROM problems WHERE slug = 'valid-anagram');
 
@@ -355,7 +285,7 @@ AND NOT EXISTS (SELECT 1 FROM test_cases t WHERE t.problem_id = p.id AND t.ordin
 
 -- ===== 4. Longest Common Prefix (topic 2, EASY) =====
 INSERT INTO problems (topic_id, title, slug, difficulty, statement, input_format, output_format,
-                      starter_code, time_limit_ms, optimal_runtime_ms, target_solve_seconds)
+                      time_limit_ms, optimal_runtime_ms, target_solve_seconds)
 SELECT 2, 'Longest Common Prefix', 'longest-common-prefix', 'EASY',
 'Given a list of words, find the longest string that every word starts with.
 
@@ -365,29 +295,6 @@ The answer is printed inside square brackets so that an empty answer is still vi
 'Line 1: n
 Next n lines: one word per line (a line may be empty)',
 'The prefix wrapped in square brackets, e.g. [ab] or []',
-'import java.io.*;
-import java.util.*;
-
-public class Main {
-    // Return the longest prefix shared by every word (possibly "").
-    static String solve(String[] words) {
-        // TODO: write your algorithm here
-        return "";
-    }
-
-    public static void main(String[] args) throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        int n = Integer.parseInt(br.readLine().trim());
-        String[] words = new String[n];
-        for (int i = 0; i < n; i++) {
-            String w = br.readLine();
-            words[i] = (w == null) ? "" : w;
-        }
-        // Brackets make an empty answer visible in the output.
-        System.out.println("[" + solve(words) + "]");
-    }
-}
-',
 2000, 500, 600
 WHERE NOT EXISTS (SELECT 1 FROM problems WHERE slug = 'longest-common-prefix');
 
@@ -467,7 +374,7 @@ AND NOT EXISTS (SELECT 1 FROM test_cases t WHERE t.problem_id = p.id AND t.ordin
 
 -- ===== 5. Pair With Target Sum in Sorted Array (topic 3, EASY) =====
 INSERT INTO problems (topic_id, title, slug, difficulty, statement, input_format, output_format,
-                      starter_code, time_limit_ms, optimal_runtime_ms, target_solve_seconds)
+                      time_limit_ms, optimal_runtime_ms, target_solve_seconds)
 SELECT 3, 'Pair With Target Sum in Sorted Array', 'pair-target-sum-sorted', 'EASY',
 'The array `nums` is sorted in non-decreasing order. Find two **different** positions `i < j` whose values add up to `target`, and print `i j` (0-based). If no such pair exists, print `-1 -1`.
 
@@ -478,32 +385,6 @@ At most one pair of positions works, so the answer is unique.
 Line 2: n space-separated integers in non-decreasing order
 Line 3: target',
 'Two integers i and j separated by a space, or -1 -1',
-'import java.io.*;
-import java.util.*;
-
-public class Main {
-    // Return {i, j} with i < j and nums[i] + nums[j] == target, or {-1, -1}.
-    static int[] solve(int[] nums, int target) {
-        // TODO: write your algorithm here
-        return new int[]{-1, -1};
-    }
-
-    public static void main(String[] args) throws IOException {
-        StreamTokenizer in = new StreamTokenizer(new BufferedReader(new InputStreamReader(System.in)));
-        int n = nextInt(in);
-        int[] nums = new int[n];
-        for (int i = 0; i < n; i++) nums[i] = nextInt(in);
-        int target = nextInt(in);
-        int[] ans = solve(nums, target);
-        System.out.println(ans[0] + " " + ans[1]);
-    }
-
-    static int nextInt(StreamTokenizer in) throws IOException {
-        in.nextToken();
-        return (int) in.nval;
-    }
-}
-',
 2000, 500, 600
 WHERE NOT EXISTS (SELECT 1 FROM problems WHERE slug = 'pair-target-sum-sorted');
 
@@ -579,7 +460,7 @@ AND NOT EXISTS (SELECT 1 FROM test_cases t WHERE t.problem_id = p.id AND t.ordin
 
 -- ===== 6. Container With Most Water (topic 3, MEDIUM) =====
 INSERT INTO problems (topic_id, title, slug, difficulty, statement, input_format, output_format,
-                      starter_code, time_limit_ms, optimal_runtime_ms, target_solve_seconds)
+                      time_limit_ms, optimal_runtime_ms, target_solve_seconds)
 SELECT 3, 'Container With Most Water', 'container-most-water', 'MEDIUM',
 'Vertical walls stand at positions 0, 1, ..., n-1 and wall `i` has height `h[i]`. Pick two walls; together with the ground they form a tank. The water it holds is the distance between the walls multiplied by the height of the **shorter** wall. Print the most water any pair of walls can hold.
 
@@ -587,30 +468,6 @@ SELECT 3, 'Container With Most Water', 'container-most-water', 'MEDIUM',
 'Line 1: n
 Line 2: n space-separated integers',
 'A single integer: the largest amount of water',
-'import java.io.*;
-import java.util.*;
-
-public class Main {
-    // Return max over i < j of min(h[i], h[j]) * (j - i).
-    static long solve(int[] h) {
-        // TODO: write your algorithm here
-        return 0;
-    }
-
-    public static void main(String[] args) throws IOException {
-        StreamTokenizer in = new StreamTokenizer(new BufferedReader(new InputStreamReader(System.in)));
-        int n = nextInt(in);
-        int[] nums = new int[n];
-        for (int i = 0; i < n; i++) nums[i] = nextInt(in);
-        System.out.println(solve(nums));
-    }
-
-    static int nextInt(StreamTokenizer in) throws IOException {
-        in.nextToken();
-        return (int) in.nval;
-    }
-}
-',
 2000, 500, 1800
 WHERE NOT EXISTS (SELECT 1 FROM problems WHERE slug = 'container-most-water');
 
@@ -679,7 +536,7 @@ AND NOT EXISTS (SELECT 1 FROM test_cases t WHERE t.problem_id = p.id AND t.ordin
 
 -- ===== 7. Maximum Sum of Subarray of Size k (topic 4, EASY) =====
 INSERT INTO problems (topic_id, title, slug, difficulty, statement, input_format, output_format,
-                      starter_code, time_limit_ms, optimal_runtime_ms, target_solve_seconds)
+                      time_limit_ms, optimal_runtime_ms, target_solve_seconds)
 SELECT 4, 'Maximum Sum of Subarray of Size k', 'max-sum-subarray-size-k', 'EASY',
 'Look at every block of exactly `k` consecutive elements in the array and print the largest block total. Values can be negative.
 
@@ -687,31 +544,6 @@ SELECT 4, 'Maximum Sum of Subarray of Size k', 'max-sum-subarray-size-k', 'EASY'
 'Line 1: n and k separated by a space
 Line 2: n space-separated integers',
 'A single integer: the largest sum of k consecutive elements',
-'import java.io.*;
-import java.util.*;
-
-public class Main {
-    // Return the largest sum of any k consecutive elements.
-    static long solve(int[] nums, int k) {
-        // TODO: write your algorithm here
-        return 0;
-    }
-
-    public static void main(String[] args) throws IOException {
-        StreamTokenizer in = new StreamTokenizer(new BufferedReader(new InputStreamReader(System.in)));
-        int n = nextInt(in);
-        int k = nextInt(in);
-        int[] nums = new int[n];
-        for (int i = 0; i < n; i++) nums[i] = nextInt(in);
-        System.out.println(solve(nums, k));
-    }
-
-    static int nextInt(StreamTokenizer in) throws IOException {
-        in.nextToken();
-        return (int) in.nval;
-    }
-}
-',
 2000, 500, 600
 WHERE NOT EXISTS (SELECT 1 FROM problems WHERE slug = 'max-sum-subarray-size-k');
 
@@ -780,32 +612,13 @@ AND NOT EXISTS (SELECT 1 FROM test_cases t WHERE t.problem_id = p.id AND t.ordin
 
 -- ===== 8. Longest Substring Without Repeating Characters (topic 4, MEDIUM) =====
 INSERT INTO problems (topic_id, title, slug, difficulty, statement, input_format, output_format,
-                      starter_code, time_limit_ms, optimal_runtime_ms, target_solve_seconds)
+                      time_limit_ms, optimal_runtime_ms, target_solve_seconds)
 SELECT 4, 'Longest Substring Without Repeating Characters', 'longest-substring-no-repeat', 'MEDIUM',
 'Find the length of the longest **contiguous** piece of the string in which no character appears twice. An empty string has answer 0.
 
 **Constraints:** 0 <= |s| <= 400000; s contains only English letters and digits (no spaces).',
 'Line 1: s (may be empty)',
 'A single integer: the length of the longest repeat-free substring',
-'import java.io.*;
-import java.util.*;
-
-public class Main {
-    // Return the length of the longest substring with all-distinct characters.
-    static int solve(String s) {
-        // TODO: write your algorithm here
-        return 0;
-    }
-
-    public static void main(String[] args) throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        String s = br.readLine();
-        // An empty line can arrive as null at end of input; treat it as an empty string.
-        if (s == null) s = "";
-        System.out.println(solve(s));
-    }
-}
-',
 2000, 500, 1800
 WHERE NOT EXISTS (SELECT 1 FROM problems WHERE slug = 'longest-substring-no-repeat');
 
@@ -867,7 +680,7 @@ AND NOT EXISTS (SELECT 1 FROM test_cases t WHERE t.problem_id = p.id AND t.ordin
 
 -- ===== 9. Two Sum (topic 5, EASY) =====
 INSERT INTO problems (topic_id, title, slug, difficulty, statement, input_format, output_format,
-                      starter_code, time_limit_ms, optimal_runtime_ms, target_solve_seconds)
+                      time_limit_ms, optimal_runtime_ms, target_solve_seconds)
 SELECT 5, 'Two Sum', 'two-sum', 'EASY',
 'The array `nums` is **not** sorted. Exactly one pair of different positions `i < j` has `nums[i] + nums[j] == target`. Print `i j` (0-based).
 
@@ -878,32 +691,6 @@ An element may not be paired with itself.
 Line 2: n space-separated integers
 Line 3: target',
 'Two integers i and j separated by a space, with i < j',
-'import java.io.*;
-import java.util.*;
-
-public class Main {
-    // Return {i, j} with i < j and nums[i] + nums[j] == target.
-    static int[] solve(int[] nums, int target) {
-        // TODO: write your algorithm here
-        return new int[]{-1, -1};
-    }
-
-    public static void main(String[] args) throws IOException {
-        StreamTokenizer in = new StreamTokenizer(new BufferedReader(new InputStreamReader(System.in)));
-        int n = nextInt(in);
-        int[] nums = new int[n];
-        for (int i = 0; i < n; i++) nums[i] = nextInt(in);
-        int target = nextInt(in);
-        int[] ans = solve(nums, target);
-        System.out.println(ans[0] + " " + ans[1]);
-    }
-
-    static int nextInt(StreamTokenizer in) throws IOException {
-        in.nextToken();
-        return (int) in.nval;
-    }
-}
-',
 2000, 500, 600
 WHERE NOT EXISTS (SELECT 1 FROM problems WHERE slug = 'two-sum');
 
@@ -979,7 +766,7 @@ AND NOT EXISTS (SELECT 1 FROM test_cases t WHERE t.problem_id = p.id AND t.ordin
 
 -- ===== 10. Count Subarrays With Sum K (topic 5, MEDIUM) =====
 INSERT INTO problems (topic_id, title, slug, difficulty, statement, input_format, output_format,
-                      starter_code, time_limit_ms, optimal_runtime_ms, target_solve_seconds)
+                      time_limit_ms, optimal_runtime_ms, target_solve_seconds)
 SELECT 5, 'Count Subarrays With Sum K', 'count-subarrays-sum-k', 'MEDIUM',
 'Count how many contiguous, non-empty blocks of the array add up to exactly `k`. Blocks at different positions count separately even if their values are the same. Values can be negative or zero.
 
@@ -987,31 +774,6 @@ SELECT 5, 'Count Subarrays With Sum K', 'count-subarrays-sum-k', 'MEDIUM',
 'Line 1: n and k separated by a space
 Line 2: n space-separated integers',
 'A single integer: the number of blocks summing to k',
-'import java.io.*;
-import java.util.*;
-
-public class Main {
-    // Return how many contiguous subarrays of nums sum to k.
-    static long solve(int[] nums, int k) {
-        // TODO: write your algorithm here
-        return 0;
-    }
-
-    public static void main(String[] args) throws IOException {
-        StreamTokenizer in = new StreamTokenizer(new BufferedReader(new InputStreamReader(System.in)));
-        int n = nextInt(in);
-        int k = nextInt(in);
-        int[] nums = new int[n];
-        for (int i = 0; i < n; i++) nums[i] = nextInt(in);
-        System.out.println(solve(nums, k));
-    }
-
-    static int nextInt(StreamTokenizer in) throws IOException {
-        in.nextToken();
-        return (int) in.nval;
-    }
-}
-',
 2000, 500, 1800
 WHERE NOT EXISTS (SELECT 1 FROM problems WHERE slug = 'count-subarrays-sum-k');
 
@@ -1071,7 +833,7 @@ AND NOT EXISTS (SELECT 1 FROM test_cases t WHERE t.problem_id = p.id AND t.ordin
 
 -- ===== 11. Reverse a Linked List (topic 6, EASY) =====
 INSERT INTO problems (topic_id, title, slug, difficulty, statement, input_format, output_format,
-                      starter_code, time_limit_ms, optimal_runtime_ms, target_solve_seconds)
+                      time_limit_ms, optimal_runtime_ms, target_solve_seconds)
 SELECT 6, 'Reverse a Linked List', 'reverse-linked-list', 'EASY',
 'A singly linked list is built from the input values in order. Reverse it by changing the `next` pointers and return the new head. The program prints the reversed list as `v1 -> v2 -> ... -> null`; an empty list prints as `null`.
 
@@ -1079,45 +841,6 @@ SELECT 6, 'Reverse a Linked List', 'reverse-linked-list', 'EASY',
 'Line 1: n
 Line 2: the n node values from head to tail (empty when n = 0)',
 'The reversed list as v1 -> v2 -> ... -> null, or null for an empty list',
-'import java.io.*;
-import java.util.*;
-
-public class Main {
-    // Reverse the list in place and return the new head (null for an empty list).
-    static ListNode solve(ListNode head) {
-        // TODO: write your algorithm here
-        return head;
-    }
-
-    public static void main(String[] args) throws IOException {
-        StreamTokenizer in = new StreamTokenizer(new BufferedReader(new InputStreamReader(System.in)));
-        int n = nextInt(in);
-        int[] nums = new int[n];
-        for (int i = 0; i < n; i++) nums[i] = nextInt(in);
-        ListNode dummy = new ListNode(0), tail = dummy;
-        for (int v : nums) {
-            tail.next = new ListNode(v);
-            tail = tail.next;
-        }
-        ListNode node = solve(dummy.next);
-        StringBuilder sb = new StringBuilder();
-        // Stop after n nodes: a reversal that leaves a cycle would otherwise print forever.
-        for (int i = 0; i < n && node != null; i++, node = node.next) sb.append(node.val).append(" -> ");
-        System.out.println(node == null ? sb + "null" : "ERROR: more nodes than the input had (cycle?)");
-    }
-
-    static int nextInt(StreamTokenizer in) throws IOException {
-        in.nextToken();
-        return (int) in.nval;
-    }
-
-    static class ListNode {
-        int val;
-        ListNode next;
-        ListNode(int val) { this.val = val; }
-    }
-}
-',
 2000, 500, 900
 WHERE NOT EXISTS (SELECT 1 FROM problems WHERE slug = 'reverse-linked-list');
 
@@ -1177,32 +900,13 @@ AND NOT EXISTS (SELECT 1 FROM test_cases t WHERE t.problem_id = p.id AND t.ordin
 
 -- ===== 12. Valid Parentheses (topic 7, EASY) =====
 INSERT INTO problems (topic_id, title, slug, difficulty, statement, input_format, output_format,
-                      starter_code, time_limit_ms, optimal_runtime_ms, target_solve_seconds)
+                      time_limit_ms, optimal_runtime_ms, target_solve_seconds)
 SELECT 7, 'Valid Parentheses', 'valid-parentheses', 'EASY',
 'The string contains only the bracket characters `( ) [ ] { }`. It is balanced when every opening bracket is closed by the **same type** of bracket, and brackets close in the reverse order they were opened. The empty string is balanced. Decide whether the string is balanced.
 
 **Constraints:** 0 <= |s| <= 400000.',
 'Line 1: s (may be empty)',
 'true or false',
-'import java.io.*;
-import java.util.*;
-
-public class Main {
-    // Return true if every bracket is closed by the same type in the right order.
-    static boolean solve(String s) {
-        // TODO: write your algorithm here
-        return false;
-    }
-
-    public static void main(String[] args) throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        String s = br.readLine();
-        // An empty line can arrive as null at end of input; treat it as an empty string.
-        if (s == null) s = "";
-        System.out.println(solve(s));
-    }
-}
-',
 2000, 500, 600
 WHERE NOT EXISTS (SELECT 1 FROM problems WHERE slug = 'valid-parentheses');
 
@@ -1264,7 +968,7 @@ AND NOT EXISTS (SELECT 1 FROM test_cases t WHERE t.problem_id = p.id AND t.ordin
 
 -- ===== 13. Maximum Depth of a Binary Tree (topic 8, EASY) =====
 INSERT INTO problems (topic_id, title, slug, difficulty, statement, input_format, output_format,
-                      starter_code, time_limit_ms, optimal_runtime_ms, target_solve_seconds)
+                      time_limit_ms, optimal_runtime_ms, target_solve_seconds)
 SELECT 8, 'Maximum Depth of a Binary Tree', 'max-depth-binary-tree', 'EASY',
 'The depth of a binary tree is the number of **nodes** on the longest path from the root down to a leaf. An empty tree has depth 0 and a single node has depth 1. Print the depth.
 
@@ -1274,55 +978,6 @@ The tree is given in level order: the root first, then for each real node in tur
 'Line 1: m, the number of tokens (0 for an empty tree)
 Line 2: m space-separated tokens, each an integer or null',
 'A single integer: the depth of the tree',
-'import java.io.*;
-import java.util.*;
-
-public class Main {
-    // Return the number of nodes on the longest root-to-leaf path (0 for null).
-    static int solve(TreeNode root) {
-        // TODO: write your algorithm here
-        return 0;
-    }
-
-    public static void main(String[] args) throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        int m = Integer.parseInt(br.readLine().trim());
-        String[] tokens = new String[m];
-        StringTokenizer st = new StringTokenizer(m == 0 ? "" : br.readLine());
-        for (int i = 0; i < m; i++) tokens[i] = st.nextToken();
-        System.out.println(solve(build(tokens)));
-    }
-
-    static class TreeNode {
-        int val;
-        TreeNode left, right;
-        TreeNode(int val) { this.val = val; }
-    }
-
-    // Level order: each real node, taken from a queue, consumes the next two tokens as its children.
-    static TreeNode build(String[] t) {
-        if (t.length == 0 || t[0].equals("null")) return null;
-        TreeNode root = new TreeNode(Integer.parseInt(t[0]));
-        ArrayDeque<TreeNode> queue = new ArrayDeque<>();
-        queue.add(root);
-        int i = 1;
-        while (!queue.isEmpty() && i < t.length) {
-            TreeNode node = queue.poll();
-            if (i < t.length && !t[i].equals("null")) {
-                node.left = new TreeNode(Integer.parseInt(t[i]));
-                queue.add(node.left);
-            }
-            i++;
-            if (i < t.length && !t[i].equals("null")) {
-                node.right = new TreeNode(Integer.parseInt(t[i]));
-                queue.add(node.right);
-            }
-            i++;
-        }
-        return root;
-    }
-}
-',
 2000, 500, 600
 WHERE NOT EXISTS (SELECT 1 FROM problems WHERE slug = 'max-depth-binary-tree');
 
@@ -1391,7 +1046,7 @@ AND NOT EXISTS (SELECT 1 FROM test_cases t WHERE t.problem_id = p.id AND t.ordin
 
 -- ===== 14. Number of Islands (topic 9, MEDIUM) =====
 INSERT INTO problems (topic_id, title, slug, difficulty, statement, input_format, output_format,
-                      starter_code, time_limit_ms, optimal_runtime_ms, target_solve_seconds)
+                      time_limit_ms, optimal_runtime_ms, target_solve_seconds)
 SELECT 9, 'Number of Islands', 'number-of-islands', 'MEDIUM',
 'A map is a grid of `1` (land) and `0` (water). Land cells that touch **up, down, left or right** belong to the same island; touching only at a corner does not connect them. Print the number of islands.
 
@@ -1399,27 +1054,6 @@ SELECT 9, 'Number of Islands', 'number-of-islands', 'MEDIUM',
 'Line 1: R and C separated by a space
 Next R lines: C characters each, every one 0 or 1, no spaces',
 'A single integer: the number of islands',
-'import java.io.*;
-import java.util.*;
-
-public class Main {
-    // Return the number of 4-directionally connected groups of ''1'' cells.
-    static int solve(char[][] grid) {
-        // TODO: write your algorithm here
-        return 0;
-    }
-
-    public static void main(String[] args) throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        StringTokenizer st = new StringTokenizer(br.readLine());
-        int rows = Integer.parseInt(st.nextToken());
-        int cols = Integer.parseInt(st.nextToken());
-        char[][] grid = new char[rows][];
-        for (int r = 0; r < rows; r++) grid[r] = br.readLine().trim().toCharArray();
-        System.out.println(solve(grid));
-    }
-}
-',
 2000, 500, 1500
 WHERE NOT EXISTS (SELECT 1 FROM problems WHERE slug = 'number-of-islands');
 
@@ -2097,7 +1731,7 @@ AND NOT EXISTS (SELECT 1 FROM test_cases t WHERE t.problem_id = p.id AND t.ordin
 
 -- ===== 15. House Robber (topic 10, MEDIUM) =====
 INSERT INTO problems (topic_id, title, slug, difficulty, statement, input_format, output_format,
-                      starter_code, time_limit_ms, optimal_runtime_ms, target_solve_seconds)
+                      time_limit_ms, optimal_runtime_ms, target_solve_seconds)
 SELECT 10, 'House Robber', 'house-robber', 'MEDIUM',
 'Houses stand in a row and house `i` holds `nums[i]` coins. You may collect from any set of houses as long as you never collect from **two neighbouring** houses. Print the most coins you can collect.
 
@@ -2105,30 +1739,6 @@ SELECT 10, 'House Robber', 'house-robber', 'MEDIUM',
 'Line 1: n
 Line 2: n space-separated integers',
 'A single integer: the maximum number of coins',
-'import java.io.*;
-import java.util.*;
-
-public class Main {
-    // Return the largest total over sets of houses with no two adjacent.
-    static long solve(int[] nums) {
-        // TODO: write your algorithm here
-        return 0;
-    }
-
-    public static void main(String[] args) throws IOException {
-        StreamTokenizer in = new StreamTokenizer(new BufferedReader(new InputStreamReader(System.in)));
-        int n = nextInt(in);
-        int[] nums = new int[n];
-        for (int i = 0; i < n; i++) nums[i] = nextInt(in);
-        System.out.println(solve(nums));
-    }
-
-    static int nextInt(StreamTokenizer in) throws IOException {
-        in.nextToken();
-        return (int) in.nval;
-    }
-}
-',
 2000, 500, 1500
 WHERE NOT EXISTS (SELECT 1 FROM problems WHERE slug = 'house-robber');
 
@@ -2201,7 +1811,7 @@ AND NOT EXISTS (SELECT 1 FROM test_cases t WHERE t.problem_id = p.id AND t.ordin
 
 -- ===== 16. Count Inversions (topic 1, HARD) =====
 INSERT INTO problems (topic_id, title, slug, difficulty, statement, input_format, output_format,
-                      starter_code, time_limit_ms, optimal_runtime_ms, target_solve_seconds)
+                      time_limit_ms, optimal_runtime_ms, target_solve_seconds)
 SELECT 1, 'Count Inversions', 'count-inversions', 'HARD',
 'Two positions **i < j** form an *inversion* when the earlier value is larger: `nums[i] > nums[j]`. Count all inversions in the array.
 
@@ -2211,30 +1821,6 @@ Equal values are **not** an inversion. The count says how far the array is from 
 'Line 1: n
 Line 2: n space-separated integers',
 'A single integer: the number of inversions',
-'import java.io.*;
-import java.util.*;
-
-public class Main {
-    // Return the number of pairs (i, j) with i < j and nums[i] > nums[j].
-    static long solve(int[] nums) {
-        // TODO: write your algorithm here
-        return 0;
-    }
-
-    public static void main(String[] args) throws IOException {
-        StreamTokenizer in = new StreamTokenizer(new BufferedReader(new InputStreamReader(System.in)));
-        int n = nextInt(in);
-        int[] nums = new int[n];
-        for (int i = 0; i < n; i++) nums[i] = nextInt(in);
-        System.out.println(solve(nums));
-    }
-
-    static int nextInt(StreamTokenizer in) throws IOException {
-        in.nextToken();
-        return (int) in.nval;
-    }
-}
-',
 2000, NULL, 2400
 WHERE NOT EXISTS (SELECT 1 FROM problems WHERE slug = 'count-inversions');
 
@@ -2303,7 +1889,7 @@ AND NOT EXISTS (SELECT 1 FROM test_cases t WHERE t.problem_id = p.id AND t.ordin
 
 -- ===== 17. Shortest Palindrome (topic 2, HARD) =====
 INSERT INTO problems (topic_id, title, slug, difficulty, statement, input_format, output_format,
-                      starter_code, time_limit_ms, optimal_runtime_ms, target_solve_seconds)
+                      time_limit_ms, optimal_runtime_ms, target_solve_seconds)
 SELECT 2, 'Shortest Palindrome', 'shortest-palindrome', 'HARD',
 'You may only **add characters to the front** of the string `s`. Find the shortest palindrome you can make this way and print it.
 
@@ -2312,26 +1898,6 @@ A palindrome reads the same forwards and backwards. The empty string is a palind
 **Constraints:** 0 <= |s| <= 200000; s contains only lowercase English letters.',
 'Line 1: s (may be empty)',
 'The shortest palindrome wrapped in square brackets, e.g. [abba] or []',
-'import java.io.*;
-import java.util.*;
-
-public class Main {
-    // Return the shortest palindrome that ends with s (characters are only added in front).
-    static String solve(String s) {
-        // TODO: write your algorithm here
-        return s;
-    }
-
-    public static void main(String[] args) throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        String s = br.readLine();
-        // An empty line can arrive as null at end of input; treat it as an empty string.
-        if (s == null) s = "";
-        // Brackets make an empty answer visible in the output.
-        System.out.println("[" + solve(s) + "]");
-    }
-}
-',
 2000, NULL, 2400
 WHERE NOT EXISTS (SELECT 1 FROM problems WHERE slug = 'shortest-palindrome');
 
@@ -2393,7 +1959,7 @@ AND NOT EXISTS (SELECT 1 FROM test_cases t WHERE t.problem_id = p.id AND t.ordin
 
 -- ===== 18. Trapping Rain Water (topic 3, HARD) =====
 INSERT INTO problems (topic_id, title, slug, difficulty, statement, input_format, output_format,
-                      starter_code, time_limit_ms, optimal_runtime_ms, target_solve_seconds)
+                      time_limit_ms, optimal_runtime_ms, target_solve_seconds)
 SELECT 3, 'Trapping Rain Water', 'trapping-rain-water', 'HARD',
 'Bars of width 1 stand side by side with the given heights. After heavy rain, water collects in the dips between taller bars. How many units of water stay trapped?
 
@@ -2403,30 +1969,6 @@ Above each bar the water level is the **lower** of the tallest bar to its left a
 'Line 1: n
 Line 2: n space-separated integers (the heights)',
 'A single integer: the trapped water',
-'import java.io.*;
-import java.util.*;
-
-public class Main {
-    // Return the total units of water trapped between the bars.
-    static long solve(int[] height) {
-        // TODO: write your algorithm here
-        return 0;
-    }
-
-    public static void main(String[] args) throws IOException {
-        StreamTokenizer in = new StreamTokenizer(new BufferedReader(new InputStreamReader(System.in)));
-        int n = nextInt(in);
-        int[] nums = new int[n];
-        for (int i = 0; i < n; i++) nums[i] = nextInt(in);
-        System.out.println(solve(nums));
-    }
-
-    static int nextInt(StreamTokenizer in) throws IOException {
-        in.nextToken();
-        return (int) in.nval;
-    }
-}
-',
 2000, NULL, 2400
 WHERE NOT EXISTS (SELECT 1 FROM problems WHERE slug = 'trapping-rain-water');
 
@@ -2495,7 +2037,7 @@ AND NOT EXISTS (SELECT 1 FROM test_cases t WHERE t.problem_id = p.id AND t.ordin
 
 -- ===== 19. Minimum Window Substring (topic 4, HARD) =====
 INSERT INTO problems (topic_id, title, slug, difficulty, statement, input_format, output_format,
-                      starter_code, time_limit_ms, optimal_runtime_ms, target_solve_seconds)
+                      time_limit_ms, optimal_runtime_ms, target_solve_seconds)
 SELECT 4, 'Minimum Window Substring', 'minimum-window-substring', 'HARD',
 'Find the **shortest contiguous substring of s** that contains every character of `t`, counting repeats: if `t` has two `a`s, the substring needs at least two `a`s.
 
@@ -2505,24 +2047,6 @@ If several shortest substrings exist, print the **leftmost** one. If there is no
 'Line 1: s
 Line 2: t',
 'The substring wrapped in square brackets, e.g. [BANC] or []',
-'import java.io.*;
-import java.util.*;
-
-public class Main {
-    // Return the shortest (then leftmost) substring of s containing all characters of t, or "" if none.
-    static String solve(String s, String t) {
-        // TODO: write your algorithm here
-        return "";
-    }
-
-    public static void main(String[] args) throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        String s = br.readLine().trim();
-        String t = br.readLine().trim();
-        System.out.println("[" + solve(s, t) + "]");
-    }
-}
-',
 2000, NULL, 2400
 WHERE NOT EXISTS (SELECT 1 FROM problems WHERE slug = 'minimum-window-substring');
 
@@ -2591,7 +2115,7 @@ AND NOT EXISTS (SELECT 1 FROM test_cases t WHERE t.problem_id = p.id AND t.ordin
 
 -- ===== 20. Four Lists, Zero Sum (topic 5, HARD) =====
 INSERT INTO problems (topic_id, title, slug, difficulty, statement, input_format, output_format,
-                      starter_code, time_limit_ms, optimal_runtime_ms, target_solve_seconds)
+                      time_limit_ms, optimal_runtime_ms, target_solve_seconds)
 SELECT 5, 'Four Lists, Zero Sum', 'four-lists-zero-sum', 'HARD',
 'You get four lists A, B, C and D, each with n integers. Count the tuples **(i, j, k, l)** for which
 
@@ -2603,31 +2127,6 @@ Tuples are counted by position, so equal values at different positions count sep
 'Line 1: n
 Lines 2-5: the lists A, B, C and D, each as n space-separated integers',
 'A single integer: the number of tuples',
-'import java.io.*;
-import java.util.*;
-
-public class Main {
-    // Return how many index tuples (i, j, k, l) have a[i] + b[j] + c[k] + d[l] == 0.
-    static long solve(int[] a, int[] b, int[] c, int[] d) {
-        // TODO: write your algorithm here
-        return 0;
-    }
-
-    public static void main(String[] args) throws IOException {
-        StreamTokenizer in = new StreamTokenizer(new BufferedReader(new InputStreamReader(System.in)));
-        int n = nextInt(in);
-        int[][] lists = new int[4][n];
-        for (int[] list : lists)
-            for (int i = 0; i < n; i++) list[i] = nextInt(in);
-        System.out.println(solve(lists[0], lists[1], lists[2], lists[3]));
-    }
-
-    static int nextInt(StreamTokenizer in) throws IOException {
-        in.nextToken();
-        return (int) in.nval;
-    }
-}
-',
 2000, NULL, 2400
 WHERE NOT EXISTS (SELECT 1 FROM problems WHERE slug = 'four-lists-zero-sum');
 
@@ -2717,7 +2216,7 @@ AND NOT EXISTS (SELECT 1 FROM test_cases t WHERE t.problem_id = p.id AND t.ordin
 
 -- ===== 21. Reverse Nodes in Groups of k (topic 6, HARD) =====
 INSERT INTO problems (topic_id, title, slug, difficulty, statement, input_format, output_format,
-                      starter_code, time_limit_ms, optimal_runtime_ms, target_solve_seconds)
+                      time_limit_ms, optimal_runtime_ms, target_solve_seconds)
 SELECT 6, 'Reverse Nodes in Groups of k', 'reverse-nodes-k-group', 'HARD',
 'Walk a singly linked list in groups of **k** consecutive nodes and reverse the nodes inside every complete group. A final group with fewer than k nodes stays as it is.
 
@@ -2727,44 +2226,6 @@ Re-link the nodes themselves; do not just swap the values. Try to use only O(1) 
 'Line 1: n and k separated by a space
 Line 2: the n node values from head to tail (empty when n = 0)',
 'The resulting list as v1 -> v2 -> ... -> null, or null for an empty list',
-'import java.io.*;
-import java.util.*;
-
-public class Main {
-    // Reverse every complete group of k nodes in place and return the new head.
-    static ListNode solve(ListNode head, int k) {
-        // TODO: write your algorithm here
-        return head;
-    }
-
-    public static void main(String[] args) throws IOException {
-        StreamTokenizer in = new StreamTokenizer(new BufferedReader(new InputStreamReader(System.in)));
-        int n = nextInt(in);
-        int k = nextInt(in);
-        ListNode dummy = new ListNode(0), tail = dummy;
-        for (int i = 0; i < n; i++) {
-            tail.next = new ListNode(nextInt(in));
-            tail = tail.next;
-        }
-        ListNode node = solve(dummy.next, k);
-        StringBuilder sb = new StringBuilder();
-        // Stop after n nodes: a mistake that leaves a cycle would otherwise print forever.
-        for (int i = 0; i < n && node != null; i++, node = node.next) sb.append(node.val).append(" -> ");
-        System.out.println(node == null ? sb + "null" : "ERROR: more nodes than the input had (cycle?)");
-    }
-
-    static int nextInt(StreamTokenizer in) throws IOException {
-        in.nextToken();
-        return (int) in.nval;
-    }
-
-    static class ListNode {
-        int val;
-        ListNode next;
-        ListNode(int val) { this.val = val; }
-    }
-}
-',
 2000, NULL, 2400
 WHERE NOT EXISTS (SELECT 1 FROM problems WHERE slug = 'reverse-nodes-k-group');
 
@@ -2833,7 +2294,7 @@ AND NOT EXISTS (SELECT 1 FROM test_cases t WHERE t.problem_id = p.id AND t.ordin
 
 -- ===== 22. Largest Rectangle in a Histogram (topic 7, HARD) =====
 INSERT INTO problems (topic_id, title, slug, difficulty, statement, input_format, output_format,
-                      starter_code, time_limit_ms, optimal_runtime_ms, target_solve_seconds)
+                      time_limit_ms, optimal_runtime_ms, target_solve_seconds)
 SELECT 7, 'Largest Rectangle in a Histogram', 'largest-rectangle-histogram', 'HARD',
 'A histogram has bars of width 1 with the given heights, standing side by side. Find the **largest rectangle area** that fits entirely inside the bars.
 
@@ -2843,30 +2304,6 @@ A rectangle spans one or more neighbouring bars, and its height is limited by th
 'Line 1: n
 Line 2: n space-separated integers (the heights)',
 'A single integer: the largest area',
-'import java.io.*;
-import java.util.*;
-
-public class Main {
-    // Return the area of the largest rectangle that fits inside the histogram.
-    static long solve(int[] height) {
-        // TODO: write your algorithm here
-        return 0;
-    }
-
-    public static void main(String[] args) throws IOException {
-        StreamTokenizer in = new StreamTokenizer(new BufferedReader(new InputStreamReader(System.in)));
-        int n = nextInt(in);
-        int[] nums = new int[n];
-        for (int i = 0; i < n; i++) nums[i] = nextInt(in);
-        System.out.println(solve(nums));
-    }
-
-    static int nextInt(StreamTokenizer in) throws IOException {
-        in.nextToken();
-        return (int) in.nval;
-    }
-}
-',
 2000, NULL, 2400
 WHERE NOT EXISTS (SELECT 1 FROM problems WHERE slug = 'largest-rectangle-histogram');
 
@@ -2935,7 +2372,7 @@ AND NOT EXISTS (SELECT 1 FROM test_cases t WHERE t.problem_id = p.id AND t.ordin
 
 -- ===== 23. Maximum Path Sum in a Binary Tree (topic 8, HARD) =====
 INSERT INTO problems (topic_id, title, slug, difficulty, statement, input_format, output_format,
-                      starter_code, time_limit_ms, optimal_runtime_ms, target_solve_seconds)
+                      time_limit_ms, optimal_runtime_ms, target_solve_seconds)
 SELECT 8, 'Maximum Path Sum in a Binary Tree', 'binary-tree-max-path-sum', 'HARD',
 'A **path** in a binary tree is a sequence of nodes where each pair of neighbours is connected by an edge and no node appears twice. It does not have to pass through the root, and it may go up through a parent and down the other side.
 
@@ -2945,55 +2382,6 @@ Find the largest possible sum of node values over all **non-empty** paths. Value
 'Line 1: m, the number of tokens
 Line 2: m space-separated tokens, each an integer or null',
 'A single integer: the maximum path sum',
-'import java.io.*;
-import java.util.*;
-
-public class Main {
-    // Return the largest sum of values over all non-empty paths in the tree.
-    static int solve(TreeNode root) {
-        // TODO: write your algorithm here
-        return 0;
-    }
-
-    public static void main(String[] args) throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        int m = Integer.parseInt(br.readLine().trim());
-        String[] tokens = new String[m];
-        StringTokenizer st = new StringTokenizer(m == 0 ? "" : br.readLine());
-        for (int i = 0; i < m; i++) tokens[i] = st.nextToken();
-        System.out.println(solve(build(tokens)));
-    }
-
-    static class TreeNode {
-        int val;
-        TreeNode left, right;
-        TreeNode(int val) { this.val = val; }
-    }
-
-    // Level order: each real node, taken from a queue, consumes the next two tokens as its children.
-    static TreeNode build(String[] t) {
-        if (t.length == 0 || t[0].equals("null")) return null;
-        TreeNode root = new TreeNode(Integer.parseInt(t[0]));
-        ArrayDeque<TreeNode> queue = new ArrayDeque<>();
-        queue.add(root);
-        int i = 1;
-        while (!queue.isEmpty() && i < t.length) {
-            TreeNode node = queue.poll();
-            if (i < t.length && !t[i].equals("null")) {
-                node.left = new TreeNode(Integer.parseInt(t[i]));
-                queue.add(node.left);
-            }
-            i++;
-            if (i < t.length && !t[i].equals("null")) {
-                node.right = new TreeNode(Integer.parseInt(t[i]));
-                queue.add(node.right);
-            }
-            i++;
-        }
-        return root;
-    }
-}
-',
 2000, NULL, 2400
 WHERE NOT EXISTS (SELECT 1 FROM problems WHERE slug = 'binary-tree-max-path-sum');
 
@@ -3062,7 +2450,7 @@ AND NOT EXISTS (SELECT 1 FROM test_cases t WHERE t.problem_id = p.id AND t.ordin
 
 -- ===== 24. Shortest Delivery Route (topic 9, HARD) =====
 INSERT INTO problems (topic_id, title, slug, difficulty, statement, input_format, output_format,
-                      starter_code, time_limit_ms, optimal_runtime_ms, target_solve_seconds)
+                      time_limit_ms, optimal_runtime_ms, target_solve_seconds)
 SELECT 9, 'Shortest Delivery Route', 'shortest-delivery-route', 'HARD',
 'A courier starts at depot **1** and must reach customer **n**. The city has one-way roads; road i goes from `u` to `v` and takes `w` minutes. Print the **fewest total minutes** needed to reach node n, or `-1` if it cannot be reached.
 
@@ -3072,36 +2460,6 @@ There can be several roads between the same pair of places, and roads that loop 
 'Line 1: n and m separated by a space
 Next m lines: u v w (a one-way road from u to v taking w minutes)',
 'A single integer: the shortest time from 1 to n, or -1',
-'import java.io.*;
-import java.util.*;
-
-public class Main {
-    // Return the shortest total time from node 1 to node n, or -1 if n is unreachable.
-    // Each edge is {u, v, w}: a one-way road from u to v taking w minutes. Nodes are numbered 1..n.
-    static long solve(int n, int[][] edges) {
-        // TODO: write your algorithm here
-        return -1;
-    }
-
-    public static void main(String[] args) throws IOException {
-        StreamTokenizer in = new StreamTokenizer(new BufferedReader(new InputStreamReader(System.in)));
-        int n = nextInt(in);
-        int m = nextInt(in);
-        int[][] edges = new int[m][3];
-        for (int i = 0; i < m; i++) {
-            edges[i][0] = nextInt(in);
-            edges[i][1] = nextInt(in);
-            edges[i][2] = nextInt(in);
-        }
-        System.out.println(solve(n, edges));
-    }
-
-    static int nextInt(StreamTokenizer in) throws IOException {
-        in.nextToken();
-        return (int) in.nval;
-    }
-}
-',
 2000, NULL, 2400
 WHERE NOT EXISTS (SELECT 1 FROM problems WHERE slug = 'shortest-delivery-route');
 
@@ -53184,7 +52542,7 @@ AND NOT EXISTS (SELECT 1 FROM test_cases t WHERE t.problem_id = p.id AND t.ordin
 
 -- ===== 25. Longest Increasing Subsequence (topic 10, HARD) =====
 INSERT INTO problems (topic_id, title, slug, difficulty, statement, input_format, output_format,
-                      starter_code, time_limit_ms, optimal_runtime_ms, target_solve_seconds)
+                      time_limit_ms, optimal_runtime_ms, target_solve_seconds)
 SELECT 10, 'Longest Increasing Subsequence', 'longest-increasing-subsequence', 'HARD',
 'A **subsequence** keeps some elements of the array in their original order (not necessarily next to each other). Find the length of the longest subsequence whose values are **strictly increasing**.
 
@@ -53192,30 +52550,6 @@ SELECT 10, 'Longest Increasing Subsequence', 'longest-increasing-subsequence', '
 'Line 1: n
 Line 2: n space-separated integers',
 'A single integer: the length',
-'import java.io.*;
-import java.util.*;
-
-public class Main {
-    // Return the length of the longest strictly increasing subsequence.
-    static int solve(int[] nums) {
-        // TODO: write your algorithm here
-        return 0;
-    }
-
-    public static void main(String[] args) throws IOException {
-        StreamTokenizer in = new StreamTokenizer(new BufferedReader(new InputStreamReader(System.in)));
-        int n = nextInt(in);
-        int[] nums = new int[n];
-        for (int i = 0; i < n; i++) nums[i] = nextInt(in);
-        System.out.println(solve(nums));
-    }
-
-    static int nextInt(StreamTokenizer in) throws IOException {
-        in.nextToken();
-        return (int) in.nval;
-    }
-}
-',
 2000, NULL, 2400
 WHERE NOT EXISTS (SELECT 1 FROM problems WHERE slug = 'longest-increasing-subsequence');
 
@@ -53287,7 +52621,7 @@ AND NOT EXISTS (SELECT 1 FROM test_cases t WHERE t.problem_id = p.id AND t.ordin
 
 -- ===== 26. Longest Palindromic Substring (topic 2, MEDIUM) =====
 INSERT INTO problems (topic_id, title, slug, difficulty, statement, input_format, output_format,
-                      starter_code, time_limit_ms, optimal_runtime_ms, target_solve_seconds)
+                      time_limit_ms, optimal_runtime_ms, target_solve_seconds)
 SELECT 2, 'Longest Palindromic Substring', 'longest-palindromic-substring', 'MEDIUM',
 'Find the **longest contiguous substring of s that is a palindrome** (reads the same forwards and backwards) and print it.
 
@@ -53296,23 +52630,6 @@ If several palindromes share the longest length, print the one that starts **lef
 **Constraints:** 1 <= |s| <= 2000; s contains only lowercase English letters.',
 'Line 1: s',
 'The palindrome wrapped in square brackets, e.g. [aba]',
-'import java.io.*;
-import java.util.*;
-
-public class Main {
-    // Return the longest palindromic substring of s (the leftmost one if there is a tie).
-    static String solve(String s) {
-        // TODO: write your algorithm here
-        return "";
-    }
-
-    public static void main(String[] args) throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        String s = br.readLine().trim();
-        System.out.println("[" + solve(s) + "]");
-    }
-}
-',
 2000, NULL, 1200
 WHERE NOT EXISTS (SELECT 1 FROM problems WHERE slug = 'longest-palindromic-substring');
 
@@ -53374,7 +52691,7 @@ AND NOT EXISTS (SELECT 1 FROM test_cases t WHERE t.problem_id = p.id AND t.ordin
 
 -- ===== 27. Remove the k-th Node From the End (topic 6, MEDIUM) =====
 INSERT INTO problems (topic_id, title, slug, difficulty, statement, input_format, output_format,
-                      starter_code, time_limit_ms, optimal_runtime_ms, target_solve_seconds)
+                      time_limit_ms, optimal_runtime_ms, target_solve_seconds)
 SELECT 6, 'Remove the k-th Node From the End', 'remove-kth-from-end', 'MEDIUM',
 'Remove the **k-th node counted from the end** of a singly linked list and return the head of the changed list. k = 1 means the last node.
 
@@ -53384,44 +52701,6 @@ Try to do it in a single pass: you do not know the length in advance.
 'Line 1: n and k separated by a space
 Line 2: the n node values from head to tail',
 'The resulting list as v1 -> v2 -> ... -> null, or null if it is now empty',
-'import java.io.*;
-import java.util.*;
-
-public class Main {
-    // Remove the k-th node from the end (k = 1 is the last node) and return the new head.
-    static ListNode solve(ListNode head, int k) {
-        // TODO: write your algorithm here
-        return head;
-    }
-
-    public static void main(String[] args) throws IOException {
-        StreamTokenizer in = new StreamTokenizer(new BufferedReader(new InputStreamReader(System.in)));
-        int n = nextInt(in);
-        int k = nextInt(in);
-        ListNode dummy = new ListNode(0), tail = dummy;
-        for (int i = 0; i < n; i++) {
-            tail.next = new ListNode(nextInt(in));
-            tail = tail.next;
-        }
-        ListNode node = solve(dummy.next, k);
-        StringBuilder sb = new StringBuilder();
-        // Stop after n nodes: a mistake that leaves a cycle would otherwise print forever.
-        for (int i = 0; i < n && node != null; i++, node = node.next) sb.append(node.val).append(" -> ");
-        System.out.println(node == null ? sb + "null" : "ERROR: more nodes than the input had (cycle?)");
-    }
-
-    static int nextInt(StreamTokenizer in) throws IOException {
-        in.nextToken();
-        return (int) in.nval;
-    }
-
-    static class ListNode {
-        int val;
-        ListNode next;
-        ListNode(int val) { this.val = val; }
-    }
-}
-',
 2000, NULL, 1200
 WHERE NOT EXISTS (SELECT 1 FROM problems WHERE slug = 'remove-kth-from-end');
 
@@ -53490,7 +52769,7 @@ AND NOT EXISTS (SELECT 1 FROM test_cases t WHERE t.problem_id = p.id AND t.ordin
 
 -- ===== 28. Days Until a Warmer Day (topic 7, MEDIUM) =====
 INSERT INTO problems (topic_id, title, slug, difficulty, statement, input_format, output_format,
-                      starter_code, time_limit_ms, optimal_runtime_ms, target_solve_seconds)
+                      time_limit_ms, optimal_runtime_ms, target_solve_seconds)
 SELECT 7, 'Days Until a Warmer Day', 'days-until-warmer', 'MEDIUM',
 'You get the daily temperatures for n days. For each day, find **how many days you must wait for a strictly warmer temperature**. If no later day is warmer, the answer for that day is 0.
 
@@ -53498,36 +52777,6 @@ SELECT 7, 'Days Until a Warmer Day', 'days-until-warmer', 'MEDIUM',
 'Line 1: n
 Line 2: n space-separated integers (the temperatures)',
 'n integers on one line, separated by single spaces',
-'import java.io.*;
-import java.util.*;
-
-public class Main {
-    // For each day, return how many days until a warmer one (0 if none).
-    static int[] solve(int[] temps) {
-        // TODO: write your algorithm here
-        return new int[temps.length];
-    }
-
-    public static void main(String[] args) throws IOException {
-        StreamTokenizer in = new StreamTokenizer(new BufferedReader(new InputStreamReader(System.in)));
-        int n = nextInt(in);
-        int[] temps = new int[n];
-        for (int i = 0; i < n; i++) temps[i] = nextInt(in);
-        int[] ans = solve(temps);
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < ans.length; i++) {
-            if (i > 0) sb.append('' '');
-            sb.append(ans[i]);
-        }
-        System.out.println(sb);
-    }
-
-    static int nextInt(StreamTokenizer in) throws IOException {
-        in.nextToken();
-        return (int) in.nval;
-    }
-}
-',
 2000, NULL, 1200
 WHERE NOT EXISTS (SELECT 1 FROM problems WHERE slug = 'days-until-warmer');
 
@@ -53596,7 +52845,7 @@ AND NOT EXISTS (SELECT 1 FROM test_cases t WHERE t.problem_id = p.id AND t.ordin
 
 -- ===== 29. Is It a Valid Search Tree? (topic 8, MEDIUM) =====
 INSERT INTO problems (topic_id, title, slug, difficulty, statement, input_format, output_format,
-                      starter_code, time_limit_ms, optimal_runtime_ms, target_solve_seconds)
+                      time_limit_ms, optimal_runtime_ms, target_solve_seconds)
 SELECT 8, 'Is It a Valid Search Tree?', 'validate-binary-search-tree', 'MEDIUM',
 'A binary tree is a valid **binary search tree** when, for every node, **all** values in its left subtree are smaller than the node and **all** values in its right subtree are larger. Equal values are not allowed.
 
@@ -53606,55 +52855,6 @@ Checking only each node''s direct children is not enough: a value deep in the le
 'Line 1: m, the number of tokens
 Line 2: m space-separated tokens, each an integer or null',
 'true or false',
-'import java.io.*;
-import java.util.*;
-
-public class Main {
-    // Return true if the tree is a valid binary search tree (strictly smaller left, strictly larger right).
-    static boolean solve(TreeNode root) {
-        // TODO: write your algorithm here
-        return false;
-    }
-
-    public static void main(String[] args) throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        int m = Integer.parseInt(br.readLine().trim());
-        String[] tokens = new String[m];
-        StringTokenizer st = new StringTokenizer(m == 0 ? "" : br.readLine());
-        for (int i = 0; i < m; i++) tokens[i] = st.nextToken();
-        System.out.println(solve(build(tokens)));
-    }
-
-    static class TreeNode {
-        int val;
-        TreeNode left, right;
-        TreeNode(int val) { this.val = val; }
-    }
-
-    // Level order: each real node, taken from a queue, consumes the next two tokens as its children.
-    static TreeNode build(String[] t) {
-        if (t.length == 0 || t[0].equals("null")) return null;
-        TreeNode root = new TreeNode(Integer.parseInt(t[0]));
-        ArrayDeque<TreeNode> queue = new ArrayDeque<>();
-        queue.add(root);
-        int i = 1;
-        while (!queue.isEmpty() && i < t.length) {
-            TreeNode node = queue.poll();
-            if (i < t.length && !t[i].equals("null")) {
-                node.left = new TreeNode(Integer.parseInt(t[i]));
-                queue.add(node.left);
-            }
-            i++;
-            if (i < t.length && !t[i].equals("null")) {
-                node.right = new TreeNode(Integer.parseInt(t[i]));
-                queue.add(node.right);
-            }
-            i++;
-        }
-        return root;
-    }
-}
-',
 2000, NULL, 1200
 WHERE NOT EXISTS (SELECT 1 FROM problems WHERE slug = 'validate-binary-search-tree');
 
@@ -53723,7 +52923,7 @@ AND NOT EXISTS (SELECT 1 FROM test_cases t WHERE t.problem_id = p.id AND t.ordin
 
 -- ===== 30. Is There a Path? (topic 9, EASY) =====
 INSERT INTO problems (topic_id, title, slug, difficulty, statement, input_format, output_format,
-                      starter_code, time_limit_ms, optimal_runtime_ms, target_solve_seconds)
+                      time_limit_ms, optimal_runtime_ms, target_solve_seconds)
 SELECT 9, 'Is There a Path?', 'path-exists', 'EASY',
 'A city has n places joined by **two-way** roads. Can you get from place `s` to place `t`?
 
@@ -53734,36 +52934,6 @@ Print `true` if some sequence of roads connects them, otherwise `false`. A place
 Next m lines: u v (a two-way road)
 Last line: s t',
 'true or false',
-'import java.io.*;
-import java.util.*;
-
-public class Main {
-    // Return true if s and t are connected through two-way roads. Places are numbered 1..n.
-    static boolean solve(int n, int[][] roads, int s, int t) {
-        // TODO: write your algorithm here
-        return false;
-    }
-
-    public static void main(String[] args) throws IOException {
-        StreamTokenizer in = new StreamTokenizer(new BufferedReader(new InputStreamReader(System.in)));
-        int n = nextInt(in);
-        int m = nextInt(in);
-        int[][] roads = new int[m][2];
-        for (int i = 0; i < m; i++) {
-            roads[i][0] = nextInt(in);
-            roads[i][1] = nextInt(in);
-        }
-        int s = nextInt(in);
-        int t = nextInt(in);
-        System.out.println(solve(n, roads, s, t));
-    }
-
-    static int nextInt(StreamTokenizer in) throws IOException {
-        in.nextToken();
-        return (int) in.nval;
-    }
-}
-',
 2000, NULL, 600
 WHERE NOT EXISTS (SELECT 1 FROM problems WHERE slug = 'path-exists');
 
@@ -83938,7 +83108,7 @@ AND NOT EXISTS (SELECT 1 FROM test_cases t WHERE t.problem_id = p.id AND t.ordin
 
 -- ===== 31. Climbing Stairs (topic 10, EASY) =====
 INSERT INTO problems (topic_id, title, slug, difficulty, statement, input_format, output_format,
-                      starter_code, time_limit_ms, optimal_runtime_ms, target_solve_seconds)
+                      time_limit_ms, optimal_runtime_ms, target_solve_seconds)
 SELECT 10, 'Climbing Stairs', 'climbing-stairs', 'EASY',
 'A staircase has **n** steps. Each move you climb either **1 or 2** steps. In how many different ways can you reach the top?
 
@@ -83947,23 +83117,6 @@ Two ways are different if the sequence of moves differs, so for n = 3 the ways a
 **Constraints:** 1 <= n <= 90. The answer may not fit in a 32-bit int.',
 'Line 1: n',
 'A single integer: the number of ways',
-'import java.io.*;
-import java.util.*;
-
-public class Main {
-    // Return the number of ways to climb n steps taking 1 or 2 steps at a time.
-    static long solve(int n) {
-        // TODO: write your algorithm here
-        return 0;
-    }
-
-    public static void main(String[] args) throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        int n = Integer.parseInt(br.readLine().trim());
-        System.out.println(solve(n));
-    }
-}
-',
 2000, NULL, 600
 WHERE NOT EXISTS (SELECT 1 FROM problems WHERE slug = 'climbing-stairs');
 

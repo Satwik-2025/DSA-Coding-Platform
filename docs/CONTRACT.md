@@ -166,7 +166,7 @@ Legend: **PK** primary key, **FK** foreign key, **UQ** unique, **NN** not null.
 | Column | Type | Constraints | Notes |
 |---|---|---|---|
 | id | BIGINT identity | PK | |
-| display_name | VARCHAR(50) | NN, UQ | Seeded with "Alex" and "Sam" |
+| display_name | VARCHAR(50) | NN, UQ | Seeded with "Rahul" (id 1) and "Ananya" (id 2). Older databases had "Alex" and "Sam" with the same ids; data.sql renames them in place, so their history stays with them |
 | created_at | TIMESTAMP | NN, default now | |
 
 The `users.self_rated_readiness` column was dropped; self-rating is per topic in `topic_state`.
@@ -197,7 +197,6 @@ The table also has `CHECK (prerequisite_id < topic_id)`. There is no weight colu
 | statement | VARCHAR(20000) | NN | Markdown |
 | input_format | VARCHAR(4000) | NN | Exact stdin layout |
 | output_format | VARCHAR(4000) | NN | Exact stdout layout |
-| starter_code | VARCHAR(20000) | NN | `Main` class with stdin parsing and an empty `solve()` |
 | time_limit_ms | INTEGER | NN, default 2000, > 0 | Per test process |
 | optimal_runtime_ms | INTEGER | nullable, > 0 | Calibrated from the reference solution; NULL means no SUBOPTIMAL check |
 | target_solve_seconds | INTEGER | NN, > 0 | Expected solve time; used by `speed_vs_target` |
@@ -427,14 +426,28 @@ For an `(error_category, topic)` pair, links are chosen as follows:
 
 1. Return up to **3** curated rows: first those with `topic_id = topic`, ordered by
    `rank`, then generic rows with `topic_id IS NULL`, ordered by `rank`.
-2. If there are **no** curated rows, return exactly two **generated search links**,
-   marked `"generated": true`.
-   - **GFG:** `https://www.google.com/search?q=site%3Ageeksforgeeks.org+<q>`
-   - **YOUTUBE:** `https://www.youtube.com/results?search_query=<q>`
+2. If there are **no** curated rows, return, in this order:
+   - **GFG**, `"generated": false`: the GeeksforGeeks tutorial for the topic itself. The
+     URL is fixed per topic id and was checked by hand; it is never a search page.
 
-   Here `<q>` is the URL-encoded string `"<topic name> <phrase> java"`, using the
-   phrase from the table below. The backend never builds a direct article or video
-   URL itself.
+     | Topic | URL |
+     |---|---|
+     | 1 Arrays | `https://www.geeksforgeeks.org/dsa/array-data-structure-guide/` |
+     | 2 Strings | `https://www.geeksforgeeks.org/dsa/string-data-structure/` |
+     | 3 Two Pointers | `https://www.geeksforgeeks.org/dsa/two-pointers-technique/` |
+     | 4 Sliding Window | `https://www.geeksforgeeks.org/dsa/window-sliding-technique/` |
+     | 5 HashMap | `https://www.geeksforgeeks.org/dsa/hashing-data-structure/` |
+     | 6 LinkedList | `https://www.geeksforgeeks.org/dsa/linked-list-data-structure/` |
+     | 7 Stack | `https://www.geeksforgeeks.org/dsa/stack-data-structure/` |
+     | 8 Trees | `https://www.geeksforgeeks.org/dsa/tree-data-structure/` |
+     | 9 Graphs | `https://www.geeksforgeeks.org/dsa/graph-data-structure-and-algorithms/` |
+     | 10 DP | `https://www.geeksforgeeks.org/dsa/dynamic-programming/` |
+
+   - **GFG**, only for `BAD_COMPLEXITY` and `SUBOPTIMAL`: "Understanding time complexity",
+     `https://www.geeksforgeeks.org/dsa/understanding-time-complexity-simple-examples/`.
+   - **YOUTUBE**, `"generated": true`: `https://www.youtube.com/results?search_query=<q>`,
+     where `<q>` is the URL-encoded string `"<topic name> <phrase> java"`, using the
+     phrase from the table below.
 
 | Category | Search phrase |
 |---|---|
@@ -451,8 +464,7 @@ For an `(error_category, topic)` pair, links are chosen as follows:
 ## 5. REST endpoints
 
 Problem ids in the examples are illustrative, because problems are seeded in a later
-phase. Curated URLs are never shown in examples; only the generated-search format is
-real.
+phase. The GeeksforGeeks topic URLs in the examples are the real ones from 4.5.
 
 ### 5.1 `POST /api/submissions`
 This endpoint compiles and runs the code, stores an attempt (and an error_event if
@@ -509,10 +521,10 @@ measured it). Each `testResults` row also has `memoryKb`.
   ],
   "resources": [
     {
-      "title": "GeeksforGeeks search: Two Pointers edge cases java",
-      "url": "https://www.google.com/search?q=site%3Ageeksforgeeks.org+Two+Pointers+edge+cases+java",
+      "title": "Two pointers technique",
+      "url": "https://www.geeksforgeeks.org/dsa/two-pointers-technique/",
       "source": "GFG",
-      "generated": true
+      "generated": false
     },
     {
       "title": "YouTube search: Two Pointers edge cases java",
@@ -566,8 +578,8 @@ Field rules:
 **Response 200**
 ```json
 [
-  { "id": 1, "displayName": "Alex" },
-  { "id": 2, "displayName": "Sam" }
+  { "id": 1, "displayName": "Rahul" },
+  { "id": 2, "displayName": "Ananya" }
 ]
 ```
 
@@ -653,9 +665,9 @@ This is the recurring-error profile over **all** of the user's error_events.
         { "topicId": 1, "name": "Arrays", "count": 1 }
       ],
       "resources": [
-        { "title": "GeeksforGeeks search: Two Pointers edge cases java",
-          "url": "https://www.google.com/search?q=site%3Ageeksforgeeks.org+Two+Pointers+edge+cases+java",
-          "source": "GFG", "generated": true },
+        { "title": "Two pointers technique",
+          "url": "https://www.geeksforgeeks.org/dsa/two-pointers-technique/",
+          "source": "GFG", "generated": false },
         { "title": "YouTube search: Two Pointers edge cases java",
           "url": "https://www.youtube.com/results?search_query=Two+Pointers+edge+cases+java",
           "source": "YOUTUBE", "generated": true }
@@ -811,7 +823,6 @@ hidden ones.
   "statement": "Given a sorted array `nums` and an integer `target`, print 0-based indices `i < j` such that `nums[i] + nums[j] == target`, or `-1 -1` if no pair exists.",
   "inputFormat": "Line 1: n\nLine 2: n space-separated integers (sorted)\nLine 3: target",
   "outputFormat": "Two integers i and j separated by a space",
-  "starterCode": "import java.io.*;\nimport java.util.*;\n\npublic class Main {\n    // Return {i, j} with i < j and nums[i] + nums[j] == target, or {-1, -1}.\n    static int[] solve(int[] nums, int target) {\n        // TODO: write your algorithm here\n        return new int[]{-1, -1};\n    }\n\n    public static void main(String[] args) throws IOException {\n        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));\n        int n = Integer.parseInt(br.readLine().trim());\n        StringTokenizer st = new StringTokenizer(br.readLine());\n        int[] nums = new int[n];\n        for (int i = 0; i < n; i++) nums[i] = Integer.parseInt(st.nextToken());\n        int target = Integer.parseInt(br.readLine().trim());\n        int[] ans = solve(nums, target);\n        System.out.println(ans[0] + \" \" + ans[1]);\n    }\n}\n",
   "timeLimitMs": 2000,
   "targetSolveSeconds": 900,
   "sampleTests": [
@@ -856,7 +867,8 @@ Runs code without recording anything (no attempt, no retention or readiness chan
                  { "id": "PYTHON", "name": "Python 3", "available": true, "timeFactor": 3.0 },
                  { "id": "CPP", "name": "C++17", "available": false, "timeFactor": 1.0 } ] }
 ```
-`GET /api/problems/{id}` (5.10) also returns `starters`: starter code per language id.
+Problems come with no starter code: the learner writes the whole program (read stdin, print to stdout;
+in Java the class must be `Main`). Older databases have their `starter_code` column dropped by schema.sql.
 
 ### 5.14 `GET /api/users/{id}/problems/{problemId}/submissions`
 The learner's attempts on one problem, newest first (at most 50):

@@ -2,7 +2,8 @@ import { Link } from 'react-router-dom'
 import { api } from '../api.js'
 import { useApi } from '../useApi.js'
 import { useUser } from '../UserContext.jsx'
-import { pct, score, signed } from '../format.js'
+import { pct, score } from '../format.js'
+import { gapSummary } from '../readinessText.js'
 import { DifficultyBadge } from '../components/Badges.jsx'
 import { EmptyState, ErrorBox, Loading, PageHeader } from '../components/Status.jsx'
 import { IconArrowRight, IconRefresh, IconSpark } from '../components/Icons.jsx'
@@ -146,37 +147,36 @@ function Overall({ overall }) {
       </EmptyState>
     )
   }
-  const gapTone = overall.gap == null ? 'text-ink' : overall.gap > 0 ? 'text-amber' : overall.gap < 0 ? 'text-moss' : 'text-ink'
+  const gap = gapSummary(overall.gap)
+  const gapTone = gap?.direction === 'behind' ? 'text-amber' : gap?.direction === 'ahead' ? 'text-moss' : 'text-ink'
   return (
     <div className="space-y-3">
       <div className="grid gap-4 sm:grid-cols-3 stagger">
         <Figure
           eyebrow="Readiness"
           value={score(overall.computed)}
-          label="Readiness from your submissions (0–100)"
+          label="How ready you are, worked out from your answers (0 to 100)"
           bar={overall.computed}
           highlight
         />
         <Figure
-          eyebrow="Self-rating"
+          eyebrow="How ready you feel"
           value={overall.selfRatingScaled == null ? '—' : score(overall.selfRatingScaled)}
-          label="What you rated yourself, scaled to 0–100"
+          label="Your own rating (1 to 5), turned into a score out of 100"
           bar={overall.selfRatingScaled}
         />
-        <Figure eyebrow="Gap" value={signed(overall.gap)} label={gapText(overall.gap)} tone={gapTone} />
+        <Figure
+          eyebrow={gap?.direction === 'behind' ? 'Points behind' : gap?.direction === 'ahead' ? 'Points ahead' : 'Ahead or behind?'}
+          value={gap ? gap.points : '—'}
+          label={gap ? `${gap.headline} ${gap.note}` : 'Rate yourself on the Readiness page to see if you are ahead or behind.'}
+          tone={gapTone}
+        />
       </div>
       <p className="text-sm text-muted px-1">
-        Based on {pct(overall.evidenceCoverage)} of topics. <Link to="/readiness" className="link">See the breakdown</Link>
+        Based on the topics you have tried so far ({pct(overall.evidenceCoverage)} of all topics). <Link to="/readiness" className="link">See every topic</Link>
       </p>
     </div>
   )
-}
-
-function gapText(gap) {
-  if (gap == null) return 'Gap: rate yourself on the Readiness page to see it'
-  if (gap > 0) return 'Gap: you rate yourself higher than your results show'
-  if (gap < 0) return 'Gap: your results are better than you think'
-  return 'Gap: your self-rating matches your results'
 }
 
 function Figure({ eyebrow, value, label, bar, highlight = false, tone = 'text-ink' }) {

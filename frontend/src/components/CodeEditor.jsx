@@ -4,7 +4,7 @@ import { java } from '@codemirror/lang-java'
 import { python } from '@codemirror/lang-python'
 import { cpp } from '@codemirror/lang-cpp'
 import { HighlightStyle, indentUnit, syntaxHighlighting } from '@codemirror/language'
-import { EditorView, keymap } from '@codemirror/view'
+import { EditorView, keymap, placeholder as placeholderText } from '@codemirror/view'
 import { Prec } from '@codemirror/state'
 import { tags as t } from '@lezer/highlight'
 
@@ -22,6 +22,7 @@ const theme = EditorView.theme({
   '.cm-matchingBracket': { backgroundColor: 'var(--accent-soft)', outline: '1px solid color-mix(in srgb, var(--accent) 40%, transparent)' },
   '.cm-tooltip': { backgroundColor: 'var(--surface-strong)', border: '1px solid var(--line-strong)', borderRadius: '10px', color: 'var(--ink)' },
   '.cm-tooltip-autocomplete ul li[aria-selected]': { backgroundColor: 'var(--accent-soft)', color: 'var(--ink)' },
+  '.cm-placeholder': { color: 'var(--faint)', fontStyle: 'italic' },
   '.cm-foldPlaceholder': { backgroundColor: 'var(--accent-soft)', border: 'none', color: 'var(--accent)' },
 })
 
@@ -40,9 +41,10 @@ const LANGS = { JAVA: java, PYTHON: python, CPP: cpp }
 
 // Real code editor (CodeMirror 6): syntax highlighting, line numbers, bracket matching, auto-indent,
 // folding, search (Ctrl/Cmd+F) and multiple cursors. Tab indents; Escape then Tab leaves the editor.
-// onRun / onSubmit are bound to Ctrl/Cmd+' and Ctrl/Cmd+Enter.
+// onRun / onSubmit are bound to Ctrl/Cmd+' and Ctrl/Cmd+Enter. placeholder is grey hint text shown only
+// while the editor is empty; it is never part of the code.
 export default function CodeEditor({ value, onChange, language = 'JAVA', readOnly = false, height = '100%',
-  ariaLabel = 'Code editor', onRun, onSubmit }) {
+  ariaLabel = 'Code editor', onRun, onSubmit, placeholder }) {
   const extensions = useMemo(() => {
     const ext = [
       (LANGS[language] ?? java)(),
@@ -51,6 +53,7 @@ export default function CodeEditor({ value, onChange, language = 'JAVA', readOnl
       indentUnit.of('    '),
       EditorView.contentAttributes.of({ 'aria-label': ariaLabel }),
     ]
+    if (placeholder) ext.push(placeholderText(placeholder))
     if (onRun || onSubmit) {
       ext.push(Prec.highest(keymap.of([
         { key: "Mod-'", preventDefault: true, run: () => { onRun?.(); return true } },
@@ -58,7 +61,7 @@ export default function CodeEditor({ value, onChange, language = 'JAVA', readOnl
       ])))
     }
     return ext
-  }, [language, ariaLabel, onRun, onSubmit])
+  }, [language, ariaLabel, onRun, onSubmit, placeholder])
 
   return (
     <CodeMirror

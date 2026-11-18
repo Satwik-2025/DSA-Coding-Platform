@@ -14,25 +14,26 @@ for review, and how ready they are for interviews.
 
 | Area | What it does |
 |---|---|
-| Problems | 31 problems over a 10-topic prerequisite graph (at least one easy, medium and hard in every topic), with statements, samples and starter code in Java, Python and C++ |
+| Problems | 31 problems over a 10-topic prerequisite graph (at least one easy, medium and hard in every topic), with statements and samples. The editor starts empty: you write the whole program in Java, Python or C++ |
 | Code editor | CodeMirror with syntax highlighting, line numbers, bracket matching, search and auto-indent; drafts are auto-saved per problem and language |
 | Run | Try code on the examples or your own input, with output, stderr and time per case, without it counting as an attempt |
 | Judging | Every test in its own process inside a sandbox; a bounded judge queue shows "In queue #2" then "Running test 3 of 7" |
 | Sandbox | Local: Java under a deny-all security manager, Python under an audit-hook guard, empty environment, process-tree kill. Docker: one locked-down container per run (no network, read-only, CPU / memory / process limits) |
-| Results | Verdict per test, progressive hints, runtime percentile among accepted solutions, peak memory (Docker sandbox), study links, submission history |
+| Results | Verdict per test, progressive hints, runtime percentile among accepted solutions, peak memory (Docker sandbox), submission history, and study links that open the GeeksforGeeks tutorial for the topic directly |
 | Mistake analysis | Classifies every failed submission (wrong approach, missed edge case, off-by-one, too slow, ...) |
 | Retention (ML) | Predicts how well each topic is remembered, with a confidence level |
 | Review queue | Topics fading below the unlock threshold, each with a problem to re-solve |
-| Topic map | Prerequisite graph; a topic unlocks when its prerequisites are retained and solved |
+| Topic map | Prerequisite graph; a topic unlocks when its prerequisites are retained and solved. Opening a problem in a locked topic first suggests an easier question to practise, with an "I still want to proceed" option |
 | Recommendations | Ranked next problems from unlocked topics, with a reason for each |
 | Study plans | Four curated sequences with progress |
 | Mock interviews | Timed sets of 2-3 problems; pick mixed (easy to harder) or one difficulty; counts real submissions |
 | Activity | Calendar heatmap, day streak and longest streak |
-| Readiness | Accuracy, retention, consistency and speed combined into a 0-100 score, compared with the learner's self-rating |
+| Readiness | Right answers, memory, practising often and speed combined into a 0-100 score, explained in plain English, with "points ahead / behind the level you expected" against the learner's own rating and a next step per topic |
 | Solve timer | Optional stopwatch or countdown on each problem |
 | Interface | Light (default) and dark themes, glass styling, sliding page transitions, responsive down to phones |
 
-There is no login: the sidebar has a demo-learner switcher (Alex and Sam).
+There is no login: the sidebar has a demo-learner switcher (Rahul and Ananya; they were called Alex and Sam
+before, and keep all of their earlier progress).
 
 ## Repository layout
 
@@ -46,7 +47,6 @@ backend/                      Spring Boot application
   src/main/resources/
     application.yml               configuration (port, sandbox, queue, limits, profiles)
     schema.sql, data.sql          schema and seed data (topics, problems, tests, users, study plans)
-    starters/                     Python and C++ starter code per problem
     runner/                       Java security policy and Python guard for the local sandbox
     ml/hlr_weights.json           trained HLR model weights
   Dockerfile
@@ -150,8 +150,8 @@ held-out learners. See `ml/README.md`.
 ## Tests
 
 ```bash
-cd backend && mvn test        # 69 tests
-cd frontend && npm test       # 15 tests
+cd backend && mvn test        # 73 tests
+cd frontend && npm test       # 21 tests
 python ml/train_hlr.py --simulate 400 --out /tmp/w.json   # trainer self-check
 ```
 
@@ -183,7 +183,7 @@ All endpoints are under `/api`; full shapes are in `docs/CONTRACT.md` section 5.
 | GET | `/study-plans?userId={id}` | Study plans |
 | GET | `/topics/graph?userId={id}` | Topic map, Problems, Mock interviews |
 | GET | `/problems?topicId=&difficulty=` | Problems |
-| GET | `/problems/{id}` | Problem page (with starter code per language) |
+| GET | `/problems/{id}` | Problem page (statement, formats, samples) |
 | GET | `/ml/model`, `/ml/training-data` | Topic map model note, retraining |
 
 ## Changes in this version
@@ -203,13 +203,23 @@ All endpoints are under `/api`; full shapes are in `docs/CONTRACT.md` section 5.
 - **Persistence:** the default database is a file, so progress survives restarts.
 - **Engineering:** code splitting (first load ~70 KB gzipped instead of ~216 KB), frontend tests,
   CI, Dockerfiles with docker-compose, and one-command start scripts.
+- **Run and Submit always reachable:** the buttons sit in the editor's top bar (they used to fall
+  below the bottom of a laptop screen), a double click submits only once, and the run output and
+  verdict scroll into view.
+- **No starter code:** the editor starts empty and you write the whole program. The starter code is
+  removed from the database (schema.sql drops the old column) and from the API.
+- **Learners renamed:** Alex is now Rahul and Sam is now Ananya. They keep their ids, so all
+  earlier submissions, mistakes, ratings and readiness history stay with the same person.
+- **Beginner-friendly Readiness page** and a gap shown as "points ahead / behind" instead of +19 / -20.8.
+- **Locked problems** ask you to practise first, with a way through.
+- **GeeksforGeeks links** open the real topic tutorial instead of a Google search.
 
 ## Known limitations
 
 - The local sandbox is defence in depth, not a hard boundary; use the Docker sandbox when strangers
   can submit code.
 - The Docker sandbox and the Docker images are covered by unit tests of their configuration but
-  were not run end to end in this environment (no Docker available); C++ starters were not compiled
+  were not run end to end in this environment (no Docker available); C++ was not compiled
   for the same reason.
 - Peak memory is reported only by the Docker sandbox.
 - There is no real login, so the API trusts the learner id it is given.
