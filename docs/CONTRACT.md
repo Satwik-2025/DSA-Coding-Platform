@@ -19,11 +19,16 @@ Changes are made here first, then in code.
 - **Long text:** `VARCHAR(n)` instead of `TEXT`. H2 maps `TEXT` to `CLOB`, which fails
   Hibernate's `ddl-auto: validate` for a `String` field. A large `VARCHAR` behaves the
   same on PostgreSQL and H2.
-- **Error body** (400 / 404):
+- **Error body** (every 4xx / 5xx):
   ```json
   { "error": "NOT_FOUND", "message": "User 7 does not exist" }
   ```
-  Error codes are `BAD_REQUEST` and `NOT_FOUND`.
+  Error codes: `BAD_REQUEST` (also a JSON field of the wrong type, e.g. `"rating": 2.5`),
+  `NOT_FOUND` (also an unknown `/api` path), `METHOD_NOT_ALLOWED`, `UNSUPPORTED_MEDIA_TYPE`,
+  `TOO_MANY_REQUESTS`, `SERVICE_UNAVAILABLE`, `FORBIDDEN` and `INTERNAL_ERROR`.
+- **Who may call it:** by default only the computer the backend runs on (`127.0.0.1` / `::1`);
+  any other address gets 403 `FORBIDDEN`, because the backend runs submitted code and has no
+  login. `LOCAL_ONLY=false` (`app.security.local-only`) turns this off; Docker does so.
 - **Status:** every endpoint in section 5 is implemented and used by the frontend.
 
 ---
@@ -858,7 +863,11 @@ Runs code without recording anything (no attempt, no retention or readiness chan
 ```
 `status`: `ACCEPTED` / `WRONG_ANSWER` (samples), `OK` (custom input that ran), `RUNTIME_ERROR`,
 `TIME_LIMIT_EXCEEDED`. `stderr` is trimmed and never contains server paths. Rate limit:
-`app.rate-limit.runs-per-minute` (429).
+`app.rate-limit.runs-per-minute` (429), counted per `userId`; an unknown `userId` is a 404.
+
+Java programs are started as `java Main`. A program that compiles but has no top-level class
+`Main` outside any package, or no `public static void main(String[] args)`, is reported as a
+compile error with a plain explanation (the same applies to submissions).
 
 ### 5.13 `GET /api/languages`
 ```json

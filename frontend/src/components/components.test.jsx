@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import Select from './Select.jsx'
 import ActivityHeatmap from './ActivityHeatmap.jsx'
+import ErrorBoundary from './ErrorBoundary.jsx'
 import { api } from '../api.js'
 
 afterEach(() => {
@@ -59,5 +60,23 @@ describe('api', () => {
   it('explains an unreachable backend when the proxy answers without JSON', async () => {
     vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('Bad Gateway', { status: 502 }))
     await expect(api.users()).rejects.toThrow(/Is Spring Boot running/)
+  })
+})
+
+describe('ErrorBoundary', () => {
+  it('shows a message instead of blanking the app when a page throws', () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    const Broken = () => { throw new Error('boom') }
+    render(<div><p>sidebar</p><ErrorBoundary><Broken /></ErrorBoundary></div>)
+    expect(screen.getByText('sidebar')).toBeTruthy()
+    expect(screen.getByRole('alert').textContent).toContain('This page ran into a problem')
+    expect(screen.getByRole('button', { name: /Reload the page/ })).toBeTruthy()
+  })
+
+  it('explains a failed page download as an update', () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    const Stale = () => { throw new TypeError('Failed to fetch dynamically imported module: /assets/x.js') }
+    render(<ErrorBoundary><Stale /></ErrorBoundary>)
+    expect(screen.getByRole('alert').textContent).toContain('The site was updated')
   })
 })

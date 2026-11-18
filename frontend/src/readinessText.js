@@ -17,7 +17,8 @@ export function readinessLevel(readiness) {
 
 // gap = (your rating x 20) - readiness, both out of 100. It is measured in points, not percent.
 // Positive: your results are below the level you expect of yourself. Negative: above it.
-export function gapSummary(gap) {
+// overall = true words it for all topics together (the Dashboard) instead of one topic.
+export function gapSummary(gap, overall = false) {
   if (gap == null) return null
   const points = Math.round(Math.abs(gap))
   const unit = points === 1 ? 'point' : 'points'
@@ -28,13 +29,17 @@ export function gapSummary(gap) {
     return {
       direction: 'behind', points,
       headline: `You are ${points} ${unit} behind the level you expected.`,
-      note: 'You need more practice in this topic. You are still building your understanding here.',
+      note: overall
+        ? 'You need more practice. The Readiness page shows which topics to work on.'
+        : 'You need more practice in this topic. You are still building your understanding here.',
     }
   }
   return {
     direction: 'ahead', points,
     headline: `You are ${points} ${unit} ahead of the level you expected.`,
-    note: 'You are doing better than you think. You have a good understanding of this topic.',
+    note: overall
+      ? 'You are doing better than you think. Your answers show good understanding.'
+      : 'You are doing better than you think. You have a good understanding of this topic.',
   }
 }
 

@@ -147,7 +147,7 @@ function Overall({ overall }) {
       </EmptyState>
     )
   }
-  const gap = gapSummary(overall.gap)
+  const gap = gapSummary(overall.gap, true)
   const gapTone = gap?.direction === 'behind' ? 'text-amber' : gap?.direction === 'ahead' ? 'text-moss' : 'text-ink'
   return (
     <div className="space-y-3">

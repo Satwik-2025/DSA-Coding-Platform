@@ -20,6 +20,10 @@ spring:
     init:
       # Run schema.sql + data.sql on every start (both are idempotent), for H2 and Postgres alike.
       mode: always
+  jackson:
+    deserialization:
+      # A rating of 2.5 is a mistake to report, not a 2 to save silently.
+      accept-float-as-int: false
 
 server:
   port: ${PORT:8081}
@@ -27,6 +31,10 @@ server:
 app:
   cors:
     allowed-origin: ${CORS_ORIGIN:http://localhost:5173}
+  security:
+    # Answer only requests from this computer (LocalOnlyFilter): the backend runs submitted code and
+    # has no login. Docker sets LOCAL_ONLY=false because nginx calls it from another container.
+    local-only: ${LOCAL_ONLY:true}
   unlock:
     # A topic unlocks when EVERY prerequisite meets both thresholds (CONTRACT.md section 2.3).
     # Kept here, not in the DB, so they can be tuned without a migration.

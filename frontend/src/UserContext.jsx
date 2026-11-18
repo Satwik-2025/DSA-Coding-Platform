@@ -7,8 +7,15 @@ const UserContext = createContext(null)
 
 export function UserProvider({ children }) {
   const { data: users, error, reload } = useApi(api.users, [])
-  // Remembered across refreshes so a demo doesn't jump back to the first user.
-  const [userId, setUserId] = useState(() => Number(localStorage.getItem('userId')) || null)
+  // Remembered across refreshes so a demo doesn't jump back to the first user. Storage can be blocked
+  // (private mode, strict settings); then the choice simply isn't remembered.
+  const [userId, setUserId] = useState(() => {
+    try {
+      return Number(localStorage.getItem('userId')) || null
+    } catch {
+      return null
+    }
+  })
 
   useEffect(() => {
     // Fall back to the first seeded user if nothing is stored or the stored id no longer exists.
@@ -16,11 +23,19 @@ export function UserProvider({ children }) {
   }, [users, userId])
 
   useEffect(() => {
-    if (userId) localStorage.setItem('userId', userId)
+    if (!userId) return
+    try {
+      localStorage.setItem('userId', userId)
+    } catch {
+      // not remembered
+    }
   }, [userId])
 
+  // Pages only see a learner that exists, so a stale stored id never sends requests for a missing user.
+  const known = users?.some((u) => u.id === userId) ? userId : null
+
   return (
-    <UserContext.Provider value={{ users, userId, setUserId, error, reload }}>
+    <UserContext.Provider value={{ users, userId: known, setUserId, error, reload }}>
       {children}
     </UserContext.Provider>
   )

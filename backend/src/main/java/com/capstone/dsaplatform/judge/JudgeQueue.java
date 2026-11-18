@@ -127,15 +127,22 @@ public class JudgeQueue {
             job.result = work.apply(listener);
             job.status = Status.DONE;
         } catch (RuntimeException e) {
-            job.failure = e;
-            job.error = toError(e);
-            job.status = Status.FAILED;
-            if (job.error.error().equals("INTERNAL_ERROR")) {
-                log.error("Judge job {} failed", job.id, e);
-            }
+            fail(job, e);
+        } catch (Error e) {
+            // Without this the job would stay RUNNING forever and the page would poll forever.
+            fail(job, new IllegalStateException("Judging stopped with " + e, e));
         } finally {
             job.finishedAt = Instant.now();
             job.done.countDown();
+        }
+    }
+
+    private static void fail(Job job, RuntimeException e) {
+        job.failure = e;
+        job.error = toError(e);
+        job.status = Status.FAILED;
+        if (job.error.error().equals("INTERNAL_ERROR")) {
+            log.error("Judge job {} failed", job.id, e);
         }
     }
 

@@ -55,6 +55,19 @@ class JudgeQueueTest {
     }
 
     @Test
+    void aJavaErrorStillFinishesTheJob() {
+        JudgeQueue queue = new JudgeQueue(1, 5);
+        JudgeQueue.Job job = queue.submit(l -> {
+            throw new StackOverflowError("deep");
+        });
+
+        assertThrows(IllegalStateException.class, () -> queue.await(job, 5000));
+        JudgeQueue.JobView view = queue.view(job.id()).orElseThrow();
+        assertEquals(JudgeQueue.Status.FAILED, view.status());
+        assertEquals("INTERNAL_ERROR", view.error().error());
+    }
+
+    @Test
     void errorsKeepTheirHttpMeaning() {
         JudgeQueue queue = new JudgeQueue(1, 5);
         JudgeQueue.Job job = queue.submit(l -> {

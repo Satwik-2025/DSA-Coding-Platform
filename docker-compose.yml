@@ -13,7 +13,8 @@ services:
       POSTGRES_USER: dsa
       POSTGRES_PASSWORD: dsa
     ports:
-      - "${DB_PORT:-5432}:5432"
+      # 127.0.0.1: only this computer can reach the database (its password is the demo password "dsa").
+      - "127.0.0.1:${DB_PORT:-5432}:5432"
     volumes:
       # Named volume so attempt history survives container restarts.
       - dsa_pgdata:/var/lib/postgresql/data
@@ -34,6 +35,9 @@ services:
       # Submissions run in the hardened local sandbox inside this container (Java security manager,
       # Python guard). C++ needs the Docker sandbox, which requires the host's Docker daemon; see README.
       RUNNER_SANDBOX: local
+      # nginx calls the backend from its own container, so it is not "this computer" to the backend.
+      # The backend's port is not published to the host; only nginx can reach it.
+      LOCAL_ONLY: "false"
     depends_on:
       postgres:
         condition: service_healthy
@@ -42,7 +46,9 @@ services:
   frontend:
     build: ./frontend
     ports:
-      - "${APP_PORT:-8080}:80"
+      # Only this computer by default, because the site runs submitted code and has no login.
+      # APP_HOST=0.0.0.0 opens it to the local network.
+      - "${APP_HOST:-127.0.0.1}:${APP_PORT:-8080}:80"
     depends_on:
       - backend
     restart: unless-stopped

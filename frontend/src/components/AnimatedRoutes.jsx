@@ -1,6 +1,7 @@
 import { Suspense, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Routes, useLocation } from 'react-router-dom'
 import { prefersReducedMotion } from '../theme.jsx'
+import ErrorBoundary from './ErrorBoundary.jsx'
 import { Loading } from './Status.jsx'
 
 // Main sections in navigation order. Moving right in this list slides the new page in from the
@@ -70,12 +71,17 @@ export default function AnimatedRoutes({ children }) {
             inert=""
             onAnimationEnd={(e) => e.target === e.currentTarget && removeOld(p.id)}
           >
-            <Suspense fallback={null}><Routes location={p.location}>{children}</Routes></Suspense>
+            <ErrorBoundary>
+              <Suspense fallback={null}><Routes location={p.location}>{children}</Routes></Suspense>
+            </ErrorBoundary>
           </div>
         ) : (
           <div key={p.id} className="page-in" style={{ '--dir': p.dir }}>
-            {/* Pages are lazy-loaded: the skeleton shows while a page's code downloads. */}
-            <Suspense fallback={<Loading />}><Routes location={location}>{children}</Routes></Suspense>
+            {/* Pages are lazy-loaded: the skeleton shows while a page's code downloads. A crash in one
+                page is contained here; navigating creates a new page entry and so a fresh boundary. */}
+            <ErrorBoundary>
+              <Suspense fallback={<Loading />}><Routes location={location}>{children}</Routes></Suspense>
+            </ErrorBoundary>
           </div>
         ),
       )}

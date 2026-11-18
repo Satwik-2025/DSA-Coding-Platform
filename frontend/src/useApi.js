@@ -5,7 +5,7 @@ import { useCallback, useEffect, useState } from 'react'
 export function useApi(fetcher, deps) {
   const [state, setState] = useState({ data: null, error: null, loading: true })
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // The caller passes the dependencies (like useEffect), so the linter cannot check them here.
   const load = useCallback(() => {
     let cancelled = false // ignore a slow response that arrives after the user switched learner
     setState((s) => ({ ...s, loading: true, error: null }))
@@ -14,7 +14,7 @@ export function useApi(fetcher, deps) {
       (error) => !cancelled && setState({ data: null, error, loading: false }),
     )
     return () => { cancelled = true }
-  }, deps)
+  }, deps) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(load, [load])
   return { ...state, reload: load }

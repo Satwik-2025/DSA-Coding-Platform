@@ -60,3 +60,10 @@ describe('readiness wording', () => {
     expect(nextStep({ recentAccuracy: 0.9, retention: 0.9, speedVsTarget: 0.85 }, 60)).toMatch(/more days/)
   })
 })
+
+describe('dashboard gap wording', () => {
+  it('does not talk about "this topic" for the overall score', () => {
+    expect(gapSummary(-12, true).note).not.toMatch(/topic\./)
+    expect(gapSummary(12, true).note).toMatch(/Readiness page/)
+  })
+})

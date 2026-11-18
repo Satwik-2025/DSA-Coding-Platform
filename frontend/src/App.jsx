@@ -1,5 +1,5 @@
 import { lazy } from 'react'
-import { Route } from 'react-router-dom'
+import { Link, Route } from 'react-router-dom'
 import Layout from './components/Layout.jsx'
 import AnimatedRoutes from './components/AnimatedRoutes.jsx'
 import { EmptyState } from './components/Status.jsx'
@@ -27,7 +27,11 @@ export default function App() {
         <Route path="/mock" element={<Mock />} />
         <Route path="/readiness" element={<Readiness />} />
         <Route path="/mistakes" element={<Mistakes />} />
-        <Route path="*" element={<EmptyState>Page not found.</EmptyState>} />
+        <Route path="*" element={
+          <EmptyState action={<Link to="/" className="btn btn-primary mt-1">Go to Today</Link>}>
+            This page does not exist.
+          </EmptyState>
+        } />
       </AnimatedRoutes>
     </Layout>
   )

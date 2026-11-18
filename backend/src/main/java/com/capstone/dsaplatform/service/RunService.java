@@ -10,6 +10,7 @@ import com.capstone.dsaplatform.entity.Problem;
 import com.capstone.dsaplatform.error.BadRequestException;
 import com.capstone.dsaplatform.error.NotFoundException;
 import com.capstone.dsaplatform.repository.ProblemRepository;
+import com.capstone.dsaplatform.repository.UserRepository;
 import com.capstone.dsaplatform.runner.CodeRunner;
 import com.capstone.dsaplatform.runner.Language;
 import com.capstone.dsaplatform.runner.RunInput;
@@ -35,15 +36,17 @@ public class RunService {
     private static final int MAX_OUTPUT_SHOWN = 64 * 1024;
 
     private final ProblemRepository problems;
+    private final UserRepository users;
     private final CodeRunner codeRunner;
     private final RateLimiter rateLimiter;
     private final int maxCodeChars;
     private final int runsPerMinute;
 
-    public RunService(ProblemRepository problems, CodeRunner codeRunner, RateLimiter rateLimiter,
+    public RunService(ProblemRepository problems, UserRepository users, CodeRunner codeRunner, RateLimiter rateLimiter,
                       @Value("${app.limits.max-code-chars:65535}") int maxCodeChars,
                       @Value("${app.rate-limit.runs-per-minute:20}") int runsPerMinute) {
         this.problems = problems;
+        this.users = users;
         this.codeRunner = codeRunner;
         this.rateLimiter = rateLimiter;
         this.maxCodeChars = maxCodeChars;
@@ -61,6 +64,10 @@ public class RunService {
         Language language = validate(request);
         if (!problems.existsById(request.problemId())) {
             throw new NotFoundException("Problem " + request.problemId() + " does not exist");
+        }
+        // The learner id is the rate-limit key, so made-up ids must not each get a fresh allowance.
+        if (request.userId() != null && !users.existsById(request.userId())) {
+            throw new NotFoundException("User " + request.userId() + " does not exist");
         }
         if (!codeRunner.availableLanguages().contains(language)) {
             throw new BadRequestException(language.displayName() + " is not available on this server");

@@ -40,7 +40,12 @@ function snapshot(userId) {
   }
   const hit = cache.get(userId)
   if (hit && hit.raw === raw) return hit.value
-  const value = raw ? JSON.parse(raw) : null
+  let value = null
+  try {
+    value = raw ? JSON.parse(raw) : null
+  } catch {
+    // damaged entry (edited by hand, or written by an old version): treat it as no session
+  }
   cache.set(userId, { raw, value })
   return value
 }

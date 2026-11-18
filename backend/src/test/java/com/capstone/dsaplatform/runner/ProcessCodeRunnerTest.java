@@ -291,6 +291,31 @@ class ProcessCodeRunnerTest {
         assertEquals(List.of("compiled 2", "1/2", "2/2"), events);
     }
 
+    @Test
+    void javaWithoutARunnableMainClassIsAClearCompileError() {
+        ProcessCodeRunner runner = runner(test(10L, TestTag.SAMPLE, 1, "", "1\n"));
+
+        RunResult wrongName = runner.run(problem(2000),
+                "class Solution { public static void main(String[] a) { System.out.println(1); } }");
+        assertFalse(wrongName.compiled());
+        assertTrue(wrongName.compileError().contains("no class called Main"), wrongName.compileError());
+
+        RunResult inPackage = runner.run(problem(2000),
+                "package app; public class Main { public static void main(String[] a) { System.out.println(1); } }");
+        assertFalse(inPackage.compiled());
+        assertTrue(inPackage.compileError().contains("package app;"), inPackage.compileError());
+
+        RunResult noMain = runner.run(problem(2000), "public class Main { static void solve() { } }");
+        assertFalse(noMain.compiled());
+        assertTrue(noMain.compileError().contains("public static void main(String[] args)"), noMain.compileError());
+
+        // A non-public class Main with extra helper classes is fine.
+        RunResult ok = runner.run(problem(2000),
+                "class Helper { }\nclass Main { public static void main(String... a) { System.out.println(1); } }");
+        assertTrue(ok.compiled(), ok.compileError());
+        assertTrue(ok.outcomes().get(0).passed());
+    }
+
     // ---- helpers ----
 
     private static boolean python() {

@@ -36,6 +36,7 @@ import com.capstone.dsaplatform.runner.RunListener;
 import com.capstone.dsaplatform.runner.RunResult;
 import com.capstone.dsaplatform.runner.TestOutcome;
 import com.capstone.dsaplatform.support.RateLimiter;
+import com.capstone.dsaplatform.support.UserLocks;
 import com.capstone.dsaplatform.support.Times;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -77,6 +78,7 @@ public class SubmissionService {
     private final ReadinessService readinessService;
     private final ResourceService resourceService;
     private final RateLimiter rateLimiter;
+    private final UserLocks userLocks;
     private final TransactionTemplate readTx;
     private final TransactionTemplate writeTx;
     private final int maxCodeChars;
@@ -86,7 +88,7 @@ public class SubmissionService {
                              AttemptRepository attempts, ErrorEventRepository errorEvents,
                              TopicStateRepository topicStates, CodeRunner codeRunner, HlrPredictor hlr,
                              ReadinessService readinessService, ResourceService resourceService,
-                             RateLimiter rateLimiter, PlatformTransactionManager txManager,
+                             RateLimiter rateLimiter, UserLocks userLocks, PlatformTransactionManager txManager,
                              @Value("${app.limits.max-code-chars:65535}") int maxCodeChars,
                              @Value("${app.rate-limit.submissions-per-minute:10}") int submissionsPerMinute) {
         this.userService = userService;
@@ -100,6 +102,7 @@ public class SubmissionService {
         this.readinessService = readinessService;
         this.resourceService = resourceService;
         this.rateLimiter = rateLimiter;
+        this.userLocks = userLocks;
         this.readTx = new TransactionTemplate(txManager);
         this.readTx.setReadOnly(true);
         this.writeTx = new TransactionTemplate(txManager);
@@ -130,7 +133,8 @@ public class SubmissionService {
         requireAvailable(language);
         Prepared p = readTx.execute(status -> prepare(request));
         RunResult result = codeRunner.run(language, request.code(), p.inputs(), p.timeLimitMs(), listener);
-        return writeTx.execute(status -> persist(p, request, language, result));
+        // Serialised per learner (see UserLocks): parallel judge workers must not overwrite each other's update.
+        return userLocks.withLock(p.userId(), () -> writeTx.execute(status -> persist(p, request, language, result)));
     }
 
     @Transactional(readOnly = true)

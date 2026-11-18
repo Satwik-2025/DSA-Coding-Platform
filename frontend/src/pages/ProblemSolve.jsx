@@ -6,7 +6,7 @@ import { useApi } from '../useApi.js'
 import { useUser } from '../UserContext.jsx'
 import { ERROR_CATEGORY, dateTime } from '../format.js'
 import { clearDraft, loadDraft, preferredLanguage, saveDraft, setPreferredLanguage } from '../drafts.js'
-import { recordSubmission } from '../mock.js'
+import { isActive, recordSubmission, useMock } from '../mock.js'
 import { DifficultyBadge, VerdictBadge } from '../components/Badges.jsx'
 import CodeEditor from '../components/CodeEditor.jsx'
 import LockedGate from '../components/LockedGate.jsx'
@@ -38,6 +38,8 @@ export default function ProblemSolve() {
   // Problem id the learner chose to open despite the lock. Only for this visit: it is never saved,
   // so the topic stays locked and the recommendation shows again next time.
   const [proceededWith, setProceededWith] = useState(null)
+  // Problems picked for a running mock interview open directly: the clock is already ticking.
+  const mock = useMock(userId)
 
   const [preferred, setPreferred] = useState(preferredLanguage)
   const [code, setCode] = useState('')
@@ -72,7 +74,8 @@ export default function ProblemSolve() {
   const p = problem.data
   shownId.current = p?.id ?? null
   const topicNode = p && graph.data?.nodes.find((n) => n.id === p.topic.id)
-  const gated = Boolean(topicNode && !topicNode.unlocked && proceededWith !== p.id)
+  const inMock = Boolean(p && isActive(mock) && mock.problemIds.includes(p.id))
+  const gated = Boolean(topicNode && !topicNode.unlocked && proceededWith !== p.id && !inMock)
 
   // New problem or language: restore the saved draft, otherwise start with an empty editor.
   useEffect(() => {
@@ -405,7 +408,7 @@ function Console({ tab, setTab, samples, customOn, setCustomOn, customInput, set
           </button>
         ))}
         <span className="ml-auto text-[11px] text-faint pr-1 text-right">
-          Runs are not saved<span className="hidden md:inline"> · <kbd className="font-mono">Ctrl+'</kbd> run · <kbd className="font-mono">Ctrl+Enter</kbd> submit</span>
+          Runs are not saved<span className="hidden md:inline"> · <kbd className="font-mono">Ctrl+&apos;</kbd> run · <kbd className="font-mono">Ctrl+Enter</kbd> submit</span>
         </span>
       </div>
       <div className="p-4 max-h-96 overflow-auto">
@@ -440,7 +443,7 @@ function Console({ tab, setTab, samples, customOn, setCustomOn, customInput, set
           </pre>
           </div>
         ) : runResult.cases.length === 0 ? (
-          <p className="text-sm text-muted">Nothing ran: this problem has no example tests. Tick "Use my own input" to try your code.</p>
+          <p className="text-sm text-muted">Nothing ran: this problem has no example tests. Tick &ldquo;Use my own input&rdquo; to try your code.</p>
         ) : (
           <div className="space-y-4">
             {runResult.cases.map((c) => (

@@ -5,7 +5,7 @@ problems in Java, Python or C++ in the browser, and the platform tracks what the
 which topics they have unlocked, what kinds of mistakes they keep making, when each topic is due
 for review, and how ready they are for interviews.
 
-- **Frontend:** React 18, Vite 6, Tailwind CSS 4, CodeMirror 6, Recharts, React Router
+- **Frontend:** React 18, Vite 6, Tailwind CSS 4, CodeMirror 6, Recharts, React Router 7
 - **Backend:** Spring Boot 3.3 (Java 17+), Spring Data JPA, H2 (file, default) or PostgreSQL
 - **ML:** half-life regression (HLR) memory model, trained offline in Python, served by the backend,
   retrainable on the platform's own learners
@@ -124,6 +124,8 @@ in `application.yml` first so the first run is not slowed down). For trusted sin
 | `DATA_DIR` | environment (default H2 profile) | `./data` |
 | `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD` | environment (postgres profile) | `localhost`, `5432`, `dsa_platform`, `dsa`, `dsa` |
 | `CORS_ORIGIN` | environment | `http://localhost:5173` |
+| `LOCAL_ONLY` | environment | `true`: only this computer may call the backend (Docker sets `false`) |
+| `APP_HOST` | environment (docker compose) | `127.0.0.1`: the site is reachable only from this computer |
 | rate limits, code size, queue size, unlock thresholds | `backend/src/main/resources/application.yml` | see `docs/CONTRACT.md` section 7 |
 
 No API keys or external services are required.
@@ -150,8 +152,8 @@ held-out learners. See `ml/README.md`.
 ## Tests
 
 ```bash
-cd backend && mvn test        # 73 tests
-cd frontend && npm test       # 21 tests
+cd backend && mvn test        # 80 tests
+cd frontend && npm test       # 24 tests
 python ml/train_hlr.py --simulate 400 --out /tmp/w.json   # trainer self-check
 ```
 
@@ -213,6 +215,13 @@ All endpoints are under `/api`; full shapes are in `docs/CONTRACT.md` section 5.
 - **Beginner-friendly Readiness page** and a gap shown as "points ahead / behind" instead of +19 / -20.8.
 - **Locked problems** ask you to practise first, with a way through.
 - **GeeksforGeeks links** open the real topic tutorial instead of a Google search.
+- **Full audit fixes:** parallel submissions or ratings of the same learner can no longer
+  overwrite each other or fail; a judge job that hits a Java `Error` no longer stays "running"
+  forever; Run checks the learner exists (the rate limit could be dodged); a rating of 2.5 is
+  rejected instead of saved as 2; every error, including unknown paths and wrong methods, has the
+  same `{ error, message }` body; Java code without a runnable `Main` gets a clear compile message;
+  only this computer can call the backend (and, in Docker, reach the site and the database);
+  a page that crashes shows a message instead of blanking the app; React Router 7 (security fix).
 
 ## Known limitations
 
@@ -222,6 +231,8 @@ All endpoints are under `/api`; full shapes are in `docs/CONTRACT.md` section 5.
   were not run end to end in this environment (no Docker available); C++ was not compiled
   for the same reason.
 - Peak memory is reported only by the Docker sandbox.
-- There is no real login, so the API trusts the learner id it is given.
+- There is no real login, so the API trusts the learner id it is given. To limit the risk, the
+  backend answers only requests from the computer it runs on (`LOCAL_ONLY`).
+- `npm audit` still lists `picomatch` (used by the Vite / Vitest build tools only, never shipped to
+  the browser); no fixed version exists yet.
 - The model's AUC (0.556) is only modestly above the baselines; retraining on real usage should help.
-- `react-router-dom` 6 has a moderate security advisory that is only fixed in the v7 major release.

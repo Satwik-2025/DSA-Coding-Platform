@@ -7,6 +7,7 @@ import static java.util.concurrent.TimeUnit.NANOSECONDS;
 import com.capstone.dsaplatform.entity.Problem;
 import com.capstone.dsaplatform.entity.TestCase;
 import com.capstone.dsaplatform.error.BadRequestException;
+import com.sun.source.util.JavacTask;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.UncheckedIOException;
@@ -22,6 +23,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
+import javax.lang.model.element.NestingKind;
+import javax.lang.model.element.PackageElement;
+import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic;
 import javax.tools.DiagnosticCollector;
 import javax.tools.JavaCompiler;
@@ -175,9 +183,19 @@ public class ProcessCodeRunner implements CodeRunner {
                     "-proc:none");
             Iterable<? extends JavaFileObject> units = fileManager.getJavaFileObjects(source.toFile());
             // The StringWriter swallows stray compiler chatter; the diagnostics carry everything we report.
-            boolean ok = compiler.getTask(new StringWriter(), fileManager, diagnostics, options, null, units).call();
-            if (ok) {
-                return null;
+            JavacTask task = (JavacTask) compiler.getTask(new StringWriter(), fileManager, diagnostics, options, null, units);
+            // Analyse first: if the code compiles but has no runnable Main, say so now. Otherwise the JVM
+            // would fail later with a confusing "Could not find or load main class Main".
+            Iterable<? extends Element> declared = task.analyze();
+            if (!hasErrors(diagnostics)) {
+                String missing = mainProblem(declared);
+                if (missing != null) {
+                    return missing;
+                }
+                task.generate();
+                if (!hasErrors(diagnostics)) {
+                    return null;
+                }
             }
         }
         String errors = diagnostics.getDiagnostics().stream()
@@ -185,6 +203,43 @@ public class ProcessCodeRunner implements CodeRunner {
                 .map(ProcessCodeRunner::formatDiagnostic)
                 .collect(Collectors.joining("\n"));
         return errors.isEmpty() ? "Compilation failed." : errors;
+    }
+
+    private static boolean hasErrors(DiagnosticCollector<JavaFileObject> diagnostics) {
+        return diagnostics.getDiagnostics().stream().anyMatch(d -> d.getKind() == Diagnostic.Kind.ERROR);
+    }
+
+    /**
+     * The program is started as "java Main", so it needs a top-level class Main, outside any package,
+     * with a static main(String[]) method. Returns a message for the learner, or null when all is well.
+     */
+    static String mainProblem(Iterable<? extends Element> declared) {
+        TypeElement main = null;
+        for (Element e : declared) {
+            if (e instanceof TypeElement t && t.getNestingKind() == NestingKind.TOP_LEVEL
+                    && t.getSimpleName().contentEquals("Main")) {
+                main = t;
+            }
+        }
+        if (main == null) {
+            return "Main.java: error: there is no class called Main. Put your program in "
+                    + "public class Main { ... } (the class must be called Main).";
+        }
+        if (main.getEnclosingElement() instanceof PackageElement pkg && !pkg.isUnnamed()) {
+            return "Main.java: error: remove the line \"package " + pkg.getQualifiedName()
+                    + ";\" at the top. Class Main must not be in a package.";
+        }
+        boolean hasMain = main.getEnclosedElements().stream()
+                .filter(e -> e.getKind() == ElementKind.METHOD && e.getSimpleName().contentEquals("main"))
+                .map(ExecutableElement.class::cast)
+                .anyMatch(m -> m.getModifiers().contains(Modifier.STATIC) && m.getModifiers().contains(Modifier.PUBLIC)
+                        && m.getParameters().size() == 1
+                        && m.getParameters().get(0).asType().toString().equals("java.lang.String[]"));
+        if (!hasMain) {
+            return "Main.java: error: class Main has no public static void main(String[] args) method. "
+                    + "Your program starts running there.";
+        }
+        return null;
     }
 
     private static String formatDiagnostic(Diagnostic<? extends JavaFileObject> d) {

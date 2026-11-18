@@ -23,10 +23,13 @@ import com.capstone.dsaplatform.repository.TopicStateRepository;
 import com.capstone.dsaplatform.service.TopicStatusService.TopicStatus;
 import com.capstone.dsaplatform.support.Rounding;
 import com.capstone.dsaplatform.support.Times;
+import com.capstone.dsaplatform.support.UserLocks;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -48,10 +51,12 @@ public class ReadinessService {
     private final TopicStatusService topicStatusService;
     private final UserService userService;
     private final int recentAttempts;
+    private final UserLocks userLocks;
+    private final TransactionTemplate writeTx;
 
     public ReadinessService(AttemptRepository attempts, ReadinessSnapshotRepository snapshots, TopicRepository topics,
                             TopicStateRepository topicStates, TopicStatusService topicStatusService,
-                            UserService userService,
+                            UserService userService, UserLocks userLocks, PlatformTransactionManager txManager,
                             @Value("${app.readiness.recent-attempts}") int recentAttempts) {
         this.attempts = attempts;
         this.snapshots = snapshots;
@@ -60,6 +65,8 @@ public class ReadinessService {
         this.topicStatusService = topicStatusService;
         this.userService = userService;
         this.recentAttempts = recentAttempts;
+        this.userLocks = userLocks;
+        this.writeTx = new TransactionTemplate(txManager);
     }
 
     /** Unrounded results; rounding happens only when building a response. */
@@ -125,8 +132,12 @@ public class ReadinessService {
         return snapshots.save(snapshot);
     }
 
-    @Transactional
     public SelfRatingResponse setSelfRating(Long userId, SelfRatingRequest request) {
+        // Same per-learner lock as submissions: both write this learner's topic_state rows.
+        return userLocks.withLock(userId, () -> writeTx.execute(status -> saveSelfRating(userId, request)));
+    }
+
+    private SelfRatingResponse saveSelfRating(Long userId, SelfRatingRequest request) {
         User user = userService.require(userId);
         if (request == null || request.topicId() == null) {
             throw new BadRequestException("topicId is required");

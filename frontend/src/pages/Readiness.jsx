@@ -176,7 +176,7 @@ function TopicCard({ t, saving, onRate }) {
 
       {t.readiness != null && (
         <div className="grid grid-cols-3 gap-3">
-          <Meter label="Right answers" value={t.components?.recentAccuracy}
+          <Meter label="Correct" value={t.components?.recentAccuracy}
             title="Share of your last 10 tries in this topic that were correct" />
           <Meter label="Memory" value={t.components?.retention}
             title="How well you still remember this topic, predicted by the learning model" />
