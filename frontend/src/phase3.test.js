@@ -67,3 +67,18 @@ describe('dashboard gap wording', () => {
     expect(gapSummary(12, true).note).toMatch(/Readiness page/)
   })
 })
+
+describe('study plan grouping', async () => {
+  const { groupByTopic } = await import('./pages/Plans.jsx')
+  it('groups the full course by topic in plan order with solved counts', () => {
+    const items = [
+      { problemId: 2, topicName: 'Arrays', status: 'SOLVED' },
+      { problemId: 1, topicName: 'Arrays', status: 'NEW' },
+      { problemId: 3, topicName: 'Strings', status: 'ATTEMPTED' },
+      { problemId: 9, topicName: 'Arrays', status: 'SOLVED' },
+    ]
+    const groups = groupByTopic(items)
+    expect(groups.map((g) => [g.topic, g.solved, g.items.length])).toEqual([['Arrays', 2, 3], ['Strings', 0, 1]])
+    expect(groups[0].items.map((i) => i.problemId)).toEqual([2, 1, 9])
+  })
+})

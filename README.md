@@ -25,7 +25,7 @@ for review, and how ready they are for interviews.
 | Review queue | Topics fading below the unlock threshold, each with a problem to re-solve |
 | Topic map | Prerequisite graph; a topic unlocks when its prerequisites are retained and solved. Opening a problem in a locked topic first suggests an easier question to practise, with an "I still want to proceed" option |
 | Recommendations | Ranked next problems from unlocked topics, with a reason for each |
-| Study plans | Four curated sequences with progress |
+| Study plans | Curated sequences with progress. The Full Path is grouped by topic: one row per topic with its solved count and progress bar, opened to see its problems |
 | Mock interviews | Timed sets of 2-3 problems; pick mixed (easy to harder) or one difficulty; counts real submissions |
 | Activity | Calendar heatmap, day streak and longest streak |
 | Readiness | Right answers, memory, practising often and speed combined into a 0-100 score, explained in plain English, with "points ahead / behind the level you expected" against the learner's own rating and a next step per topic |
@@ -146,7 +146,7 @@ held-out learners. See `ml/README.md`.
 
 ```bash
 cd backend && mvn test        # 81 tests
-cd frontend && npm test       # 26 tests
+cd frontend && npm test       # 27 tests
 python ml/train_hlr.py --simulate 400 --out /tmp/w.json   # trainer self-check
 ```
 

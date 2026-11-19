@@ -5,7 +5,11 @@ import { useApi } from '../useApi.js'
 import { useUser } from '../UserContext.jsx'
 import { DifficultyBadge } from '../components/Badges.jsx'
 import { ErrorBox, Loading, PageHeader } from '../components/Status.jsx'
-import { IconArrowRight, IconCheck, IconChevronDown } from '../components/Icons.jsx'
+import { IconArrowRight, IconCheck, IconChevronDown, IconChevronRight } from '../components/Icons.jsx'
+
+// The full course is long, so it is shown topic by topic (like a roadmap): one row per topic with its
+// progress, opened to see that topic's problems. The other plans are short and stay a single list.
+const GROUPED_PLAN = 'full-path'
 
 // Curated sequences of problems with this learner's progress through each one.
 export default function Plans() {
@@ -64,27 +68,93 @@ export default function Plans() {
                   </button>
                 </div>
               </div>
-              {isOpen && (
-                <ol className="border-t border-line divide-y divide-line animate-fade-up">
-                  {plan.items.map((item, i) => (
-                    <li key={item.problemId}>
-                      <Link to={`/problems/${item.problemId}`}
-                        className="group flex items-center gap-4 px-5 sm:px-6 py-3 hover:bg-sunken transition-colors">
-                        <StatusDot status={item.status} />
-                        <span className="text-xs text-faint tabular-nums w-5">{i + 1}</span>
-                        <span className="flex-1 min-w-0 truncate text-sm text-ink group-hover:text-accent transition-colors">{item.title}</span>
-                        <span className="hidden sm:inline text-xs text-faint">{item.topicName}</span>
-                        <DifficultyBadge difficulty={item.difficulty} />
-                      </Link>
-                    </li>
-                  ))}
-                </ol>
-              )}
+              {isOpen && (plan.slug === GROUPED_PLAN
+                ? <TopicGroups items={plan.items} />
+                : (
+                  <ol className="border-t border-line divide-y divide-line animate-fade-up">
+                    {plan.items.map((item, i) => <ProblemRow key={item.problemId} item={item} number={i + 1} showTopic />)}
+                  </ol>
+                ))}
             </li>
           )
         })}
       </ul>
     </div>
+  )
+}
+
+// Splits the plan into topics, keeping the plan's own order (topics in prerequisite order,
+// easiest problem first within each topic).
+export function groupByTopic(items) {
+  const groups = []
+  for (const item of items) {
+    let g = groups.at(-1)
+    if (!g || g.topic !== item.topicName) {
+      g = groups.find((x) => x.topic === item.topicName)
+      if (!g) {
+        g = { topic: item.topicName, items: [] }
+        groups.push(g)
+      }
+    }
+    g.items.push(item)
+  }
+  return groups.map((g) => ({ ...g, solved: g.items.filter((i) => i.status === 'SOLVED').length }))
+}
+
+function TopicGroups({ items }) {
+  const groups = groupByTopic(items)
+  // The first topic with something left to solve starts open; the rest start closed.
+  const [open, setOpen] = useState(() => new Set([groups.find((g) => g.solved < g.items.length)?.topic].filter(Boolean)))
+  const toggle = (topic) => setOpen((prev) => {
+    const next = new Set(prev)
+    if (next.has(topic)) next.delete(topic)
+    else next.add(topic)
+    return next
+  })
+
+  return (
+    <div className="border-t border-line p-3 sm:p-4 space-y-2 animate-fade-up">
+      {groups.map((g) => {
+        const isOpen = open.has(g.topic)
+        const done = g.solved === g.items.length
+        const id = `topic-${g.topic.replace(/\W+/g, '-')}`
+        return (
+          <section key={g.topic} className="rounded-xl border border-line bg-surface overflow-hidden">
+            <button type="button" onClick={() => toggle(g.topic)} aria-expanded={isOpen} aria-controls={id}
+              className="w-full flex items-center gap-3 sm:gap-4 px-4 py-3.5 text-left hover:bg-sunken transition-colors">
+              <IconChevronRight size={16} className={`text-faint shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-90' : ''}`} />
+              <span className="flex-1 min-w-0 truncate font-semibold text-ink">{g.topic}</span>
+              {done && <IconCheck size={15} className="text-moss shrink-0" aria-label="Topic complete" />}
+              <span className="font-mono text-xs text-muted tabular-nums shrink-0">{g.solved}/{g.items.length}</span>
+              <span className="w-20 sm:w-48 lg:w-72 h-1.5 rounded-full bg-sunken overflow-hidden shrink-0" aria-hidden="true">
+                <span className={`block h-full rounded-full transition-[width] duration-500 ${done ? 'bg-moss' : 'bg-accent'}`}
+                  style={{ width: `${(g.solved / g.items.length) * 100}%` }} />
+              </span>
+            </button>
+            {isOpen && (
+              <ol id={id} className="border-t border-line divide-y divide-line animate-fade-up">
+                {g.items.map((item, i) => <ProblemRow key={item.problemId} item={item} number={i + 1} />)}
+              </ol>
+            )}
+          </section>
+        )
+      })}
+    </div>
+  )
+}
+
+function ProblemRow({ item, number, showTopic = false }) {
+  return (
+    <li>
+      <Link to={`/problems/${item.problemId}`}
+        className="group flex items-center gap-4 px-5 sm:px-6 py-3 hover:bg-sunken transition-colors">
+        <StatusDot status={item.status} />
+        <span className="text-xs text-faint tabular-nums w-5">{number}</span>
+        <span className="flex-1 min-w-0 truncate text-sm text-ink group-hover:text-accent transition-colors">{item.title}</span>
+        {showTopic && <span className="hidden sm:inline text-xs text-faint">{item.topicName}</span>}
+        <DifficultyBadge difficulty={item.difficulty} />
+      </Link>
+    </li>
   )
 }
 
