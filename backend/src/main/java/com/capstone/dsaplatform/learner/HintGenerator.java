@@ -67,7 +67,7 @@ public final class HintGenerator {
                 hints.add("An index went one step too far. Check every loop bound: should it be < n or <= n?");
                 hints.add("The last valid index is length - 1. Look at accesses like a[i + 1] or s.charAt(j) near the end of a loop.");
                 if (failedTag == TestTag.BOUNDARY) {
-                    hints.add("It failed on a boundary test: try the smallest and largest sizes the constraints allow.");
+                    hints.add("It failed on a limit test: try the smallest and the largest inputs the problem allows.");
                 }
             }
             case MISSED_EDGE_CASE -> {
@@ -81,7 +81,7 @@ public final class HintGenerator {
             }
             case STATE_TRANSITION -> {
                 if (Long.valueOf(10L).equals(topicId)) {
-                    hints.add("The recurrence is off. Say in one sentence what dp[i] stores.");
+                    hints.add("The rule that builds each answer from earlier answers is off. Say in one sentence what dp[i] stores.");
                     hints.add("Check the base cases first, then which earlier states dp[i] combines (for example dp[i-1] versus dp[i-2] + value).");
                 } else {
                     // Problems outside DP can carry this label too (a running value updated wrongly).
@@ -91,14 +91,15 @@ public final class HintGenerator {
                 }
             }
             case BAD_COMPLEXITY -> {
-                hints.add("Too slow for the large test. Estimate your time complexity: inputs up to 10^5 need O(n) or O(n log n).");
+                hints.add("Too slow on the biggest test. With 100,000 numbers, a loop inside a loop is too slow: "
+                        + "look for a method that goes through the input about once, or uses sorting or binary search.");
                 hints.add(TOPIC_APPROACH.getOrDefault(topicId, "Look for work that is repeated inside a loop and do it once instead."));
                 if ("PYTHON".equals(language)) {
                     hints.add("In Python, read all input at once (sys.stdin.buffer.read().split()) and build output with ' '.join(...).");
                 }
             }
             case SUBOPTIMAL -> {
-                hints.add("Correct, but slower than the reference solution on the largest input.");
+                hints.add("Your answer is right, but a faster solution exists for the biggest input.");
                 hints.add(TOPIC_APPROACH.getOrDefault(topicId, "Look for a single pass that avoids repeated work."));
             }
         }
@@ -119,7 +120,6 @@ public final class HintGenerator {
             case "ArithmeticException", "ZeroDivisionError", "FloatingPointException" -> "You divided by zero somewhere: guard the divisor.";
             case "NumberFormatException", "ValueError" -> "Parsing failed: read the input exactly in the format the problem describes.";
             case "OutOfMemoryError", "MemoryError" -> "You ran out of memory: avoid building huge lists or strings you do not need.";
-            case "SegmentationFault" -> "A segmentation fault usually means an out-of-range index or a null pointer.";
             case "KeyError" -> "A KeyError means you read a dictionary key that was never added: use .get(key, default).";
             case "PermissionError", "AccessControlException", "SecurityException" ->
                     "Solutions cannot use files, the network or other programs: read stdin and print to stdout only.";

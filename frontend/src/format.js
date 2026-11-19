@@ -23,11 +23,11 @@ export const VERDICT = {
 }
 
 export const ERROR_CATEGORY = {
-  SYNTAX_COMPILATION: { label: 'Compilation', hint: 'The code does not compile.' },
-  OFF_BY_ONE: { label: 'Off by one', hint: 'Index or bound errors at the limits of the input.' },
-  MISSED_EDGE_CASE: { label: 'Missed edge case', hint: 'Empty, single-element, duplicate or negative inputs are not handled.' },
-  WRONG_ALGORITHM: { label: 'Wrong approach', hint: 'The approach is wrong even on typical inputs.' },
-  STATE_TRANSITION: { label: 'DP state transition', hint: 'The recurrence or state update is wrong.' },
-  BAD_COMPLEXITY: { label: 'Too slow', hint: 'Exceeded the time limit.' },
-  SUBOPTIMAL: { label: 'Slower than optimal', hint: 'Correct, but slower than the reference solution.' },
+  SYNTAX_COMPILATION: { label: 'Code does not run', hint: 'There is a typing (syntax) mistake, so the code could not even start.' },
+  OFF_BY_ONE: { label: 'Off by one', hint: 'A loop or index went one step too far, or stopped one step too early.' },
+  MISSED_EDGE_CASE: { label: 'Missed a special case', hint: 'Unusual inputs, like an empty list, one item, repeats or negative numbers, were not handled.' },
+  WRONG_ALGORITHM: { label: 'Wrong approach', hint: 'The idea behind the solution does not work, even on normal inputs.' },
+  STATE_TRANSITION: { label: 'Wrong step-by-step rule', hint: 'The rule that builds each answer from the earlier answers (or the value carried from step to step) is wrong.' },
+  BAD_COMPLEXITY: { label: 'Too slow', hint: 'The code took longer than the time limit on a big input. A faster method is needed.' },
+  SUBOPTIMAL: { label: 'Slower than it could be', hint: 'The answer is right, but there is a faster way to get it.' },
 }

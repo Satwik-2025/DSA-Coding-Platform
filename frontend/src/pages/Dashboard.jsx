@@ -35,7 +35,7 @@ export default function Dashboard() {
           <div>
             <h2 className="text-lg font-semibold text-ink">Solve next</h2>
             <p className="text-sm text-muted mt-1">
-              Picked from unlocked topics only. Each reason says what the pick does for you.
+              Picked from the topics you have opened. Each one says why it is a good next step.
             </p>
           </div>
           <Link to="/problems" className="hidden sm:inline-flex btn btn-ghost h-9 px-3 text-xs shrink-0">
@@ -97,8 +97,8 @@ function ReviewQueue({ review }) {
           <IconRefresh size={18} className="text-accent" /> Due for review
         </h2>
         <p className="text-sm text-muted mt-1">
-          Predicted retention is below {Math.round(review.minRetention * 100)}% (or will be within {review.horizonDays} days).
-          A quick re-solve resets the forgetting curve.
+          You are starting to forget these topics: their memory score is below {Math.round(review.minRetention * 100)}%,
+          or will be within {review.horizonDays} days. Solving one problem again brings it back up.
         </p>
       </div>
       <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 stagger">
@@ -109,7 +109,7 @@ function ReviewQueue({ review }) {
                 <p className="font-medium text-ink">{it.name}</p>
                 <p className="text-xs text-muted mt-0.5">
                   {it.status === 'DUE' ? 'Due now' : `Due in ${it.dueInDays < 1 ? 'under a day' : `${Math.round(it.dueInDays)} day${Math.round(it.dueInDays) === 1 ? '' : 's'}`}`}
-                  {' · '}retention {pct(it.predictedRetention)}
+                  {' · '}memory score {pct(it.predictedRetention)}
                 </p>
               </div>
               <span className={`shrink-0 inline-flex items-center h-6 px-2.5 rounded-full border text-[11px] font-medium

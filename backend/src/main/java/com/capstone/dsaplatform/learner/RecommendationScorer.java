@@ -81,27 +81,40 @@ public final class RecommendationScorer {
         return 1 - Math.abs(problem.getWeight() - target.getWeight()) / 2.0;
     }
 
+    /** Why this problem is suggested, in plain words for a beginner (the numbers are the ones used for ranking). */
     static String reason(Candidate c, double minRetention) {
         StringBuilder sb = new StringBuilder();
         if (c.retention() == null) {
-            sb.append(c.topicName()).append(" is unlocked and not yet attempted.");
+            sb.append("You have not tried ").append(c.topicName()).append(" yet.");
         } else {
-            sb.append(String.format(Locale.ROOT, "%s retention is %.2f with %d correct and %d wrong.",
-                    c.topicName(), c.retention(), c.correctCount(), c.wrongCount()));
+            sb.append(String.format(Locale.ROOT, "Your memory score in %s is %d%% (%d solved, %d wrong).",
+                    c.topicName(), Math.round(c.retention() * 100), c.correctCount(), c.wrongCount()));
         }
         if (c.alreadyAccepted()) {
-            sb.append(" You solved this before, but retention is below ").append(minRetention).append(", so it is worth redoing.");
+            sb.append(String.format(Locale.ROOT,
+                    " You solved this one before, but your memory score is under %d%%, so solving it again will refresh it.",
+                    Math.round(minRetention * 100)));
         }
         Difficulty target = targetDifficulty(c.correctCount());
         if (c.difficulty() == target) {
-            sb.append(' ').append(c.difficulty()).append(" matches your current level in this topic.");
+            sb.append(' ').append(level(c.difficulty())).append(" problems are the right level for you here.");
         } else {
-            sb.append(" Your target level here is ").append(target).append("; this one is ").append(c.difficulty()).append('.');
+            sb.append(' ').append(level(target)).append(" problems suit you best here right now; this one is ")
+                    .append(level(c.difficulty()).toLowerCase(Locale.ROOT)).append('.');
         }
         if (!c.gatedTopicNames().isEmpty()) {
-            sb.append(" It gates ").append(joinNames(c.gatedTopicNames())).append('.');
+            sb.append(" Getting good at ").append(c.topicName()).append(" opens up ")
+                    .append(joinNames(c.gatedTopicNames())).append('.');
         }
         return sb.toString();
+    }
+
+    private static String level(Difficulty d) {
+        return switch (d) {
+            case EASY -> "Easy";
+            case MEDIUM -> "Medium";
+            case HARD -> "Hard";
+        };
     }
 
     // "A", "A and B", "A, B and C"

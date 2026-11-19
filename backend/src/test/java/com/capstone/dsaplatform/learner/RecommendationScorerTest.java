@@ -62,7 +62,7 @@ class RecommendationScorerTest {
                 candidate(3, Difficulty.EASY, true, 3, 1, 0.6, true)),  // exactly 0.6 is not "below" -> skip
                 0.6, 5);
         assertEquals(List.of(2L), ranked.stream().map(s -> s.candidate().problemId()).toList());
-        assertTrue(ranked.get(0).reason().contains("solved this before"));
+        assertTrue(ranked.get(0).reason().contains("solved this one before"));
     }
 
     @Test
@@ -86,12 +86,13 @@ class RecommendationScorerTest {
     @Test
     void reasonIsBuiltFromTheNumbers() {
         String reason = RecommendationScorer.reason(candidate(1, Difficulty.EASY, true, 2, 4, 0.41, false), 0.6);
-        assertEquals("Two Pointers retention is 0.41 with 2 correct and 4 wrong. "
-                + "Your target level here is MEDIUM; this one is EASY. It gates Sliding Window.", reason);
+        assertEquals("Your memory score in Two Pointers is 41% (2 solved, 4 wrong). "
+                + "Medium problems suit you best here right now; this one is easy. "
+                + "Getting good at Two Pointers opens up Sliding Window.", reason);
 
         Candidate fresh = new Candidate(9L, "Reverse a Linked List", 6L, "LinkedList", Difficulty.EASY, true,
                 0, 0, null, false, List.of("Trees"));
-        assertEquals("LinkedList is unlocked and not yet attempted. EASY matches your current level in this topic. "
-                + "It gates Trees.", RecommendationScorer.reason(fresh, 0.6));
+        assertEquals("You have not tried LinkedList yet. Easy problems are the right level for you here. "
+                + "Getting good at LinkedList opens up Trees.", RecommendationScorer.reason(fresh, 0.6));
     }
 }

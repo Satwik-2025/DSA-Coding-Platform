@@ -517,6 +517,10 @@ function Block({ title, children, mono }) {
   )
 }
 
+// Test kinds in plain words: examples, unusual inputs, inputs at the limits, and one very big input.
+const TEST_NAME = { SAMPLE: 'example', EDGE: 'special case', BOUNDARY: 'limit', LARGE: 'big input' }
+const TEST_KIND = { SAMPLE: 'an example', EDGE: 'a special-case', BOUNDARY: 'a limit', LARGE: 'the big-input' }
+
 // Renders POST /api/submissions response (CONTRACT.md 5.1).
 function SubmissionResult({ r }) {
   const category = r.errorCategory && ERROR_CATEGORY[r.errorCategory]
@@ -582,7 +586,7 @@ function SubmissionResult({ r }) {
 
       {ft && (
         <div className="text-sm space-y-2">
-          <p className="text-muted">First problem on {ft.tag.toLowerCase()} test #{ft.ordinal}.</p>
+          <p className="text-muted">It first went wrong on {TEST_KIND[ft.tag] ?? 'a'} test (test #{ft.ordinal}).</p>
           {/* Only SAMPLE tests carry data; hidden tests come back null on purpose so they can't be copied. */}
           {ft.input != null && (
             <div className="grid sm:grid-cols-3 gap-2">
@@ -596,15 +600,15 @@ function SubmissionResult({ r }) {
 
       {r.testResults.length > 0 && (
         <div>
-          <h3 className="eyebrow mb-2">Every test, in run order</h3>
+          <h3 className="eyebrow mb-2">Every test, in the order they ran</h3>
           <ul className="flex flex-wrap gap-1.5 stagger">
             {r.testResults.map((t) => (
               <li key={t.ordinal}
-                title={`${t.tag} #${t.ordinal}: ${t.verdict} in ${t.runtimeMs} ms`}
+                title={`${TEST_NAME[t.tag] ?? t.tag} test #${t.ordinal}: ${t.verdict === 'ACCEPTED' ? 'passed' : 'failed'} in ${t.runtimeMs} ms`}
                 className={`inline-flex items-center gap-1.5 h-7 px-2.5 rounded-lg border text-xs tabular-nums
                   ${t.verdict === 'ACCEPTED' ? 'bg-moss-soft text-moss border-moss/20' : 'bg-brick-soft text-brick border-brick/20'}`}>
                 <span className="h-1.5 w-1.5 rounded-full bg-current" aria-hidden="true" />
-                {t.tag.toLowerCase()} {t.ordinal}: {t.runtimeMs} ms
+                {TEST_NAME[t.tag] ?? t.tag} {t.ordinal}: {t.runtimeMs} ms
               </li>
             ))}
           </ul>
@@ -612,7 +616,7 @@ function SubmissionResult({ r }) {
       )}
 
       {r.largeRuntimeMs != null && r.optimalRuntimeMs != null && (
-        <p className="text-sm text-muted">Largest input took {r.largeRuntimeMs} ms; reference solution takes about {r.optimalRuntimeMs} ms.</p>
+        <p className="text-sm text-muted">Your code took {r.largeRuntimeMs} ms on the biggest input; a fast solution takes about {r.optimalRuntimeMs} ms.</p>
       )}
 
       {r.resources.length > 0 && (

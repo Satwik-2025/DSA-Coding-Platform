@@ -633,15 +633,15 @@ phase; this phase fixes only the shape.
     { "problemId": 15, "title": "Remove Duplicates from Sorted Array",
       "topicId": 3, "topicName": "Two Pointers", "difficulty": "EASY",
       "score": 0.82,
-      "reason": "Two Pointers retention is 0.41; it must reach 0.6 to unlock Sliding Window." },
+      "reason": "Your memory score in Two Pointers is 41% (2 solved, 4 wrong). Medium problems suit you best here right now; this one is easy. Getting good at Two Pointers opens up Sliding Window." },
     { "problemId": 7, "title": "Reverse Words in a String",
       "topicId": 2, "topicName": "Strings", "difficulty": "MEDIUM",
       "score": 0.74,
-      "reason": "Strings retention is 0.55 and it gates HashMap, Stack and Sliding Window." },
+      "reason": "Your memory score in Strings is 55% (3 solved, 1 wrong). Medium problems are the right level for you here. Getting good at Strings opens up Sliding Window, HashMap and Stack." },
     { "problemId": 21, "title": "Reverse a Linked List",
       "topicId": 6, "topicName": "LinkedList", "difficulty": "EASY",
       "score": 0.6,
-      "reason": "LinkedList is unlocked and not yet attempted; it gates Trees." }
+      "reason": "You have not tried LinkedList yet. Easy problems are the right level for you here. Getting good at LinkedList opens up Trees." }
   ]
 }
 ```

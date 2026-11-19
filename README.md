@@ -146,7 +146,7 @@ held-out learners. See `ml/README.md`.
 
 ```bash
 cd backend && mvn test        # 81 tests
-cd frontend && npm test       # 27 tests
+cd frontend && npm test       # 29 tests
 python ml/train_hlr.py --simulate 400 --out /tmp/w.json   # trainer self-check
 ```
 
@@ -214,6 +214,11 @@ All endpoints are under `/api`; full shapes are in `docs/CONTRACT.md` section 5.
   shows a loading state; a slow older request can never overwrite a newer result.
 - **Learn This Topic:** every problem has a tab with its key idea, two YouTube videos (playable in
   the page or on YouTube) and two GeeksforGeeks articles, all chosen for that problem and checked.
+- **Plain words everywhere:** "memory score" instead of retention, "memory halves in about N days"
+  instead of half-life, plain mistake names, test kinds and recommendation reasons; the model's
+  technical details are kept behind a "Technical details" link on the Topic map.
+- **Mock interview results** appear only on the Mock interview page; other pages show just the
+  countdown while an interview is running.
 - **Problem page workspace:** the header, Run and Submit stay put; only the editor (and, separately,
   the description and the results) scroll. The editor starts empty on every visit; code is no
   longer saved in the browser, and copies saved by older versions are removed.

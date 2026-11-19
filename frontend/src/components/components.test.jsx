@@ -109,3 +109,25 @@ describe('LearnTopic', () => {
     expect(document.querySelector('iframe').getAttribute('src')).toBe(`${learn.videos[0].embedUrl}?autoplay=1&rel=0`)
   })
 })
+
+describe('MockBanner', async () => {
+  const { MemoryRouter } = await import('react-router-dom')
+  const { default: MockBanner } = await import('./MockBanner.jsx')
+  const session = (endedAt) => ({ id: 1, problemIds: [5], durationMin: 30, difficulty: 'MIXED', startedAt: Date.now() - 60_000,
+    endedAt, results: { 5: { attempts: 1, solved: false, solvedAt: null, lastVerdict: 'WRONG_ANSWER' } } })
+  const show = (path) => render(<MemoryRouter initialEntries={[path]}><MockBanner userId={1} /></MemoryRouter>)
+
+  it('shows the clock on other pages while the interview runs', () => {
+    localStorage.setItem('mock:1', JSON.stringify(session(null)))
+    show('/problems/5')
+    expect(screen.getByRole('status').textContent).toContain('left')
+    localStorage.removeItem('mock:1')
+  })
+
+  it('keeps a finished interview\'s result off every page except Mock interview', () => {
+    localStorage.setItem('mock:1', JSON.stringify(session(Date.now())))
+    const { container } = show('/problems/5')
+    expect(container.textContent).toBe('')
+    localStorage.removeItem('mock:1')
+  })
+})

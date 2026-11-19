@@ -18,7 +18,8 @@ export default function Mistakes() {
   return (
     <div className="space-y-8">
       <PageHeader eyebrow="Insights" title="Mistakes">
-        Every failed submission is classified into one mistake type. {totalErrorEvents} so far.
+        Each time a submission fails, we note what kind of mistake it was, so you can see your habits and
+        fix them. {totalErrorEvents} so far.
       </PageHeader>
 
       {categories.length === 0 ? (
