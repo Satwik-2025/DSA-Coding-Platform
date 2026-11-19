@@ -65,6 +65,7 @@ export default function CodeEditor({ value, onChange, language = 'JAVA', readOnl
 
   return (
     <CodeMirror
+      className="h-full"
       value={value}
       onChange={onChange}
       extensions={extensions}

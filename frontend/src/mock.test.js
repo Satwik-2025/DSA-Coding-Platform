@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest'
-import { clearDraft, loadDraft, saveDraft } from './drafts.js'
+import { forgetSavedCode, preferredLanguage, setPreferredLanguage } from './drafts.js'
 import { clearMock, endMock, isActive, pickProblems, recordSubmission, startMock } from './mock.js'
 
 const read = () => JSON.parse(localStorage.getItem('mock:1'))
@@ -64,16 +64,18 @@ describe('mock interviews', () => {
   })
 })
 
-describe('drafts', () => {
+describe('saved code', () => {
   beforeEach(() => localStorage.clear())
 
-  it('keeps one draft per learner, problem and language', () => {
-    saveDraft(1, 5, 'JAVA', 'java code')
-    saveDraft(1, 5, 'PYTHON', 'python code')
-    expect(loadDraft(1, 5, 'JAVA')).toBe('java code')
-    expect(loadDraft(1, 5, 'PYTHON')).toBe('python code')
-    expect(loadDraft(2, 5, 'JAVA')).toBeNull()
-    clearDraft(1, 5, 'JAVA')
-    expect(loadDraft(1, 5, 'JAVA')).toBeNull()
+  it('removes code saved by older versions and keeps everything else', () => {
+    localStorage.setItem('draft:1:5:JAVA', 'old java code')
+    localStorage.setItem('draft:2:7:PYTHON', 'old python code')
+    localStorage.setItem('theme', 'dark')
+    setPreferredLanguage('PYTHON')
+    forgetSavedCode()
+    expect(localStorage.getItem('draft:1:5:JAVA')).toBeNull()
+    expect(localStorage.getItem('draft:2:7:PYTHON')).toBeNull()
+    expect(localStorage.getItem('theme')).toBe('dark')
+    expect(preferredLanguage()).toBe('PYTHON')
   })
 })

@@ -15,7 +15,7 @@ for review, and how ready they are for interviews.
 | Area | What it does |
 |---|---|
 | Problems | 31 problems over a 10-topic prerequisite graph (at least one easy, medium and hard in every topic), with statements and samples. The editor starts empty: you write the whole program in Java, Python or C++ |
-| Code editor | CodeMirror with syntax highlighting, line numbers, bracket matching, search and auto-indent; drafts are auto-saved per problem and language |
+| Code editor | CodeMirror with syntax highlighting, line numbers, bracket matching, search and auto-indent. Every visit to a problem starts with an empty editor (nothing is saved or restored; earlier submissions can be loaded from the Submissions tab). On laptops and larger the problem page is a one-screen workspace: the description, the code and the results each scroll on their own, so long code never moves the page |
 | Run | Try code on the examples or your own input, with output, stderr and time per case, without it counting as an attempt |
 | Judging | Every test in its own process inside a sandbox; a bounded judge queue shows "In queue #2" then "Running test 3 of 7" |
 | Sandbox | Local: Java under a deny-all security manager, Python under an audit-hook guard, empty environment, process-tree kill. Docker: one locked-down container per run (no network, read-only, CPU / memory / process limits) |
@@ -215,6 +215,9 @@ All endpoints are under `/api`; full shapes are in `docs/CONTRACT.md` section 5.
 - **Beginner-friendly Readiness page** and a gap shown as "points ahead / behind" instead of +19 / -20.8.
 - **Locked problems** ask you to practise first, with a way through.
 - **GeeksforGeeks links** open the real topic tutorial instead of a Google search.
+- **Problem page workspace:** the header, Run and Submit stay put; only the editor (and, separately,
+  the description and the results) scroll. The editor starts empty on every visit; code is no
+  longer saved in the browser, and copies saved by older versions are removed.
 - **Full audit fixes:** parallel submissions or ratings of the same learner can no longer
   overwrite each other or fail; a judge job that hits a Java `Error` no longer stays "running"
   forever; Run checks the learner exists (the rate limit could be dodged); a rating of 2.5 is

@@ -63,7 +63,7 @@ The learner switcher in the sidebar (or the mobile menu) uses `GET /api/users` (
     src/components/CodeEditor.jsx    CodeMirror editor with theme-aware syntax colours
     src/components/ActivityHeatmap.jsx  submissions-per-day calendar and streaks
     src/components/MockBanner.jsx    time-left bar shown while a mock interview runs
-    src/drafts.js                    auto-saved code per learner, problem and language
+    src/drafts.js                    remembered language; removes code saved by older versions
     src/mock.js                      mock interview state (localStorage) and problem picking
     src/components/ThemeToggle.jsx   dark/light switch
     src/components/Icons.jsx         inline SVG icons

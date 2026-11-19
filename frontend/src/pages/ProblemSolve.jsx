@@ -5,7 +5,7 @@ import { api, submitAndWait } from '../api.js'
 import { useApi } from '../useApi.js'
 import { useUser } from '../UserContext.jsx'
 import { ERROR_CATEGORY, dateTime } from '../format.js'
-import { clearDraft, loadDraft, preferredLanguage, saveDraft, setPreferredLanguage } from '../drafts.js'
+import { forgetSavedCode, preferredLanguage, setPreferredLanguage } from '../drafts.js'
 import { isActive, recordSubmission, useMock } from '../mock.js'
 import { DifficultyBadge, VerdictBadge } from '../components/Badges.jsx'
 import CodeEditor from '../components/CodeEditor.jsx'
@@ -43,7 +43,9 @@ export default function ProblemSolve() {
 
   const [preferred, setPreferred] = useState(preferredLanguage)
   const [code, setCode] = useState('')
-  const [savedAt, setSavedAt] = useState(null)
+  // Code per language for this visit only (switching Java -> Python -> Java keeps the Java code).
+  // Nothing is stored: leaving the problem and coming back always starts with an empty editor.
+  const codeByLanguage = useRef({})
   const [leftTab, setLeftTab] = useState('description')
   const [historyVersion, setHistoryVersion] = useState(0)
   const [notice, setNotice] = useState(null)
@@ -77,14 +79,14 @@ export default function ProblemSolve() {
   const inMock = Boolean(p && isActive(mock) && mock.problemIds.includes(p.id))
   const gated = Boolean(topicNode && !topicNode.unlocked && proceededWith !== p.id && !inMock)
 
-  // New problem or language: restore the saved draft, otherwise start with an empty editor.
-  useEffect(() => {
-    if (p) setCode(loadDraft(userId, p.id, language) ?? '')
-  }, [p?.id, language, userId]) // eslint-disable-line react-hooks/exhaustive-deps
+  // Older versions saved code in the browser and restored it; remove those copies once.
+  useEffect(() => { forgetSavedCode() }, [])
 
-  // New problem: clear old results and restart the clock.
+  // New problem (or another learner): an empty editor, no results, and a fresh clock.
   useEffect(() => {
     if (!p) return
+    codeByLanguage.current = {}
+    setCode('')
     setResult(null)
     setRunResult(null)
     setRunError(null)
@@ -93,18 +95,7 @@ export default function ProblemSolve() {
     setConsoleTab('tests')
     setCustomInput(p.sampleTests[0]?.input ?? '')
     openedAt.current = Date.now()
-  }, [p?.id]) // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Auto-save half a second after typing stops. Only code is a dependency: problem / language changes
-  // first load the right code, and only then is it saved under the new key.
-  useEffect(() => {
-    if (!p) return undefined
-    const t = setTimeout(() => {
-      if (!code.trim()) clearDraft(userId, p.id, language)
-      else if (saveDraft(userId, p.id, language, code)) setSavedAt(Date.now())
-    }, 500)
-    return () => clearTimeout(t)
-  }, [code]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [p?.id, userId]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Keyboard shortcuts call the latest handlers through refs, so the editor never needs re-creating.
   const runRef = useRef(null)
@@ -183,8 +174,11 @@ export default function ProblemSolve() {
   submitRef.current = submit
 
   function changeLanguage(next) {
+    if (next === language) return
+    codeByLanguage.current[language] = code
     setPreferred(next)
     setPreferredLanguage(next)
+    setCode(codeByLanguage.current[next] ?? '')
   }
 
   function editCode(next) {
@@ -192,25 +186,31 @@ export default function ProblemSolve() {
     if (notice) setNotice(null)
   }
 
+  // Only when the learner asks for it: put an earlier submission back into the editor.
   function loadFromHistory(item) {
-    changeLanguage(item.language)
-    // The draft effect would load the stored draft for that language; write this code there first.
-    saveDraft(userId, p.id, item.language, item.code)
-    if (item.language === language) setCode(item.code)
+    codeByLanguage.current[language] = code
+    codeByLanguage.current[item.language] = item.code
+    setPreferred(item.language)
+    setPreferredLanguage(item.language)
+    setCode(item.code)
   }
 
   function clearCode() {
-    if (code.trim() && !window.confirm('Clear the editor? Your code for this problem will be deleted.')) return
-    clearDraft(userId, p.id, language)
+    if (code.trim() && !window.confirm('Clear the editor? The code you wrote will be removed.')) return
+    codeByLanguage.current[language] = ''
     setCode('')
   }
 
   const busyNow = running || submitting
 
   return (
-    <div className="space-y-6">
+    // From lg up the page is a fixed workspace exactly one screen tall: the header row stays put and
+    // the description, the code and the results each scroll inside their own panel, so long code never
+    // moves the page. Below lg the panels stack and the page scrolls as usual (the editor keeps a fixed
+    // height and scrolls inside). 4.5rem = Layout's top + bottom padding on problem pages.
+    <div className="space-y-6 lg:space-y-0 lg:flex lg:flex-col lg:gap-5 lg:h-[calc(100dvh-4.5rem)] lg:min-h-[34rem]">
       {/* z-30 keeps the timer panel above the glass cards below it. */}
-      <div className="relative z-30 flex items-center justify-between gap-3">
+      <div className="relative z-30 flex items-center justify-between gap-3 lg:shrink-0">
         <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-xs text-faint min-w-0">
           <Link to="/problems" className="hover:text-ink transition-colors shrink-0">Problems</Link>
           <IconChevronRight size={13} className="shrink-0" />
@@ -220,9 +220,9 @@ export default function ProblemSolve() {
       </div>
 
       {/* Editor column is the wider one (55% on laptops, 60% on large screens). */}
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,9fr)_minmax(0,11fr)] xl:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] items-start">
-        <section className="glass rounded-2xl min-w-0 overflow-hidden">
-          <div className="flex items-center gap-1 px-3 h-12 border-b border-line" role="tablist">
+      <div className="grid gap-6 items-start lg:items-stretch lg:flex-1 lg:min-h-0 lg:grid-cols-[minmax(0,9fr)_minmax(0,11fr)] xl:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+        <section className="glass rounded-2xl min-w-0 overflow-hidden lg:flex lg:flex-col lg:min-h-0">
+          <div className="flex items-center gap-1 px-3 h-12 border-b border-line shrink-0" role="tablist">
             {[['description', 'Description'], ['submissions', 'Submissions']].map(([key, label]) => (
               <button key={key} role="tab" aria-selected={leftTab === key} onClick={() => setLeftTab(key)}
                 className={`h-8 px-3 rounded-lg text-xs font-medium transition-colors
@@ -231,22 +231,23 @@ export default function ProblemSolve() {
               </button>
             ))}
           </div>
-          {leftTab === 'description'
-            ? <Description p={p} />
-            : <SubmissionHistory key={historyVersion} userId={userId} problemId={p.id} onLoad={loadFromHistory} />}
+          <div className="lg:flex-1 lg:min-h-0 lg:overflow-y-auto lg:overscroll-contain">
+            {leftTab === 'description'
+              ? <Description p={p} />
+              : <SubmissionHistory key={historyVersion} userId={userId} problemId={p.id} onLoad={loadFromHistory} />}
+          </div>
         </section>
 
-        <section className="space-y-4 min-w-0">
-          <div className="glass rounded-2xl overflow-hidden relative z-20">
+        <section className="space-y-4 min-w-0 lg:space-y-0 lg:flex lg:flex-col lg:gap-4 lg:min-h-0">
+          <div className="glass rounded-2xl overflow-hidden relative z-20 lg:flex lg:flex-col lg:flex-1 lg:min-h-[15rem]">
             {/* Run and Submit live in the top bar, so they are on screen at every screen size. */}
-            <div className="flex flex-wrap items-center justify-between gap-2 px-3 py-2 min-h-12 border-b border-line">
+            <div className="flex flex-wrap items-center justify-between gap-2 px-3 py-2 min-h-12 border-b border-line shrink-0">
               <div className="flex items-center gap-2 min-w-0">
                 <Select className="w-32 sm:w-36" value={language} onChange={changeLanguage} ariaLabel="Language"
                   options={available.map((l) => ({ value: l.id, label: l.name }))} />
                 <span className="hidden sm:inline-flex items-center h-7 px-3 rounded-lg bg-sunken border border-line font-mono text-xs text-ink">
                   {FILE[language]}
                 </span>
-                {savedAt && code.trim() && <span className="hidden xl:inline text-[11px] text-faint">Draft saved</span>}
               </div>
               <div className="flex flex-wrap items-center justify-end gap-2 ml-auto">
                 <button type="button" onClick={clearCode} disabled={busyNow || !code}
@@ -266,14 +267,17 @@ export default function ProblemSolve() {
               </div>
             </div>
             {notice && (
-              <p role="alert" className="px-4 py-2 text-sm text-amber bg-amber-soft border-b border-amber/20">{notice}</p>
+              <p role="alert" className="px-4 py-2 text-sm text-amber bg-amber-soft border-b border-amber/20 shrink-0">{notice}</p>
             )}
-            <div className="h-[420px] sm:h-[480px] lg:h-[clamp(420px,calc(100dvh-15rem),900px)]">
+            {/* Fixed height: long code scrolls inside the editor instead of making the page taller. */}
+            <div className="h-[420px] sm:h-[480px] lg:h-auto lg:flex-1 lg:min-h-0">
               <CodeEditor value={code} onChange={editCode} language={language} onRun={stableRun} onSubmit={stableSubmit}
                 placeholder={PLACEHOLDER[language]} />
             </div>
           </div>
 
+          {/* Test input, run output and the verdict share one panel that scrolls on its own. */}
+          <div className="space-y-4 lg:h-[36%] lg:[@media(max-height:760px)]:h-[30%] lg:shrink-0 lg:overflow-y-auto lg:overscroll-contain lg:rounded-2xl">
           <div ref={consoleRef} className="scroll-mt-6">
             <Console
               tab={consoleTab} setTab={setConsoleTab} samples={p.sampleTests}
@@ -285,6 +289,7 @@ export default function ProblemSolve() {
           <div ref={resultRef} className="scroll-mt-6 space-y-4">
             {submitError && <ErrorBox error={submitError} />}
             {result && <SubmissionResult key={result.attemptId} r={result} />}
+          </div>
           </div>
         </section>
       </div>
@@ -411,7 +416,7 @@ function Console({ tab, setTab, samples, customOn, setCustomOn, customInput, set
           Runs are not saved<span className="hidden md:inline"> · <kbd className="font-mono">Ctrl+&apos;</kbd> run · <kbd className="font-mono">Ctrl+Enter</kbd> submit</span>
         </span>
       </div>
-      <div className="p-4 max-h-96 overflow-auto">
+      <div className="p-4 max-h-96 lg:max-h-none overflow-auto">
         {tab === 'tests' ? (
           <div className="space-y-3">
             <label className="flex items-center gap-2 text-sm text-ink cursor-pointer w-fit">
