@@ -17,7 +17,7 @@ import java.util.stream.Stream;
  * One throw-away container per compile / test run:
  * --network none, --read-only root filesystem, a small writable /tmp, memory + swap cap,
  * CPU cap, process-count cap, all Linux capabilities dropped, no privilege escalation, and an
- * unprivileged user. The submission folder is mounted read-only (read-write only while C++ compiles).
+ * unprivileged user. The submission folder is mounted read-only.
  *
  * Timing is measured inside the container by a tiny shell wrapper (so container start-up is not
  * counted against the learner), which also reports the cgroup's peak memory where available.
@@ -44,11 +44,6 @@ public class DockerSandbox implements Sandbox {
     }
 
     @Override
-    public boolean isolatesNativeCode() {
-        return true;
-    }
-
-    @Override
     public boolean supports(Language language) {
         return true;
     }
@@ -57,7 +52,7 @@ public class DockerSandbox implements Sandbox {
     public ExecResult run(Language language, Stage stage, Path workDir, String stdin, long timeLimitMs) {
         String container = "dsa-run-" + UUID.randomUUID();
         List<String> command = command(language, stage, workDir, container, timeLimitMs);
-        openPermissions(workDir, stage == Stage.COMPILE && language == Language.CPP);
+        openPermissions(workDir);
 
         // The outer limit adds start-up time; the inner `timeout` enforces the learner's real limit.
         ExecResult outer = ProcessExec.run(command, workDir, null, stdin,
@@ -72,7 +67,6 @@ public class DockerSandbox implements Sandbox {
 
     /** The full `docker run` command line; package-private so tests can check every isolation flag. */
     List<String> command(Language language, Stage stage, Path workDir, String container, long timeLimitMs) {
-        boolean writable = stage == Stage.COMPILE && language == Language.CPP;
         List<String> c = new ArrayList<>(List.of(
                 settings.dockerCommand, "run", "--rm", "-i", "--name", container,
                 "--network", "none",
@@ -83,7 +77,7 @@ public class DockerSandbox implements Sandbox {
                 "--cap-drop", "ALL", "--security-opt", "no-new-privileges",
                 "--user", "65534:65534",
                 "-e", "LIMIT=" + String.format(Locale.ROOT, "%.3fs", timeLimitMs / 1000.0),
-                "-v", workDir.toAbsolutePath() + ":/work:" + (writable ? "rw" : "ro"),
+                "-v", workDir.toAbsolutePath() + ":/work:ro",
                 "-w", "/work",
                 image(language),
                 "sh", "-c", WRAPPER, "sh"));
@@ -95,7 +89,6 @@ public class DockerSandbox implements Sandbox {
         return switch (language) {
             case JAVA -> settings.dockerJavaImage;
             case PYTHON -> settings.dockerPythonImage;
-            case CPP -> settings.dockerCppImage;
         };
     }
 
@@ -105,9 +98,6 @@ public class DockerSandbox implements Sandbox {
             case PYTHON -> stage == Stage.COMPILE
                     ? List.of("python3", "-I", "-S", "-B", "-X", "utf8", "-c", LocalSandbox.PYTHON_CHECK, "/work/Main.py")
                     : List.of("python3", "-I", "-S", "-B", "-X", "utf8", "/work/Main.py");
-            case CPP -> stage == Stage.COMPILE
-                    ? List.of("g++", "-std=c++17", "-O2", "-pipe", "-o", "/work/main", "/work/main.cpp")
-                    : List.of("/work/main");
         };
     }
 
@@ -139,14 +129,12 @@ public class DockerSandbox implements Sandbox {
         }
     }
 
-    /** The container runs as "nobody", so the bind-mounted folder must be readable (and writable to build C++). */
-    private static void openPermissions(Path workDir, boolean writable) {
+    /** The container runs as "nobody", so the bind-mounted folder must be readable by everyone. */
+    private static void openPermissions(Path workDir) {
         try (Stream<Path> paths = Files.walk(workDir)) {
             paths.forEach(p -> {
                 try {
-                    // Execute bit on files too: the compiled C++ binary must stay runnable.
-                    String perms = writable ? "rwxrwxrwx" : "rwxr-xr-x";
-                    Files.setPosixFilePermissions(p, PosixFilePermissions.fromString(perms));
+                    Files.setPosixFilePermissions(p, PosixFilePermissions.fromString("rwxr-xr-x"));
                 } catch (UnsupportedOperationException | IOException ignored) {
                     // Non-POSIX file system (Windows host): Docker Desktop handles access itself.
                 }

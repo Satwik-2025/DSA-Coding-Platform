@@ -23,9 +23,12 @@ public class ProblemService {
 
     private final ProblemRepository problems;
     private final TestCaseRepository testCases;
-    public ProblemService(ProblemRepository problems, TestCaseRepository testCases) {
+    private final LearnCatalog learnCatalog;
+
+    public ProblemService(ProblemRepository problems, TestCaseRepository testCases, LearnCatalog learnCatalog) {
         this.problems = problems;
         this.testCases = testCases;
+        this.learnCatalog = learnCatalog;
     }
 
     /** Both filters optional; ordered by topic id, then difficulty (EASY first), then id. */
@@ -55,6 +58,7 @@ public class ProblemService {
         return new ProblemDetail(p.getId(), p.getTitle(), p.getSlug(),
                 new TopicRef(p.getTopic().getId(), p.getTopic().getName()), p.getDifficulty(),
                 p.getStatement(), p.getInputFormat(), p.getOutputFormat(),
-                p.getTimeLimitMs(), p.getTargetSolveSeconds(), samples, tests.size());
+                p.getTimeLimitMs(), p.getTargetSolveSeconds(), samples, tests.size(),
+                learnCatalog.forSlug(p.getSlug()));
     }
 }

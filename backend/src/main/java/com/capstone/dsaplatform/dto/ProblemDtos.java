@@ -31,6 +31,19 @@ public final class ProblemDtos {
                                 Integer timeLimitMs,
                                 Integer targetSolveSeconds,
                                 List<SampleTestView> sampleTests,
-                                long testCount) {
+                                long testCount,
+                                // "Learn This Topic": videos and reading for the concept this problem needs.
+                                LearnResources learn) {
+    }
+
+    public record LearnVideo(String title, String channel, String youtubeId, String watchUrl, String embedUrl,
+                             String thumbnailUrl, String about) {
+    }
+
+    public record LearnReading(String title, String site, String url, String about) {
+    }
+
+    // concept: the main idea the problem needs, e.g. "Monotonic stack".
+    public record LearnResources(String concept, List<LearnVideo> videos, List<LearnReading> reading) {
     }
 }

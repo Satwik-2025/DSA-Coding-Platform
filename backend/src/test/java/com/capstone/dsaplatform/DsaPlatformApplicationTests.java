@@ -2,7 +2,11 @@ package com.capstone.dsaplatform;
 
 import com.capstone.dsaplatform.domain.ErrorCategory;
 import com.capstone.dsaplatform.domain.ResourceSource;
+import com.capstone.dsaplatform.dto.ProblemDtos.LearnReading;
+import com.capstone.dsaplatform.dto.ProblemDtos.LearnResources;
+import com.capstone.dsaplatform.dto.ProblemDtos.LearnVideo;
 import com.capstone.dsaplatform.dto.ResourceLink;
+import com.capstone.dsaplatform.service.LearnCatalog;
 import com.capstone.dsaplatform.service.ResourceService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +38,9 @@ class DsaPlatformApplicationTests {
 
     @Autowired
     private ResourceService resourceService;
+
+    @Autowired
+    private LearnCatalog learnCatalog;
 
     @Test
     void contextLoads() {
@@ -89,6 +96,34 @@ class DsaPlatformApplicationTests {
         assertThat(slow).extracting(ResourceLink::url).contains(
                 "https://www.geeksforgeeks.org/dsa/dynamic-programming/",
                 "https://www.geeksforgeeks.org/dsa/understanding-time-complexity-simple-examples/");
+    }
+
+    @Test
+    void everyProblemHasItsOwnVideosAndReading() {
+        List<String> slugs = jdbc.queryForList("SELECT slug FROM problems", String.class);
+        java.util.Set<String> firstVideos = new java.util.HashSet<>();
+        for (String slug : slugs) {
+            LearnResources learn = learnCatalog.forSlug(slug);
+            assertThat(learnCatalog.covers(slug)).as(slug).isTrue();
+            assertThat(learn.concept()).as(slug).isNotBlank();
+            assertThat(learn.videos()).as(slug).hasSizeGreaterThanOrEqualTo(2);
+            assertThat(learn.reading()).as(slug).hasSizeGreaterThanOrEqualTo(2);
+            for (LearnVideo v : learn.videos()) {
+                assertThat(v.youtubeId()).as(slug).matches("[A-Za-z0-9_-]{11}");
+                assertThat(v.title()).as(slug).isNotBlank();
+                assertThat(v.channel()).as(slug).isNotBlank();
+                assertThat(v.embedUrl()).isEqualTo("https://www.youtube-nocookie.com/embed/" + v.youtubeId());
+            }
+            for (LearnReading r : learn.reading()) {
+                // A direct article, never a home page or a search page.
+                assertThat(r.url()).as(slug).matches("https://www\\.geeksforgeeks\\.org/dsa/[a-z0-9-]+/");
+                assertThat(r.about()).as(slug).isNotBlank();
+            }
+            firstVideos.add(learn.videos().get(0).youtubeId());
+        }
+        // Context-aware: problems do not all share the same main video (only 4-lists reuses Two Sum's, on purpose).
+        assertThat(firstVideos).hasSizeGreaterThanOrEqualTo(slugs.size() - 2);
+        assertThat(learnCatalog.forSlug("no-such-problem").videos()).isEmpty();
     }
 
     private List<Map.Entry<Long, String>> users() {

@@ -60,7 +60,6 @@ public final class HintGenerator {
                         : "Start with the first compiler error: later errors are often caused by it.");
                 hints.add(switch (language == null ? "JAVA" : language) {
                     case "PYTHON" -> "Check indentation, a missing colon after if / for / def, and unbalanced brackets.";
-                    case "CPP" -> "Check for a missing semicolon or brace, and that every function is declared before it is used.";
                     default -> "Check for a missing semicolon or brace, a misspelled type, and that the class is still called Main.";
                 });
             }

@@ -52,13 +52,9 @@ app:
     sandbox: ${RUNNER_SANDBOX:local}
     # Empty = auto-detect python3 / python (3.8+ needed).
     python-command: ${RUNNER_PYTHON:}
-    cpp-command: ${RUNNER_CPP:g++}
-    # Native C++ cannot be contained by the local sandbox; only enable this for trusted, single-user use.
-    allow-unsandboxed-native: ${RUNNER_ALLOW_UNSANDBOXED_NATIVE:false}
     docker:
       java-image: eclipse-temurin:21-jre
       python-image: python:3.12-slim
-      cpp-image: gcc:13
       memory: 256m
       cpus: 1
       pids-limit: 64

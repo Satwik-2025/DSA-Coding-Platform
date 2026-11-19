@@ -33,7 +33,7 @@ services:
       DB_USER: dsa
       DB_PASSWORD: dsa
       # Submissions run in the hardened local sandbox inside this container (Java security manager,
-      # Python guard). C++ needs the Docker sandbox, which requires the host's Docker daemon; see README.
+      # Python guard).
       RUNNER_SANDBOX: local
       # nginx calls the backend from its own container, so it is not "this computer" to the backend.
       # The backend's port is not published to the host; only nginx can reach it.

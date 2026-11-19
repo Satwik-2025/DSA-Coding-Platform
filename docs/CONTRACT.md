@@ -236,7 +236,7 @@ whoever writes the seed, not by a constraint. Ordinals should follow tag order
 | large_runtime_ms | INTEGER | nullable | Max runtime over LARGE tests |
 | time_spent_seconds | INTEGER | nullable, ≥ 0 | Client-measured, from problem open to submit |
 | submitted_at | TIMESTAMP | NN | |
-| language | VARCHAR(10) | NN, default `JAVA` | `JAVA`, `PYTHON` or `CPP` (added with an idempotent `ALTER TABLE ... ADD COLUMN IF NOT EXISTS`) |
+| language | VARCHAR(10) | NN, default `JAVA` | `JAVA` or `PYTHON` (added with an idempotent `ALTER TABLE ... ADD COLUMN IF NOT EXISTS`). `CPP` may appear on attempts from when C++ was offered; they are kept as history |
 
 Indexes: `(user_id, submitted_at)`.
 
@@ -317,11 +317,11 @@ backend (`learner/`, `runner/` and `service/` packages).
 
 ### 4.1 Submission pipeline
 1. Compile the code **once**: Java with `javac` in-process (annotation processing off, so no
-   learner code runs at compile time), Python with a syntax check, C++ with `g++ -std=c++17 -O2`.
+   learner code runs at compile time), Python with a syntax check. Only Java and Python are supported.
    If compilation fails, the verdict is `COMPILE_ERROR`, no tests run, and `total_count = 0`.
 2. Order the tests by tag (`SAMPLE → EDGE → BOUNDARY → LARGE`), then by `ordinal`.
    Run **every** test in that order, each as its **own** process with `input` on stdin, inside
-   the sandbox. Each process is killed after `time_limit_ms × time factor` (Java and C++ 1×,
+   the sandbox. Each process is killed after `time_limit_ms × time factor` (Java 1×,
    Python 3×; the SUBOPTIMAL threshold `optimal_runtime_ms` is scaled the same way).
 3. **Output comparison:** strip trailing whitespace from each line and drop trailing
    empty lines on both sides, then compare exactly.
@@ -340,13 +340,11 @@ backend (`learner/`, `runner/` and `service/` packages).
    - `local` (default): child processes with an empty environment, a private temp directory and
      process-tree kill. Java runs under a security manager with a deny-all policy (no file,
      network or process access); Python runs in isolated mode under an audit-hook guard with the
-     same restrictions. C++ is refused here (native code cannot be contained) unless
-     `app.runner.allow-unsandboxed-native=true`.
+     same restrictions.
    - `docker`: one container per run with `--network none`, read-only root filesystem, memory /
      CPU / process limits, all capabilities dropped and an unprivileged user. Timing is measured
      inside the container, and peak memory is read from the container's cgroup.
-9. **Index exceptions** for step 3 of §4.2 also include Python's `IndexError` and C++'s
-   `std::out_of_range`.
+9. **Index exceptions** for step 3 of §4.2 also include Python's `IndexError`.
 10. Every execution goes through a bounded **judge queue** (`app.judge.workers` workers,
     `app.judge.max-queued` waiting; a full queue answers 503). The runner reports progress
     per test.
@@ -484,8 +482,9 @@ applicable), updates `topic_state`, and writes a readiness snapshot.
   "timeSpentSeconds": 640
 }
 ```
-`timeSpentSeconds` is optional (nullable). `language` is optional: `JAVA` (default), `PYTHON`
-or `CPP`; it must be one of the languages `GET /api/languages` reports as available.
+`timeSpentSeconds` is optional (nullable). `language` is optional: `JAVA` (default) or `PYTHON`;
+it must be one of the languages `GET /api/languages` reports as available. Anything else, including
+`CPP` (no longer supported), is a 400. The web app always sends the language and defaults to Python.
 
 Responses also carry `language`, `hints` (ordered list of strings, empty when accepted; built
 from the mistake category, topic, first failing test, exception and language),
@@ -834,9 +833,27 @@ hidden ones.
     { "ordinal": 1, "input": "4\n2 7 11 15\n9\n", "expectedOutput": "0 1\n" },
     { "ordinal": 2, "input": "3\n1 2 3\n7\n", "expectedOutput": "-1 -1\n" }
   ],
-  "testCount": 7
+  "testCount": 7,
+  "learn": {
+    "concept": "Two pointers on a sorted array",
+    "videos": [ { "title": "TWO SUM II - Amazon Coding Interview Question - Leetcode 167 - Python",
+                  "channel": "NeetCode", "youtubeId": "cQ1Oz4ckceM",
+                  "watchUrl": "https://www.youtube.com/watch?v=cQ1Oz4ckceM",
+                  "embedUrl": "https://www.youtube-nocookie.com/embed/cQ1Oz4ckceM",
+                  "thumbnailUrl": "https://i.ytimg.com/vi/cQ1Oz4ckceM/hqdefault.jpg",
+                  "about": "Solves the sorted pair-sum problem with two pointers." } ],
+    "reading": [ { "title": "Two Pointers Technique", "site": "GeeksforGeeks",
+                   "url": "https://www.geeksforgeeks.org/dsa/two-pointers-technique/",
+                   "about": "Moving two indexes towards each other on a sorted array; …" } ]
+  }
 }
 ```
+`learn` ("Learn This Topic") comes from `backend/src/main/resources/learn/problem-resources.json`,
+keyed by problem slug: the key idea, two YouTube videos and two articles chosen for that problem.
+Every video was confirmed with YouTube's oEmbed endpoint (exists, may be embedded, title and
+channel) and every article was opened (HTTP 200, title matches). A problem missing from the file
+gets empty lists.
+
 **Errors:** 404 if the problem does not exist.
 
 ### 5.11 Judge jobs: `POST /api/submissions/jobs`, `GET /api/submissions/jobs/{jobId}`
@@ -873,8 +890,7 @@ compile error with a plain explanation (the same applies to submissions).
 ```json
 { "sandbox": "local",
   "languages": [ { "id": "JAVA", "name": "Java", "available": true, "timeFactor": 1.0 },
-                 { "id": "PYTHON", "name": "Python 3", "available": true, "timeFactor": 3.0 },
-                 { "id": "CPP", "name": "C++17", "available": false, "timeFactor": 1.0 } ] }
+                 { "id": "PYTHON", "name": "Python 3", "available": true, "timeFactor": 3.0 } ] }
 ```
 Problems come with no starter code: the learner writes the whole program (read stdin, print to stdout;
 in Java the class must be `Main`). Older databases have their `starter_code` column dropped by schema.sql.
@@ -975,7 +991,6 @@ is the trained one.
 | `app.hlr.weights-path` | `classpath:ml/hlr_weights.json` | HLR inference (§4.3) |
 | `app.runner.sandbox` (`RUNNER_SANDBOX`) | `local` | Sandbox: `local` or `docker` (§4.1) |
 | `app.runner.python-command` (`RUNNER_PYTHON`) | auto (`python3` / `python`) | Python submissions |
-| `app.runner.allow-unsandboxed-native` | `false` | Allow C++ in the local sandbox |
 | `app.runner.docker.*` | images, `256m`, 1 CPU, 64 pids | Docker sandbox limits |
 | `app.judge.workers` (`JUDGE_WORKERS`) | `0` = half the cores, max 4 | Judge queue |
 | `app.judge.max-queued` | `50` | Judge queue |

@@ -1,0 +1,966 @@
+{
+  "_note": "Learning resources per problem slug. Every video was confirmed with YouTube oEmbed (exists, embeddable, title and channel) and every article was opened (HTTP 200, title matches) when this file was written.",
+  "problems": {
+    "rotate-array": {
+      "concept": "Array rotation (reversal trick)",
+      "videos": [
+        {
+          "youtubeId": "BHr381Guz3Y",
+          "title": "Rotate Array - Leetcode 189 - Python",
+          "channel": "NeetCode",
+          "about": "Solves this exact problem, including the in-place reverse trick."
+        },
+        {
+          "youtubeId": "QOpU9-l5T7Y",
+          "title": "Reversal algorithm for array rotation | GeeksforGeeks",
+          "channel": "GeeksforGeeks",
+          "about": "A short animation of the reversal algorithm for rotating an array."
+        }
+      ],
+      "reading": [
+        {
+          "title": "Rotate an Array - Clockwise or Right",
+          "site": "GeeksforGeeks",
+          "url": "https://www.geeksforgeeks.org/dsa/complete-guide-on-array-rotations/",
+          "about": "Several ways to rotate an array to the right, from simple to the O(1)-extra-space reversal trick."
+        },
+        {
+          "title": "Reversal algorithm for Array rotation",
+          "site": "GeeksforGeeks",
+          "url": "https://www.geeksforgeeks.org/dsa/program-for-array-rotation-continued-reversal-algorithm/",
+          "about": "Why reversing three parts of the array rotates it, with a worked example."
+        }
+      ]
+    },
+    "max-subarray-sum": {
+      "concept": "Kadane's algorithm",
+      "videos": [
+        {
+          "youtubeId": "5WZl3MMT0Eg",
+          "title": "Maximum Subarray - Amazon Coding Interview Question - Leetcode 53 - Python",
+          "channel": "NeetCode",
+          "about": "Solves this exact problem with Kadane's algorithm."
+        },
+        {
+          "youtubeId": "AHZpyENo7k4",
+          "title": "Kadane's Algorithm | Maximum Subarray Sum | Finding and Printing",
+          "channel": "take U forward",
+          "about": "Builds Kadane's algorithm slowly from the brute force, with dry runs."
+        }
+      ],
+      "reading": [
+        {
+          "title": "Maximum Subarray Sum - Kadane's Algorithm",
+          "site": "GeeksforGeeks",
+          "url": "https://www.geeksforgeeks.org/dsa/largest-sum-contiguous-subarray/",
+          "about": "Kadane's algorithm: keep the best sum ending here, and reset when it turns negative."
+        },
+        {
+          "title": "Array Data Structure",
+          "site": "GeeksforGeeks",
+          "url": "https://www.geeksforgeeks.org/dsa/array-data-structure-guide/",
+          "about": "Array basics: indexing, traversal and the common patterns used in array problems."
+        }
+      ]
+    },
+    "count-inversions": {
+      "concept": "Merge sort (divide and conquer)",
+      "videos": [
+        {
+          "youtubeId": "AseUmwVNaoY",
+          "title": "Count Inversions in an Array | Brute and Optimal",
+          "channel": "take U forward",
+          "about": "Counts inversions from the brute force up to the merge sort method."
+        },
+        {
+          "youtubeId": "mB5HXBb_HY8",
+          "title": "2.7.2.  Merge Sort Algorithm",
+          "channel": "Abdul Bari",
+          "about": "A classic, clear explanation of how merge sort works."
+        }
+      ],
+      "reading": [
+        {
+          "title": "Count Inversions of an Array",
+          "site": "GeeksforGeeks",
+          "url": "https://www.geeksforgeeks.org/dsa/inversion-count-in-array-using-merge-sort/",
+          "about": "Counting inversions while merge sorting, in O(n log n) instead of checking every pair."
+        },
+        {
+          "title": "Merge Sort",
+          "site": "GeeksforGeeks",
+          "url": "https://www.geeksforgeeks.org/dsa/merge-sort/",
+          "about": "How merge sort splits, sorts and merges, which the inversion count is built on."
+        }
+      ]
+    },
+    "valid-anagram": {
+      "concept": "Counting with a hash map",
+      "videos": [
+        {
+          "youtubeId": "9UtInBqnCgA",
+          "title": "Valid Anagram - Leetcode 242 - Python",
+          "channel": "NeetCode",
+          "about": "Solves this exact problem by counting characters."
+        },
+        {
+          "youtubeId": "knV86FlSXJ8",
+          "title": "Hash tables in 4 minutes",
+          "channel": "Michael Sambol",
+          "about": "Hash tables in four minutes: the idea behind fast lookups."
+        }
+      ],
+      "reading": [
+        {
+          "title": "Check if two Strings are Anagrams of each other",
+          "site": "GeeksforGeeks",
+          "url": "https://www.geeksforgeeks.org/dsa/check-whether-two-strings-are-anagram-of-each-other/",
+          "about": "Comparing two strings by counting how often each character appears."
+        },
+        {
+          "title": "Introduction to Hashing",
+          "site": "GeeksforGeeks",
+          "url": "https://www.geeksforgeeks.org/dsa/introduction-to-hashing-2/",
+          "about": "What a hash map is and why looking a key up takes constant time on average."
+        }
+      ]
+    },
+    "longest-common-prefix": {
+      "concept": "Comparing strings character by character",
+      "videos": [
+        {
+          "youtubeId": "0sWShKIJoo4",
+          "title": "Longest Common Prefix - Leetcode 14 - Python",
+          "channel": "NeetCode",
+          "about": "Solves this exact problem by comparing character by character."
+        },
+        {
+          "youtubeId": "wtOQaovlvhY",
+          "title": "Longest Common Prefix (LeetCode 14) | Full solution with animations and examples | Study Algorithms",
+          "channel": "Nikhil Lohia",
+          "about": "The same problem again, with animations of every step."
+        }
+      ],
+      "reading": [
+        {
+          "title": "Longest Common Prefix",
+          "site": "GeeksforGeeks",
+          "url": "https://www.geeksforgeeks.org/dsa/longest-common-prefix/",
+          "about": "Comparing words character by character to find the prefix they all share."
+        },
+        {
+          "title": "String in Data Structure",
+          "site": "GeeksforGeeks",
+          "url": "https://www.geeksforgeeks.org/dsa/string-data-structure/",
+          "about": "String basics: characters, indexing, substrings and common string problems."
+        }
+      ]
+    },
+    "longest-palindromic-substring": {
+      "concept": "Expand around the centre",
+      "videos": [
+        {
+          "youtubeId": "XYQecbcd6_c",
+          "title": "Longest Palindromic Substring - Python - Leetcode 5",
+          "channel": "NeetCode",
+          "about": "Solves this exact problem by expanding around each centre."
+        },
+        {
+          "youtubeId": "uX0-xyPkR2w",
+          "title": "Longest Palindromic Sub-string (LeetCode 5) | Full solution with examples | Study Algorithms",
+          "channel": "Nikhil Lohia",
+          "about": "The same problem explained with step-by-step examples."
+        }
+      ],
+      "reading": [
+        {
+          "title": "Longest Palindromic Substring",
+          "site": "GeeksforGeeks",
+          "url": "https://www.geeksforgeeks.org/dsa/longest-palindromic-substring/",
+          "about": "Expanding around every centre to find the longest palindrome, in O(n^2) time and O(1) space."
+        },
+        {
+          "title": "Palindrome String",
+          "site": "GeeksforGeeks",
+          "url": "https://www.geeksforgeeks.org/dsa/palindrome-string/",
+          "about": "What a palindrome is and how to check one with two indexes."
+        }
+      ]
+    },
+    "shortest-palindrome": {
+      "concept": "KMP prefix function",
+      "videos": [
+        {
+          "youtubeId": "BDNehaLxvOY",
+          "title": "Shortest Palindrome | Leetcode 214",
+          "channel": "Techdose",
+          "about": "Solves this exact problem (Shortest Palindrome) using the KMP table."
+        },
+        {
+          "youtubeId": "V5-7GzOfADQ",
+          "title": "9.1 Knuth-Morris-Pratt KMP String Matching Algorithm",
+          "channel": "Abdul Bari",
+          "about": "How the KMP prefix table is built, which this problem relies on."
+        }
+      ],
+      "reading": [
+        {
+          "title": "Palindrome by Front Insertion",
+          "site": "GeeksforGeeks",
+          "url": "https://www.geeksforgeeks.org/dsa/minimum-characters-added-front-make-string-palindrome/",
+          "about": "Finding the longest palindromic prefix, the key step in making the shortest palindrome."
+        },
+        {
+          "title": "KMP Algorithm",
+          "site": "GeeksforGeeks",
+          "url": "https://www.geeksforgeeks.org/dsa/kmp-algorithm-for-pattern-searching/",
+          "about": "The KMP prefix (LPS) table, which finds the longest palindromic prefix in linear time."
+        }
+      ]
+    },
+    "pair-target-sum-sorted": {
+      "concept": "Two pointers on a sorted array",
+      "videos": [
+        {
+          "youtubeId": "cQ1Oz4ckceM",
+          "title": "TWO SUM II - Amazon Coding Interview Question - Leetcode 167 - Python",
+          "channel": "NeetCode",
+          "about": "Solves the sorted pair-sum problem with two pointers."
+        },
+        {
+          "youtubeId": "QzZ7nmouLTI",
+          "title": "Two Pointers in 7 minutes | LeetCode Pattern",
+          "channel": "AlgoMasterIO",
+          "about": "The two pointers pattern in seven minutes, with several examples."
+        }
+      ],
+      "reading": [
+        {
+          "title": "Two Pointers Technique",
+          "site": "GeeksforGeeks",
+          "url": "https://www.geeksforgeeks.org/dsa/two-pointers-technique/",
+          "about": "Moving two indexes towards each other on a sorted array; its first example is exactly the pair-sum problem."
+        },
+        {
+          "title": "Binary Search",
+          "site": "GeeksforGeeks",
+          "url": "https://www.geeksforgeeks.org/dsa/binary-search/",
+          "about": "Halving a sorted range each step; the O(n log n) LIS uses it."
+        }
+      ]
+    },
+    "container-most-water": {
+      "concept": "Two pointers (greedy)",
+      "videos": [
+        {
+          "youtubeId": "UuiTKBwPgAo",
+          "title": "Container with Most Water - Leetcode 11 - Python",
+          "channel": "NeetCode",
+          "about": "Solves this exact problem and shows why moving the shorter wall is safe."
+        },
+        {
+          "youtubeId": "QzZ7nmouLTI",
+          "title": "Two Pointers in 7 minutes | LeetCode Pattern",
+          "channel": "AlgoMasterIO",
+          "about": "The two pointers pattern in seven minutes, with several examples."
+        }
+      ],
+      "reading": [
+        {
+          "title": "Container with Most Water",
+          "site": "GeeksforGeeks",
+          "url": "https://www.geeksforgeeks.org/dsa/container-with-most-water/",
+          "about": "Why moving the shorter wall inwards never misses the best container."
+        },
+        {
+          "title": "Two Pointers Technique",
+          "site": "GeeksforGeeks",
+          "url": "https://www.geeksforgeeks.org/dsa/two-pointers-technique/",
+          "about": "Moving two indexes towards each other on a sorted array; its first example is exactly the pair-sum problem."
+        }
+      ]
+    },
+    "trapping-rain-water": {
+      "concept": "Two pointers with running maximums",
+      "videos": [
+        {
+          "youtubeId": "ZI2z5pq0TqA",
+          "title": "Trapping Rain Water - Google Interview Question - Leetcode 42",
+          "channel": "NeetCode",
+          "about": "Solves this exact problem, from prefix maximums to two pointers."
+        },
+        {
+          "youtubeId": "QzZ7nmouLTI",
+          "title": "Two Pointers in 7 minutes | LeetCode Pattern",
+          "channel": "AlgoMasterIO",
+          "about": "The two pointers pattern in seven minutes, with several examples."
+        }
+      ],
+      "reading": [
+        {
+          "title": "Trapping Rain Water Problem",
+          "site": "GeeksforGeeks",
+          "url": "https://www.geeksforgeeks.org/dsa/trapping-rain-water/",
+          "about": "Water above each bar = min(highest wall on the left, highest on the right) minus the bar, solved with two pointers."
+        },
+        {
+          "title": "Two Pointers Technique",
+          "site": "GeeksforGeeks",
+          "url": "https://www.geeksforgeeks.org/dsa/two-pointers-technique/",
+          "about": "Moving two indexes towards each other on a sorted array; its first example is exactly the pair-sum problem."
+        }
+      ]
+    },
+    "max-sum-subarray-size-k": {
+      "concept": "Fixed-size sliding window",
+      "videos": [
+        {
+          "youtubeId": "y2d0VHdvfdc",
+          "title": "Sliding Window in 7 minutes | LeetCode Pattern",
+          "channel": "AlgoMasterIO",
+          "about": "The sliding window pattern: fixed and variable windows."
+        },
+        {
+          "youtubeId": "dOonV4byDEg",
+          "title": "Sliding Window Technique",
+          "channel": "Profound Academy",
+          "about": "A beginner explanation of the sliding window technique with a fixed-size window sum."
+        }
+      ],
+      "reading": [
+        {
+          "title": "Maximum sum of a subarray of size k",
+          "site": "GeeksforGeeks",
+          "url": "https://www.geeksforgeeks.org/dsa/find-maximum-minimum-sum-subarray-size-k/",
+          "about": "A fixed-size sliding window: add the new element, drop the old one, never recompute the whole sum."
+        },
+        {
+          "title": "Sliding Window Technique",
+          "site": "GeeksforGeeks",
+          "url": "https://www.geeksforgeeks.org/dsa/window-sliding-technique/",
+          "about": "Fixed and variable-size windows, and how they turn O(n*k) work into O(n)."
+        }
+      ]
+    },
+    "longest-substring-no-repeat": {
+      "concept": "Variable-size sliding window",
+      "videos": [
+        {
+          "youtubeId": "wiGpQwVHdE0",
+          "title": "Longest Substring Without Repeating Characters - Leetcode 3 - Python",
+          "channel": "NeetCode",
+          "about": "Solves this exact problem with a window and a set."
+        },
+        {
+          "youtubeId": "y2d0VHdvfdc",
+          "title": "Sliding Window in 7 minutes | LeetCode Pattern",
+          "channel": "AlgoMasterIO",
+          "about": "The sliding window pattern: fixed and variable windows."
+        }
+      ],
+      "reading": [
+        {
+          "title": "Longest Substring Without Repeating Characters",
+          "site": "GeeksforGeeks",
+          "url": "https://www.geeksforgeeks.org/dsa/length-of-the-longest-substring-without-repeating-characters/",
+          "about": "A variable window that shrinks from the left whenever a character repeats."
+        },
+        {
+          "title": "Sliding Window Technique",
+          "site": "GeeksforGeeks",
+          "url": "https://www.geeksforgeeks.org/dsa/window-sliding-technique/",
+          "about": "Fixed and variable-size windows, and how they turn O(n*k) work into O(n)."
+        }
+      ]
+    },
+    "minimum-window-substring": {
+      "concept": "Variable-size sliding window with counts",
+      "videos": [
+        {
+          "youtubeId": "jSto0O4AJbM",
+          "title": "Minimum Window Substring - Airbnb Interview Question - Leetcode 76",
+          "channel": "NeetCode",
+          "about": "Solves this exact problem by growing and shrinking the window."
+        },
+        {
+          "youtubeId": "y2d0VHdvfdc",
+          "title": "Sliding Window in 7 minutes | LeetCode Pattern",
+          "channel": "AlgoMasterIO",
+          "about": "The sliding window pattern: fixed and variable windows."
+        }
+      ],
+      "reading": [
+        {
+          "title": "Smallest window in a String containing all characters of other String",
+          "site": "GeeksforGeeks",
+          "url": "https://www.geeksforgeeks.org/dsa/find-the-smallest-window-in-a-string-containing-all-characters-of-another-string/",
+          "about": "Growing the window until it covers every needed character, then shrinking it as far as possible."
+        },
+        {
+          "title": "Sliding Window Technique",
+          "site": "GeeksforGeeks",
+          "url": "https://www.geeksforgeeks.org/dsa/window-sliding-technique/",
+          "about": "Fixed and variable-size windows, and how they turn O(n*k) work into O(n)."
+        }
+      ]
+    },
+    "two-sum": {
+      "concept": "Hash map of seen values",
+      "videos": [
+        {
+          "youtubeId": "KLlXCFG5TnA",
+          "title": "Two Sum - Leetcode 1 - HashMap - Python",
+          "channel": "NeetCode",
+          "about": "Solves Two Sum with a hash map; the same 'look up the complement' idea solves the four-lists problem."
+        },
+        {
+          "youtubeId": "knV86FlSXJ8",
+          "title": "Hash tables in 4 minutes",
+          "channel": "Michael Sambol",
+          "about": "Hash tables in four minutes: the idea behind fast lookups."
+        }
+      ],
+      "reading": [
+        {
+          "title": "Two Sum - Pair with given Sum",
+          "site": "GeeksforGeeks",
+          "url": "https://www.geeksforgeeks.org/dsa/check-if-pair-with-given-sum-exists-in-array/",
+          "about": "From the brute force to a single pass with a hash map that remembers what you have seen."
+        },
+        {
+          "title": "Introduction to Hashing",
+          "site": "GeeksforGeeks",
+          "url": "https://www.geeksforgeeks.org/dsa/introduction-to-hashing-2/",
+          "about": "What a hash map is and why looking a key up takes constant time on average."
+        }
+      ]
+    },
+    "count-subarrays-sum-k": {
+      "concept": "Prefix sums with a hash map",
+      "videos": [
+        {
+          "youtubeId": "fFVZt-6sgyo",
+          "title": "Subarray Sum Equals K - Prefix Sums - Leetcode 560 - Python",
+          "channel": "NeetCode",
+          "about": "Solves this exact problem with prefix sums and a hash map."
+        },
+        {
+          "youtubeId": "yuws7YK0Yng",
+          "title": "Prefix Sum in 4 minutes | LeetCode Pattern",
+          "channel": "AlgoMasterIO",
+          "about": "The prefix sum pattern explained in four minutes."
+        }
+      ],
+      "reading": [
+        {
+          "title": "Count Subarrays having Sum K",
+          "site": "GeeksforGeeks",
+          "url": "https://www.geeksforgeeks.org/dsa/number-subarrays-sum-exactly-equal-k/",
+          "about": "Prefix sums plus a hash map of how often each prefix sum appeared."
+        },
+        {
+          "title": "Hashing in Data Structure",
+          "site": "GeeksforGeeks",
+          "url": "https://www.geeksforgeeks.org/dsa/hashing-data-structure/",
+          "about": "Hash maps and sets, and the problems they make fast."
+        }
+      ]
+    },
+    "four-lists-zero-sum": {
+      "concept": "Meet in the middle with a hash map",
+      "videos": [
+        {
+          "youtubeId": "KLlXCFG5TnA",
+          "title": "Two Sum - Leetcode 1 - HashMap - Python",
+          "channel": "NeetCode",
+          "about": "Solves Two Sum with a hash map; the same 'look up the complement' idea solves the four-lists problem."
+        },
+        {
+          "youtubeId": "knV86FlSXJ8",
+          "title": "Hash tables in 4 minutes",
+          "channel": "Michael Sambol",
+          "about": "Hash tables in four minutes: the idea behind fast lookups."
+        }
+      ],
+      "reading": [
+        {
+          "title": "Meet in the middle",
+          "site": "GeeksforGeeks",
+          "url": "https://www.geeksforgeeks.org/dsa/meet-in-the-middle/",
+          "about": "Split the work into two halves and combine them; here: sums of A+B against sums of C+D."
+        },
+        {
+          "title": "2 Sum - Count pairs with given sum",
+          "site": "GeeksforGeeks",
+          "url": "https://www.geeksforgeeks.org/dsa/count-pairs-with-given-sum/",
+          "about": "Counting pairs with a hash map of frequencies, the building block of the four-lists problem."
+        }
+      ]
+    },
+    "reverse-linked-list": {
+      "concept": "Pointer reversal",
+      "videos": [
+        {
+          "youtubeId": "G0_I-ZF0S38",
+          "title": "Reverse Linked List - Iterative AND Recursive - Leetcode 206 - Python",
+          "channel": "NeetCode",
+          "about": "Solves this exact problem, both iteratively and recursively."
+        },
+        {
+          "youtubeId": "N6dOwBde7-M",
+          "title": "Learn Linked Lists in 13 minutes",
+          "channel": "Bro Code",
+          "about": "Linked lists from scratch: nodes, pointers, inserting and removing."
+        }
+      ],
+      "reading": [
+        {
+          "title": "Reverse a Linked List",
+          "site": "GeeksforGeeks",
+          "url": "https://www.geeksforgeeks.org/dsa/reverse-a-linked-list/",
+          "about": "Reversing the links one node at a time with prev, current and next pointers."
+        },
+        {
+          "title": "Introduction to Linked List",
+          "site": "GeeksforGeeks",
+          "url": "https://www.geeksforgeeks.org/dsa/introduction-to-linked-list-data-structure/",
+          "about": "What nodes and next pointers are, and how to walk, insert and delete in a linked list."
+        }
+      ]
+    },
+    "remove-kth-from-end": {
+      "concept": "Fast and slow pointers",
+      "videos": [
+        {
+          "youtubeId": "XVuQxVej6y8",
+          "title": "Remove Nth Node from End of List - Oracle Interview Question - Leetcode 19",
+          "channel": "NeetCode",
+          "about": "Solves this exact problem with a fast and a slow pointer."
+        },
+        {
+          "youtubeId": "N6dOwBde7-M",
+          "title": "Learn Linked Lists in 13 minutes",
+          "channel": "Bro Code",
+          "about": "Linked lists from scratch: nodes, pointers, inserting and removing."
+        }
+      ],
+      "reading": [
+        {
+          "title": "Remove Nth node from end of the Linked List",
+          "site": "GeeksforGeeks",
+          "url": "https://www.geeksforgeeks.org/dsa/remove-nth-node-from-end-of-the-linked-list/",
+          "about": "The fast and slow pointer trick: move one pointer k steps ahead, then move both together."
+        },
+        {
+          "title": "Introduction to Linked List",
+          "site": "GeeksforGeeks",
+          "url": "https://www.geeksforgeeks.org/dsa/introduction-to-linked-list-data-structure/",
+          "about": "What nodes and next pointers are, and how to walk, insert and delete in a linked list."
+        }
+      ]
+    },
+    "reverse-nodes-k-group": {
+      "concept": "Reversing linked list segments",
+      "videos": [
+        {
+          "youtubeId": "1UOPsfP85V4",
+          "title": "Reverse Nodes in K-Group - Linked List - Leetcode 25",
+          "channel": "NeetCode",
+          "about": "Solves this exact problem by reversing one group at a time."
+        },
+        {
+          "youtubeId": "N6dOwBde7-M",
+          "title": "Learn Linked Lists in 13 minutes",
+          "channel": "Bro Code",
+          "about": "Linked lists from scratch: nodes, pointers, inserting and removing."
+        }
+      ],
+      "reading": [
+        {
+          "title": "Reverse a Linked List in groups of given size",
+          "site": "GeeksforGeeks",
+          "url": "https://www.geeksforgeeks.org/dsa/reverse-a-linked-list-in-groups-of-given-size-iterative-approach/",
+          "about": "Reversing k nodes at a time and reconnecting each reversed group to the rest of the list."
+        },
+        {
+          "title": "Reverse a Linked List",
+          "site": "GeeksforGeeks",
+          "url": "https://www.geeksforgeeks.org/dsa/reverse-a-linked-list/",
+          "about": "Reversing the links one node at a time with prev, current and next pointers."
+        }
+      ]
+    },
+    "valid-parentheses": {
+      "concept": "Stack matching",
+      "videos": [
+        {
+          "youtubeId": "WTzjTskDFMg",
+          "title": "Valid Parentheses - Stack - Leetcode 20 - Python",
+          "channel": "NeetCode",
+          "about": "Solves this exact problem with a stack."
+        },
+        {
+          "youtubeId": "KInG04mAjO0",
+          "title": "Learn Stack data structures in 10 minutes",
+          "channel": "Bro Code",
+          "about": "Stacks explained in ten minutes: push, pop and peek."
+        }
+      ],
+      "reading": [
+        {
+          "title": "Valid Parentheses in an Expression",
+          "site": "GeeksforGeeks",
+          "url": "https://www.geeksforgeeks.org/dsa/check-for-balanced-parentheses-in-an-expression/",
+          "about": "Push opening brackets, pop on a closing one, and check that they match."
+        },
+        {
+          "title": "Introduction to Stack Data Structure",
+          "site": "GeeksforGeeks",
+          "url": "https://www.geeksforgeeks.org/dsa/introduction-to-stack-data-structure-and-algorithm-tutorials/",
+          "about": "Last-in-first-out: push, pop and peek, and when a stack is the right tool."
+        }
+      ]
+    },
+    "days-until-warmer": {
+      "concept": "Monotonic stack",
+      "videos": [
+        {
+          "youtubeId": "cTBiBSnjO3c",
+          "title": "Daily Temperatures - Monotonic Stack - Leetcode 739 - Python",
+          "channel": "NeetCode",
+          "about": "Solves this problem (Daily Temperatures) with a monotonic stack."
+        },
+        {
+          "youtubeId": "DtJVwbbicjQ",
+          "title": "Monotonic Stack in 6 minutes | LeetCode Pattern",
+          "channel": "AlgoMasterIO",
+          "about": "The monotonic stack pattern explained in six minutes."
+        }
+      ],
+      "reading": [
+        {
+          "title": "Next Greater Element in Array",
+          "site": "GeeksforGeeks",
+          "url": "https://www.geeksforgeeks.org/dsa/next-greater-element/",
+          "about": "Finding the next bigger value for every element with a stack; days until warmer is the distance to it."
+        },
+        {
+          "title": "Introduction to Monotonic Stack",
+          "site": "GeeksforGeeks",
+          "url": "https://www.geeksforgeeks.org/dsa/introduction-to-monotonic-stack-2/",
+          "about": "A stack kept in increasing or decreasing order, which answers 'next greater / smaller' questions in O(n)."
+        }
+      ]
+    },
+    "largest-rectangle-histogram": {
+      "concept": "Monotonic stack (nearest smaller bar)",
+      "videos": [
+        {
+          "youtubeId": "zx5Sw9130L0",
+          "title": "LARGEST RECTANGLE IN HISTOGRAM - Leetcode 84 - Python",
+          "channel": "NeetCode",
+          "about": "Solves this exact problem with a monotonic stack."
+        },
+        {
+          "youtubeId": "DtJVwbbicjQ",
+          "title": "Monotonic Stack in 6 minutes | LeetCode Pattern",
+          "channel": "AlgoMasterIO",
+          "about": "The monotonic stack pattern explained in six minutes."
+        }
+      ],
+      "reading": [
+        {
+          "title": "Largest Rectangular Area in a Histogram",
+          "site": "GeeksforGeeks",
+          "url": "https://www.geeksforgeeks.org/dsa/largest-rectangular-area-in-a-histogram-using-stack/",
+          "about": "For each bar, the nearest smaller bar on each side gives the widest rectangle it can be part of."
+        },
+        {
+          "title": "Introduction to Monotonic Stack",
+          "site": "GeeksforGeeks",
+          "url": "https://www.geeksforgeeks.org/dsa/introduction-to-monotonic-stack-2/",
+          "about": "A stack kept in increasing or decreasing order, which answers 'next greater / smaller' questions in O(n)."
+        }
+      ]
+    },
+    "max-depth-binary-tree": {
+      "concept": "Tree recursion (DFS)",
+      "videos": [
+        {
+          "youtubeId": "hTM3phVI6YQ",
+          "title": "Maximum Depth of Binary Tree - 3 Solutions - Leetcode 104 - Python",
+          "channel": "NeetCode",
+          "about": "Solves this exact problem three ways: recursive DFS, BFS and iterative DFS."
+        },
+        {
+          "youtubeId": "Um_sAan1LO4",
+          "title": "Binary Trees Explained in 4 Minutes!",
+          "channel": "GeeksforGeeks",
+          "about": "What a binary tree is, in four minutes."
+        }
+      ],
+      "reading": [
+        {
+          "title": "Maximum Depth or Height of a Binary Tree",
+          "site": "GeeksforGeeks",
+          "url": "https://www.geeksforgeeks.org/dsa/find-the-maximum-depth-or-height-of-a-tree/",
+          "about": "Depth of a tree = 1 + the depth of its deeper subtree, with recursion or level by level."
+        },
+        {
+          "title": "Introduction to Tree Data Structure",
+          "site": "GeeksforGeeks",
+          "url": "https://www.geeksforgeeks.org/dsa/introduction-to-tree-data-structure/",
+          "about": "Roots, children, leaves and levels: the words every tree problem uses."
+        }
+      ]
+    },
+    "validate-binary-search-tree": {
+      "concept": "BST ordering with min / max bounds",
+      "videos": [
+        {
+          "youtubeId": "s6ATEkipzow",
+          "title": "Validate Binary Search Tree - Depth First Search - Leetcode 98",
+          "channel": "NeetCode",
+          "about": "Solves this exact problem by passing a valid range down the tree."
+        },
+        {
+          "youtubeId": "p7-9UvDQZ3w",
+          "title": "L39. Introduction to Binary Search Tree | BST",
+          "channel": "take U forward",
+          "about": "An introduction to binary search trees and their ordering rule."
+        }
+      ],
+      "reading": [
+        {
+          "title": "Check if a Binary Tree is BST or not",
+          "site": "GeeksforGeeks",
+          "url": "https://www.geeksforgeeks.org/dsa/a-program-to-check-if-a-binary-tree-is-bst-or-not/",
+          "about": "Passing an allowed (min, max) range down the tree, or checking that the in-order walk is sorted."
+        },
+        {
+          "title": "Binary Search Tree",
+          "site": "GeeksforGeeks",
+          "url": "https://www.geeksforgeeks.org/dsa/binary-search-tree-data-structure/",
+          "about": "The BST rule (left smaller, right bigger) and what it makes fast."
+        }
+      ]
+    },
+    "binary-tree-max-path-sum": {
+      "concept": "Post-order DFS on a tree",
+      "videos": [
+        {
+          "youtubeId": "Hr5cWUld4vU",
+          "title": "Binary Tree Maximum Path Sum - DFS - Leetcode 124 - Python",
+          "channel": "NeetCode",
+          "about": "Solves this exact problem with a DFS that returns the best one-sided path."
+        },
+        {
+          "youtubeId": "s2Yyk3qdy3o",
+          "title": "How to solve (almost) any binary tree coding problem",
+          "channel": "Inside code",
+          "about": "A simple recipe for solving binary tree problems with recursion."
+        }
+      ],
+      "reading": [
+        {
+          "title": "Maximum Path Sum in a Binary Tree",
+          "site": "GeeksforGeeks",
+          "url": "https://www.geeksforgeeks.org/dsa/find-maximum-path-sum-in-a-binary-tree/",
+          "about": "At each node, combine the best downward path from the left and the right, and return only one side upwards."
+        },
+        {
+          "title": "Tree Traversal Techniques",
+          "site": "GeeksforGeeks",
+          "url": "https://www.geeksforgeeks.org/dsa/tree-traversals-inorder-preorder-and-postorder/",
+          "about": "Inorder, preorder, postorder and level order: the four ways to visit every node."
+        }
+      ]
+    },
+    "path-exists": {
+      "concept": "Graph traversal (BFS / DFS)",
+      "videos": [
+        {
+          "youtubeId": "knLFe7hEp3Y",
+          "title": "Find if Path Exists in Graph - Leetcode 1971 - Graphs (Python)",
+          "channel": "Greg Hogg",
+          "about": "Solves this exact problem with BFS, DFS and union-find."
+        },
+        {
+          "youtubeId": "pcKY4hjDrxk",
+          "title": "5.1 Graph Traversals - BFS & DFS -Breadth First Search and Depth First Search",
+          "channel": "Abdul Bari",
+          "about": "A clear explanation of BFS and DFS graph traversals."
+        }
+      ],
+      "reading": [
+        {
+          "title": "Find if there is a path between two vertices",
+          "site": "GeeksforGeeks",
+          "url": "https://www.geeksforgeeks.org/dsa/find-if-there-is-a-path-between-two-vertices-in-an-undirected-graph/",
+          "about": "Start a BFS or DFS at the source and check whether it ever reaches the destination."
+        },
+        {
+          "title": "Breadth First Search or BFS for a Graph",
+          "site": "GeeksforGeeks",
+          "url": "https://www.geeksforgeeks.org/dsa/breadth-first-search-or-bfs-for-a-graph/",
+          "about": "Visiting a graph level by level with a queue and a visited set."
+        }
+      ]
+    },
+    "number-of-islands": {
+      "concept": "Flood fill on a grid",
+      "videos": [
+        {
+          "youtubeId": "pV2kpPD66nE",
+          "title": "NUMBER OF ISLANDS - Leetcode 200 - Python",
+          "channel": "NeetCode",
+          "about": "Solves this exact problem with a BFS from every new island."
+        },
+        {
+          "youtubeId": "pcKY4hjDrxk",
+          "title": "5.1 Graph Traversals - BFS & DFS -Breadth First Search and Depth First Search",
+          "channel": "Abdul Bari",
+          "about": "A clear explanation of BFS and DFS graph traversals."
+        }
+      ],
+      "reading": [
+        {
+          "title": "Number of Islands",
+          "site": "GeeksforGeeks",
+          "url": "https://www.geeksforgeeks.org/dsa/find-the-number-of-islands-using-dfs/",
+          "about": "Each DFS or BFS from an unvisited land cell sinks one whole island; count how many times you start one."
+        },
+        {
+          "title": "Depth First Search or DFS for a Graph",
+          "site": "GeeksforGeeks",
+          "url": "https://www.geeksforgeeks.org/dsa/depth-first-search-or-dfs-for-a-graph/",
+          "about": "Going as deep as possible before backtracking, with recursion or a stack."
+        }
+      ]
+    },
+    "shortest-delivery-route": {
+      "concept": "Dijkstra's shortest path",
+      "videos": [
+        {
+          "youtubeId": "EaphyqKU4PQ",
+          "title": "Network Delay Time - Dijkstra's algorithm - Leetcode 743",
+          "channel": "NeetCode",
+          "about": "Solves a shortest-delivery-time problem (Network Delay Time) with Dijkstra's algorithm."
+        },
+        {
+          "youtubeId": "EFg3u_E6eHU",
+          "title": "How Dijkstra's Algorithm Works",
+          "channel": "Spanning Tree",
+          "about": "An animated, beginner-friendly explanation of how Dijkstra's algorithm works."
+        }
+      ],
+      "reading": [
+        {
+          "title": "Dijkstra's Algorithm",
+          "site": "GeeksforGeeks",
+          "url": "https://www.geeksforgeeks.org/dsa/dijkstras-shortest-path-algorithm-greedy-algo-7/",
+          "about": "Shortest paths with non-negative weights using a priority queue."
+        },
+        {
+          "title": "Introduction to Graph Data Structure",
+          "site": "GeeksforGeeks",
+          "url": "https://www.geeksforgeeks.org/dsa/introduction-to-graphs-data-structure-and-algorithm-tutorials/",
+          "about": "Vertices, edges, directed and weighted graphs, and adjacency lists."
+        }
+      ]
+    },
+    "climbing-stairs": {
+      "concept": "Dynamic programming basics",
+      "videos": [
+        {
+          "youtubeId": "Y0lT9Fck7qI",
+          "title": "Climbing Stairs - Dynamic Programming - Leetcode 70 - Python",
+          "channel": "NeetCode",
+          "about": "Solves this exact problem, from recursion to bottom-up DP."
+        },
+        {
+          "youtubeId": "aPQY__2H3tE",
+          "title": "5 Simple Steps for Solving Dynamic Programming Problems",
+          "channel": "Reducible",
+          "about": "Five simple steps to approach any dynamic programming problem."
+        }
+      ],
+      "reading": [
+        {
+          "title": "Climbing stairs to reach the top",
+          "site": "GeeksforGeeks",
+          "url": "https://www.geeksforgeeks.org/dsa/count-ways-reach-nth-stair/",
+          "about": "ways(n) = ways(n-1) + ways(n-2): from plain recursion to an O(1)-space loop."
+        },
+        {
+          "title": "Dynamic Programming (DP) Introduction",
+          "site": "GeeksforGeeks",
+          "url": "https://www.geeksforgeeks.org/dsa/introduction-to-dynamic-programming-data-structures-and-algorithm-tutorials/",
+          "about": "Overlapping subproblems, memoization and tabulation, explained from the start."
+        }
+      ]
+    },
+    "house-robber": {
+      "concept": "1D dynamic programming",
+      "videos": [
+        {
+          "youtubeId": "73r3KWiEvyk",
+          "title": "House Robber -  Leetcode 198 - Python Dynamic Programming",
+          "channel": "NeetCode",
+          "about": "Solves this exact problem with a two-variable DP."
+        },
+        {
+          "youtubeId": "aPQY__2H3tE",
+          "title": "5 Simple Steps for Solving Dynamic Programming Problems",
+          "channel": "Reducible",
+          "about": "Five simple steps to approach any dynamic programming problem."
+        }
+      ],
+      "reading": [
+        {
+          "title": "Stickler Thief - Max Sum without Adjacent",
+          "site": "GeeksforGeeks",
+          "url": "https://www.geeksforgeeks.org/dsa/find-maximum-possible-stolen-value-houses/",
+          "about": "For each house: rob it plus the best up to two houses back, or skip it."
+        },
+        {
+          "title": "Dynamic Programming (DP) Introduction",
+          "site": "GeeksforGeeks",
+          "url": "https://www.geeksforgeeks.org/dsa/introduction-to-dynamic-programming-data-structures-and-algorithm-tutorials/",
+          "about": "Overlapping subproblems, memoization and tabulation, explained from the start."
+        }
+      ]
+    },
+    "longest-increasing-subsequence": {
+      "concept": "DP with binary search",
+      "videos": [
+        {
+          "youtubeId": "on2hvxBXJH4",
+          "title": "DP 43. Longest Increasing Subsequence | Binary Search | Intuition",
+          "channel": "take U forward",
+          "about": "The O(n log n) binary search method for LIS, which this problem's large test needs."
+        },
+        {
+          "youtubeId": "cjWnW0hdF1Y",
+          "title": "Longest Increasing Subsequence - Dynamic Programming - Leetcode 300",
+          "channel": "NeetCode",
+          "about": "The O(n^2) DP for LIS, the easier idea to understand first."
+        }
+      ],
+      "reading": [
+        {
+          "title": "Longest Increasing Subsequence",
+          "site": "GeeksforGeeks",
+          "url": "https://www.geeksforgeeks.org/dsa/longest-increasing-subsequence-dp-3/",
+          "about": "The O(n^2) DP and the O(n log n) method that keeps the smallest tail for each length with binary search."
+        },
+        {
+          "title": "Binary Search",
+          "site": "GeeksforGeeks",
+          "url": "https://www.geeksforgeeks.org/dsa/binary-search/",
+          "about": "Halving a sorted range each step; the O(n log n) LIS uses it."
+        }
+      ]
+    }
+  }
+}

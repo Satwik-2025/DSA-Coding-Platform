@@ -22,8 +22,6 @@ import org.slf4j.LoggerFactory;
  * - Python runs in isolated mode under an audit hook (python_guard.py) with the same restrictions.
  * - Every process gets an empty environment (no secrets leak through env vars), a private temp
  *   directory, capped output, a hard time limit, and is killed together with any children it spawned.
- * - Native code (C++) cannot be contained this way, so it is refused unless
- *   app.runner.allow-unsandboxed-native=true. Use the Docker sandbox for C++.
  */
 public class LocalSandbox implements Sandbox {
 
@@ -37,7 +35,6 @@ public class LocalSandbox implements Sandbox {
     private final String javaExecutable;
     private final boolean securityManager;
     private final String pythonExecutable; // null when no Python 3.8+ was found
-    private final String cppExecutable;    // null when C++ is not offered
     private final String guardSource;
     private final String policySource;
 
@@ -54,12 +51,6 @@ public class LocalSandbox implements Sandbox {
         if (pythonExecutable == null) {
             log.warn("No Python 3.8+ found: Python submissions are disabled.");
         }
-        String gpp = findOnPath(settings.cppCommand);
-        if (gpp != null && !settings.allowUnsandboxedNative) {
-            log.info("C++ is disabled in the local sandbox (native code cannot be contained). "
-                    + "Use app.runner.sandbox=docker, or set app.runner.allow-unsandboxed-native=true for trusted use.");
-        }
-        this.cppExecutable = settings.allowUnsandboxedNative ? gpp : null;
         this.guardSource = resource("/runner/python_guard.py");
         this.policySource = resource("/runner/java_sandbox.policy");
     }
@@ -70,16 +61,10 @@ public class LocalSandbox implements Sandbox {
     }
 
     @Override
-    public boolean isolatesNativeCode() {
-        return false;
-    }
-
-    @Override
     public boolean supports(Language language) {
         return switch (language) {
             case JAVA -> true;
             case PYTHON -> pythonExecutable != null;
-            case CPP -> cppExecutable != null;
         };
     }
 
@@ -117,23 +102,12 @@ public class LocalSandbox implements Sandbox {
                     command.addAll(List.of("guard.py", "Main.py"));
                 }
             }
-            case CPP -> {
-                if (cppExecutable == null) {
-                    throw new IllegalStateException("C++ is not available in the local sandbox");
-                }
-                String exe = WINDOWS ? "main.exe" : "main";
-                if (stage == Stage.COMPILE) {
-                    command.addAll(List.of(cppExecutable, "-std=c++17", "-O2", "-pipe", "-o", exe, "main.cpp"));
-                } else {
-                    command.add(workDir.resolve(exe).toString());
-                }
-            }
         }
-        return ProcessExec.run(command, workDir, environment(workDir, language), stdin, timeLimitMs);
+        return ProcessExec.run(command, workDir, environment(workDir), stdin, timeLimitMs);
     }
 
     /** The child sees only what it needs to start: no tokens, credentials or user paths from our env. */
-    private Map<String, String> environment(Path workDir, Language language) {
+    private Map<String, String> environment(Path workDir) {
         Map<String, String> env = new HashMap<>();
         if (WINDOWS) {
             // Windows programs cannot start without SystemRoot; nothing else is passed through.
@@ -143,13 +117,6 @@ public class LocalSandbox implements Sandbox {
         } else {
             env.put("PATH", "/usr/local/bin:/usr/bin:/bin");
             env.put("LANG", "C.UTF-8");
-        }
-        if (language == Language.CPP && cppExecutable != null) {
-            // The compiler driver finds its helper programs (and MinGW its DLLs) next to itself.
-            Path dir = Path.of(cppExecutable).getParent();
-            if (dir != null) {
-                env.put("PATH", dir + (WINDOWS ? ";" : ":") + env.get("PATH"));
-            }
         }
         env.put("TEMP", workDir.toString());
         env.put("TMP", workDir.toString());
@@ -186,28 +153,6 @@ public class LocalSandbox implements Sandbox {
         return null;
     }
 
-    static String findOnPath(String command) {
-        if (command == null || command.isBlank()) {
-            return null;
-        }
-        Path direct = Path.of(command);
-        if (direct.isAbsolute()) {
-            return Files.isRegularFile(direct) ? direct.toString() : null;
-        }
-        String path = System.getenv("PATH");
-        if (path == null) {
-            return null;
-        }
-        for (String dir : path.split(java.io.File.pathSeparator)) {
-            for (String name : WINDOWS ? List.of(command + ".exe", command) : List.of(command)) {
-                Path p = Path.of(dir, name);
-                if (Files.isRegularFile(p)) {
-                    return p.toString();
-                }
-            }
-        }
-        return null;
-    }
 
     private static Path write(Path file, String content) {
         try {

@@ -3,6 +3,7 @@ package com.capstone.dsaplatform.runner;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import static org.mockito.Mockito.mock;
@@ -11,6 +12,7 @@ import static org.mockito.Mockito.when;
 import com.capstone.dsaplatform.domain.TestTag;
 import com.capstone.dsaplatform.entity.Problem;
 import com.capstone.dsaplatform.entity.TestCase;
+import com.capstone.dsaplatform.error.BadRequestException;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
@@ -270,9 +272,11 @@ class ProcessCodeRunnerTest {
     }
 
     @Test
-    void cppIsNotOfferedByTheLocalSandboxByDefault() {
-        assertFalse(runner().availableLanguages().contains(Language.CPP));
+    void onlyJavaAndPythonExistAndCppIsRejected() {
+        assertEquals(List.of(Language.JAVA, Language.PYTHON), List.of(Language.values()));
         assertTrue(runner().availableLanguages().contains(Language.JAVA));
+        BadRequestException e = assertThrows(BadRequestException.class, () -> Language.parse("CPP"));
+        assertTrue(e.getMessage().contains("Use JAVA or PYTHON"), e.getMessage());
     }
 
     @Test

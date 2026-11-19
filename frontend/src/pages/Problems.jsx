@@ -37,7 +37,7 @@ export default function Problems() {
   return (
     <div className="space-y-8">
       <PageHeader eyebrow="Practice" title="Problems">
-        Problems in every topic, in Java, Python or C++. If a problem is locked, we first suggest an easier
+        Problems in every topic, in Python or Java. If a problem is locked, we first suggest an easier
         question to practise, but you can still choose to open it.
       </PageHeader>
 

@@ -59,7 +59,8 @@ public class Attempt {
     @Column(name = "submitted_at", nullable = false)
     private LocalDateTime submittedAt;
 
-    // JAVA, PYTHON or CPP; rows from before languages existed default to JAVA.
+    // JAVA or PYTHON (CPP on attempts made while C++ was offered; kept as history).
+    // Rows from before languages existed default to JAVA.
     @Column(nullable = false, length = 10)
     private String language = "JAVA";
 

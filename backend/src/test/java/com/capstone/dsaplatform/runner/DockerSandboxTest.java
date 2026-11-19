@@ -31,13 +31,13 @@ class DockerSandboxTest {
     }
 
     @Test
-    void onlyTheCppBuildGetsAWritableMount() {
-        List<String> build = sandbox.command(Language.CPP, Sandbox.Stage.COMPILE, Path.of("/tmp/x"), "c2", 20000);
-        List<String> run = sandbox.command(Language.CPP, Sandbox.Stage.EXECUTE, Path.of("/tmp/x"), "c3", 2000);
+    void codeIsAlwaysMountedReadOnly() {
+        List<String> check = sandbox.command(Language.PYTHON, Sandbox.Stage.COMPILE, Path.of("/tmp/x"), "c2", 20000);
+        List<String> run = sandbox.command(Language.JAVA, Sandbox.Stage.EXECUTE, Path.of("/tmp/x"), "c3", 2000);
 
-        assertTrue(build.stream().anyMatch(s -> s.endsWith(":/work:rw")));
+        assertTrue(check.stream().anyMatch(s -> s.endsWith(":/work:ro")));
         assertTrue(run.stream().anyMatch(s -> s.endsWith(":/work:ro")));
-        assertEquals("/work/main", run.get(run.size() - 1));
+        assertFalse(check.stream().anyMatch(s -> s.endsWith(":/work:rw")));
     }
 
     @Test

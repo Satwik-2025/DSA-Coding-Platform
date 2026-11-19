@@ -26,7 +26,7 @@ Default is `http://localhost:8081`, which is what `application.yml` sets today.
 | `/` | Overall readiness, due for review, recommended problems, activity heatmap | 5.6, 5.15, 5.4, 5.16 |
 | `/topics` | Prerequisite graph with lock state and retention | 5.8, 5.3 |
 | `/problems` | Problem list with topic / difficulty filters | 5.9, 5.8 |
-| `/problems/:id` | Statement, code editor (Java / Python / C++), Run console, live judging, result with hints, submission history, stopwatch / timer | 5.10, 5.11-5.14 |
+| `/problems/:id` | Statement, Learn This Topic (videos and reading), code editor (Python / Java), Run console, live judging, result with hints, submission history, stopwatch / timer | 5.10, 5.11-5.14 |
 | `/plans` | Study plans with progress | 5.18 |
 | `/mock` | Mock interviews: time, number of problems and difficulty (mixed / easy / medium / hard), countdown, summary | 5.9, 5.8, 5.17 |
 | `/readiness` | Readiness history chart, per-topic scores, self-rating | 5.6, 5.7 |

@@ -43,7 +43,7 @@ import org.springframework.stereotype.Service;
  * Compiles a submission once, then runs every input in a fresh process inside the configured
  * {@link Sandbox}. A fresh process per test means static state or a crash in one test cannot affect
  * another. Java is compiled in-process (annotation processing off, so no learner code runs at
- * compile time); Python is syntax-checked and C++ is built inside the sandbox.
+ * compile time); Python is syntax-checked inside the sandbox.
  */
 @Service
 @Primary
@@ -68,8 +68,6 @@ public class ProcessCodeRunner implements CodeRunner {
             Pattern.compile("\\b((?:[A-Za-z_$][\\w$]*\\.)+[A-Z][\\w$]*(?:Exception|Error))\\b");
     // Last line of a Python traceback: "IndexError: list index out of range"
     private static final Pattern PY_EXCEPTION = Pattern.compile("^([A-Za-z_][\\w.]*(?:Error|Exception|Exit|Interrupt))(?::.*)?$");
-    // "terminate called after throwing an instance of 'std::out_of_range'"
-    private static final Pattern CPP_THROW = Pattern.compile("instance of '([^']+)'");
     private static final Pattern PY_FRAME = Pattern.compile("^\\s*File \"([^\"]*)\", line (\\d+)");
 
     private final RunnerTestCaseRepository testCaseRepository;
@@ -157,13 +155,6 @@ public class ProcessCodeRunner implements CodeRunner {
             case PYTHON -> {
                 ExecResult r = sandbox.run(language, Sandbox.Stage.COMPILE, workDir, "", COMPILE_LIMIT_MS);
                 yield r.exitCode() == 0 && !r.timedOut() ? null : formatPythonSyntaxError(r.stderr());
-            }
-            case CPP -> {
-                ExecResult r = sandbox.run(language, Sandbox.Stage.COMPILE, workDir, "", COMPILE_LIMIT_MS);
-                if (r.timedOut()) {
-                    yield "main.cpp: error: compilation took longer than " + COMPILE_LIMIT_MS / 1000 + " s";
-                }
-                yield r.exitCode() == 0 ? null : (r.stderr().isBlank() ? "Compilation failed." : r.stderr().strip());
             }
         };
     }
@@ -322,24 +313,6 @@ public class ProcessCodeRunner implements CodeRunner {
                         String name = m.group(1);
                         yield name.substring(name.lastIndexOf('.') + 1);
                     }
-                }
-                yield NON_ZERO_EXIT;
-            }
-            case CPP -> {
-                Matcher m = CPP_THROW.matcher(stderr);
-                if (m.find()) {
-                    String name = m.group(1);
-                    yield name.substring(name.lastIndexOf(':') + 1);
-                }
-                // 139 / 0xC0000005: segmentation fault (often an out-of-range index); 134 / 3: abort.
-                if (exitCode == 139 || exitCode == -1073741819) {
-                    yield "SegmentationFault";
-                }
-                if (exitCode == 136 || exitCode == -1073741676) {
-                    yield "FloatingPointException";
-                }
-                if (exitCode == 134 || exitCode == 3) {
-                    yield "Aborted";
                 }
                 yield NON_ZERO_EXIT;
             }

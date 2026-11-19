@@ -9,8 +9,7 @@ import java.util.Locale;
  */
 public enum Language {
     JAVA("Java", "Main.java", 1.0),
-    PYTHON("Python 3", "Main.py", 3.0),
-    CPP("C++17", "main.cpp", 1.0);
+    PYTHON("Python 3", "Main.py", 3.0);
 
     private final String displayName;
     private final String sourceFile;
@@ -38,7 +37,8 @@ public enum Language {
         try {
             return Language.valueOf(value.trim().toUpperCase(Locale.ROOT));
         } catch (IllegalArgumentException e) {
-            throw new BadRequestException("Unknown language '" + value + "'. Use JAVA, PYTHON or CPP.");
+            // C++ used to be offered; old attempts keep "CPP" in the database but new code cannot use it.
+            throw new BadRequestException("Unknown language '" + value + "'. Use JAVA or PYTHON.");
         }
     }
 }

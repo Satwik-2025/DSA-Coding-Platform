@@ -1,7 +1,7 @@
 # DSA Coding Platform
 
 An adaptive coding and data-structures-and-algorithms (DSA) learning platform. Learners solve
-problems in Java, Python or C++ in the browser, and the platform tracks what they remember,
+problems in Python or Java in the browser, and the platform tracks what they remember,
 which topics they have unlocked, what kinds of mistakes they keep making, when each topic is due
 for review, and how ready they are for interviews.
 
@@ -14,7 +14,7 @@ for review, and how ready they are for interviews.
 
 | Area | What it does |
 |---|---|
-| Problems | 31 problems over a 10-topic prerequisite graph (at least one easy, medium and hard in every topic), with statements and samples. The editor starts empty: you write the whole program in Java, Python or C++ |
+| Problems | 31 problems over a 10-topic prerequisite graph (at least one easy, medium and hard in every topic), with statements and samples. The editor starts empty: you write the whole program in Python or Java. A **Learn This Topic** tab on every problem has its key idea, two YouTube videos and two GeeksforGeeks articles |
 | Code editor | CodeMirror with syntax highlighting, line numbers, bracket matching, search and auto-indent. Every visit to a problem starts with an empty editor (nothing is saved or restored; earlier submissions can be loaded from the Submissions tab). On laptops and larger the problem page is a one-screen workspace: the description, the code and the results each scroll on their own, so long code never moves the page |
 | Run | Try code on the examples or your own input, with output, stderr and time per case, without it counting as an attempt |
 | Judging | Every test in its own process inside a sandbox; a bounded judge queue shows "In queue #2" then "Running test 3 of 7" |
@@ -105,13 +105,6 @@ cd backend && mvn spring-boot:run
 cd frontend && cp .env.example .env && npm install && npm run dev
 ```
 
-### C++ submissions
-
-C++ is native code, which the local sandbox cannot contain, so it is only offered with the Docker
-sandbox: run the backend on a host with Docker and set `RUNNER_SANDBOX=docker` (pull the images
-in `application.yml` first so the first run is not slowed down). For trusted single-user use,
-`RUNNER_ALLOW_UNSANDBOXED_NATIVE=true` enables C++ locally if `g++` is installed.
-
 ## Configuration
 
 | Setting | Where | Default |
@@ -152,8 +145,8 @@ held-out learners. See `ml/README.md`.
 ## Tests
 
 ```bash
-cd backend && mvn test        # 80 tests
-cd frontend && npm test       # 24 tests
+cd backend && mvn test        # 81 tests
+cd frontend && npm test       # 26 tests
 python ml/train_hlr.py --simulate 400 --out /tmp/w.json   # trainer self-check
 ```
 
@@ -197,7 +190,7 @@ All endpoints are under `/api`; full shapes are in `docs/CONTRACT.md` section 5.
   stopwatch / timer, larger editor.
 - **Safer judging:** sandboxed runner (local hardening or Docker), bounded judge queue with live
   progress, rate limits and a code-size limit.
-- **Coding experience:** CodeMirror editor, Python and C++, auto-saved drafts, Run with custom
+- **Coding experience:** CodeMirror editor, Python (default) and Java, Run with custom
   input, submission history, runtime percentile, progressive hints.
 - **Learning features:** review queue, activity heatmap and streaks, study plans, mock interviews,
   prediction confidence.
@@ -215,6 +208,12 @@ All endpoints are under `/api`; full shapes are in `docs/CONTRACT.md` section 5.
 - **Beginner-friendly Readiness page** and a gap shown as "points ahead / behind" instead of +19 / -20.8.
 - **Locked problems** ask you to practise first, with a way through.
 - **GeeksforGeeks links** open the real topic tutorial instead of a Google search.
+- **Python and Java only:** C++ is removed from the editor, the API and the runner (a C++ request is
+  a 400). Python is the default language. Old C++ attempts, if any, stay in the history.
+- **Clean results:** every Run or Submit clears the previous output, errors and verdict at once and
+  shows a loading state; a slow older request can never overwrite a newer result.
+- **Learn This Topic:** every problem has a tab with its key idea, two YouTube videos (playable in
+  the page or on YouTube) and two GeeksforGeeks articles, all chosen for that problem and checked.
 - **Problem page workspace:** the header, Run and Submit stay put; only the editor (and, separately,
   the description and the results) scroll. The editor starts empty on every visit; code is no
   longer saved in the browser, and copies saved by older versions are removed.
@@ -231,11 +230,8 @@ All endpoints are under `/api`; full shapes are in `docs/CONTRACT.md` section 5.
 - The local sandbox is defence in depth, not a hard boundary; use the Docker sandbox when strangers
   can submit code.
 - The Docker sandbox and the Docker images are covered by unit tests of their configuration but
-  were not run end to end in this environment (no Docker available); C++ was not compiled
-  for the same reason.
+  were not run end to end in this environment (no Docker available).
 - Peak memory is reported only by the Docker sandbox.
 - There is no real login, so the API trusts the learner id it is given. To limit the risk, the
   backend answers only requests from the computer it runs on (`LOCAL_ONLY`).
-- `npm audit` still lists `picomatch` (used by the Vite / Vitest build tools only, never shipped to
-  the browser); no fixed version exists yet.
 - The model's AUC (0.556) is only modestly above the baselines; retraining on real usage should help.

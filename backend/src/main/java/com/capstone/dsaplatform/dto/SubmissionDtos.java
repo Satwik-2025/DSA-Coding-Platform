@@ -13,7 +13,7 @@ public final class SubmissionDtos {
     private SubmissionDtos() {
     }
 
-    // language: JAVA (default when omitted), PYTHON or CPP.
+    // language: JAVA (default when omitted) or PYTHON.
     public record SubmissionRequest(Long userId, Long problemId, String code, Integer timeSpentSeconds, String language) {
     }
 

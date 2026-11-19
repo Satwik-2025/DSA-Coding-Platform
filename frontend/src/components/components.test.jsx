@@ -3,6 +3,7 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import Select from './Select.jsx'
 import ActivityHeatmap from './ActivityHeatmap.jsx'
 import ErrorBoundary from './ErrorBoundary.jsx'
+import LearnTopic from './LearnTopic.jsx'
 import { api } from '../api.js'
 
 afterEach(() => {
@@ -78,5 +79,33 @@ describe('ErrorBoundary', () => {
     const Stale = () => { throw new TypeError('Failed to fetch dynamically imported module: /assets/x.js') }
     render(<ErrorBoundary><Stale /></ErrorBoundary>)
     expect(screen.getByRole('alert').textContent).toContain('The site was updated')
+  })
+})
+
+describe('LearnTopic', () => {
+  const learn = {
+    concept: 'Monotonic stack',
+    videos: [{ youtubeId: 'cTBiBSnjO3c', title: 'Daily Temperatures', channel: 'NeetCode', about: 'Solves it.',
+      watchUrl: 'https://www.youtube.com/watch?v=cTBiBSnjO3c', embedUrl: 'https://www.youtube-nocookie.com/embed/cTBiBSnjO3c',
+      thumbnailUrl: 'https://i.ytimg.com/vi/cTBiBSnjO3c/hqdefault.jpg' }],
+    reading: [{ title: 'Next Greater Element in Array', site: 'GeeksforGeeks',
+      url: 'https://www.geeksforgeeks.org/dsa/next-greater-element/', about: 'Uses a stack.' }],
+  }
+
+  it('shows the key idea, videos with channel and links, and reading', () => {
+    render(<LearnTopic learn={learn} problemTitle="Days Until a Warmer Day" />)
+    expect(screen.getByText('Monotonic stack')).toBeTruthy()
+    expect(screen.getByText('NeetCode · YouTube')).toBeTruthy()
+    expect(screen.getByRole('link', { name: /Open on YouTube/ }).getAttribute('href')).toBe(learn.videos[0].watchUrl)
+    const article = screen.getByRole('link', { name: /Next Greater Element/ })
+    expect(article.getAttribute('href')).toBe(learn.reading[0].url)
+    expect(article.getAttribute('target')).toBe('_blank')
+    expect(document.querySelector('iframe')).toBeNull() // no player until asked
+  })
+
+  it('plays the video inside the page when asked', () => {
+    render(<LearnTopic learn={learn} problemTitle="x" />)
+    fireEvent.click(screen.getByRole('button', { name: /Watch here/ }))
+    expect(document.querySelector('iframe').getAttribute('src')).toBe(`${learn.videos[0].embedUrl}?autoplay=1&rel=0`)
   })
 })

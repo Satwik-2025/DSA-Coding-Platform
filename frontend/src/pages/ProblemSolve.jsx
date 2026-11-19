@@ -9,6 +9,7 @@ import { forgetSavedCode, preferredLanguage, setPreferredLanguage } from '../dra
 import { isActive, recordSubmission, useMock } from '../mock.js'
 import { DifficultyBadge, VerdictBadge } from '../components/Badges.jsx'
 import CodeEditor from '../components/CodeEditor.jsx'
+import LearnTopic from '../components/LearnTopic.jsx'
 import LockedGate from '../components/LockedGate.jsx'
 import ResourceList from '../components/ResourceList.jsx'
 import Select from '../components/Select.jsx'
@@ -18,14 +19,16 @@ import {
   IconCheck, IconChevronDown, IconChevronRight, IconClock, IconCode, IconPlay, IconRefresh, IconSpark, IconTarget,
 } from '../components/Icons.jsx'
 
-const FILE = { JAVA: 'Main.java', PYTHON: 'Main.py', CPP: 'main.cpp' }
+// The two languages the judge supports. Python is the default.
+const FILE = { PYTHON: 'Main.py', JAVA: 'Main.java' }
+const FALLBACK_LANGUAGES = [{ id: 'PYTHON', name: 'Python 3' }, { id: 'JAVA', name: 'Java' }]
+// Display names for the history list; CPP only appears on old attempts from when C++ was offered.
 const LANG_NAME = { JAVA: 'Java', PYTHON: 'Python', CPP: 'C++' }
 
 // Grey hint text shown while the editor is empty. It is not code and disappears as soon as you type.
 const PLACEHOLDER = {
   JAVA: 'Write your complete Java program here.\nRead the input from System.in.\nPrint the answer with System.out.\nYour class must be called Main.',
   PYTHON: 'Write your complete Python program here.\nRead the input with input() or sys.stdin.\nPrint the answer with print().',
-  CPP: 'Write your complete C++ program here.\nRead the input with cin.\nPrint the answer with cout.',
 }
 
 export default function ProblemSolve() {
@@ -68,11 +71,17 @@ export default function ProblemSolve() {
   const busy = useRef(false)
   // The problem currently on screen; a result that arrives after switching problems is dropped.
   const shownId = useRef(null)
+  // Number of the newest Run / Submit. An answer is shown only if it belongs to the newest one,
+  // so a slow older request can never overwrite a newer result.
+  const latest = useRef(0)
   const consoleRef = useRef(null)
   const resultRef = useRef(null)
 
-  const available = languages.data?.languages.filter((l) => l.available) ?? [{ id: 'JAVA', name: 'Java' }]
-  const language = available.some((l) => l.id === preferred) ? preferred : 'JAVA'
+  // Python first, then Java; only languages this server can actually run.
+  const available = languages.data
+    ? FALLBACK_LANGUAGES.map((f) => languages.data.languages.find((l) => l.id === f.id && l.available)).filter(Boolean)
+    : FALLBACK_LANGUAGES
+  const language = available.some((l) => l.id === preferred) ? preferred : (available[0]?.id ?? 'PYTHON')
   const p = problem.data
   shownId.current = p?.id ?? null
   const topicNode = p && graph.data?.nodes.find((n) => n.id === p.topic.id)
@@ -122,21 +131,28 @@ export default function ProblemSolve() {
     }
     busy.current = true
     setNotice(null)
+    // The panel must only ever show the newest attempt: remove every earlier output, error and verdict.
+    setRunResult(null)
+    setRunError(null)
+    setResult(null)
+    setSubmitError(null)
+    latest.current += 1
     return true
   }
 
   async function run() {
     if (!start('Run')) return
     const pid = p.id
+    const ticket = latest.current
+    const current = () => shownId.current === pid && latest.current === ticket
     setRunning(true)
-    setRunError(null)
     setConsoleTab('result')
     consoleRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
     try {
       const r = await api.run(userId, pid, code, language, customOn ? customInput : undefined)
-      if (shownId.current === pid) setRunResult(r)
+      if (current()) setRunResult(r)
     } catch (e) {
-      if (shownId.current === pid) setRunError(e)
+      if (current()) setRunError(e)
     } finally {
       busy.current = false
       setRunning(false)
@@ -146,21 +162,23 @@ export default function ProblemSolve() {
   async function submit() {
     if (!start('Submit')) return
     const pid = p.id
+    const ticket = latest.current
+    const current = () => shownId.current === pid && latest.current === ticket
     setSubmitting(true)
-    setSubmitError(null)
     setProgress({ status: 'QUEUED' })
+    requestAnimationFrame(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }))
     try {
       const seconds = Math.round((Date.now() - openedAt.current) / 1000)
-      const r = await submitAndWait(userId, pid, code, seconds, language, setProgress)
+      const r = await submitAndWait(userId, pid, code, seconds, language, (job) => { if (current()) setProgress(job) })
       recordSubmission(userId, pid, r.verdict) // counts toward a running mock interview, if any
-      if (shownId.current === pid) {
+      if (current()) {
         setResult(r)
         setHistoryVersion((v) => v + 1)
         // The verdict appears below the console; bring it on screen.
         requestAnimationFrame(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }))
       }
     } catch (e) {
-      if (shownId.current === pid) {
+      if (current()) {
         setSubmitError(e)
         requestAnimationFrame(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }))
       }
@@ -222,19 +240,20 @@ export default function ProblemSolve() {
       {/* Editor column is the wider one (55% on laptops, 60% on large screens). */}
       <div className="grid gap-6 items-start lg:items-stretch lg:flex-1 lg:min-h-0 lg:grid-cols-[minmax(0,9fr)_minmax(0,11fr)] xl:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
         <section className="glass rounded-2xl min-w-0 overflow-hidden lg:flex lg:flex-col lg:min-h-0">
-          <div className="flex items-center gap-1 px-3 h-12 border-b border-line shrink-0" role="tablist">
-            {[['description', 'Description'], ['submissions', 'Submissions']].map(([key, label]) => (
+          <div className="flex items-center gap-1 px-3 h-12 border-b border-line shrink-0 overflow-x-auto" role="tablist">
+            {[['description', 'Description'], ['learn', 'Learn This Topic'], ['submissions', 'Submissions']].map(([key, label]) => (
               <button key={key} role="tab" aria-selected={leftTab === key} onClick={() => setLeftTab(key)}
-                className={`h-8 px-3 rounded-lg text-xs font-medium transition-colors
+                className={`h-8 px-3 rounded-lg text-xs font-medium whitespace-nowrap shrink-0 transition-colors
                   ${leftTab === key ? 'bg-accent-soft text-ink' : 'text-muted hover:text-ink hover:bg-sunken'}`}>
                 {label}
               </button>
             ))}
           </div>
           <div className="lg:flex-1 lg:min-h-0 lg:overflow-y-auto lg:overscroll-contain">
-            {leftTab === 'description'
-              ? <Description p={p} />
-              : <SubmissionHistory key={historyVersion} userId={userId} problemId={p.id} onLoad={loadFromHistory} />}
+            {leftTab === 'description' && <Description p={p} />}
+            {leftTab === 'learn' && <LearnTopic key={p.id} learn={p.learn} problemTitle={p.title} />}
+            {leftTab === 'submissions' && <SubmissionHistory key={historyVersion} userId={userId} problemId={p.id} onLoad={loadFromHistory}
+                  canLoad={(lang) => available.some((l) => l.id === lang)} />}
           </div>
         </section>
 
@@ -287,6 +306,11 @@ export default function ProblemSolve() {
           </div>
 
           <div ref={resultRef} className="scroll-mt-6 space-y-4">
+            {submitting && (
+              <div className="glass rounded-2xl p-5 flex items-center gap-3 text-sm text-muted animate-fade-up" role="status">
+                <Spinner /> Judging your code: {progressLabel(progress).toLowerCase()}
+              </div>
+            )}
             {submitError && <ErrorBox error={submitError} />}
             {result && <SubmissionResult key={result.attemptId} r={result} />}
           </div>
@@ -341,8 +365,10 @@ function Description({ p }) {
       <div className="rounded-xl px-4 py-3 bg-accent-soft border border-accent/15 text-sm text-ink space-y-1">
         <p className="font-medium">How to answer</p>
         <p className="text-muted">
-          Write a complete program. Read the input exactly as described above, and print only the answer.
-          In Java, your class must be called <code className="font-mono text-[13px] text-ink">Main</code>.
+          Write a complete program in Python or Java. Read the input exactly as described above, and print
+          only the answer. In Python, read with <code className="font-mono text-[13px] text-ink">input()</code> and
+          print with <code className="font-mono text-[13px] text-ink">print()</code>. In Java, your class must be
+          called <code className="font-mono text-[13px] text-ink">Main</code>.
         </p>
       </div>
       <p className="text-xs text-faint">Python gets 3× the time limit, because limits are set for Java.</p>
@@ -351,7 +377,7 @@ function Description({ p }) {
 }
 
 // The learner's own past attempts on this problem, newest first; any of them can be loaded back.
-function SubmissionHistory({ userId, problemId, onLoad }) {
+function SubmissionHistory({ userId, problemId, onLoad, canLoad }) {
   const history = useApi(() => api.history(userId, problemId), [userId, problemId])
   const [open, setOpen] = useState(null)
 
@@ -378,9 +404,13 @@ function SubmissionHistory({ userId, problemId, onLoad }) {
               <div className="rounded-xl overflow-hidden border border-line h-72">
                 <CodeEditor value={h.code} language={h.language} readOnly ariaLabel="Submitted code" />
               </div>
-              <button onClick={() => onLoad(h)} className="btn btn-ghost h-8 px-3 text-xs">
-                <IconCode size={14} /> Load into editor
-              </button>
+              {canLoad(h.language) ? (
+                <button onClick={() => onLoad(h)} className="btn btn-ghost h-8 px-3 text-xs">
+                  <IconCode size={14} /> Load into editor
+                </button>
+              ) : (
+                <p className="text-xs text-faint">{LANG_NAME[h.language] ?? h.language} is no longer offered, so this code can only be viewed.</p>
+              )}
             </div>
           )}
         </li>

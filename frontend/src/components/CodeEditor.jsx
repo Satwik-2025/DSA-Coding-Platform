@@ -2,7 +2,6 @@ import { useMemo } from 'react'
 import CodeMirror from '@uiw/react-codemirror'
 import { java } from '@codemirror/lang-java'
 import { python } from '@codemirror/lang-python'
-import { cpp } from '@codemirror/lang-cpp'
 import { HighlightStyle, indentUnit, syntaxHighlighting } from '@codemirror/language'
 import { EditorView, keymap, placeholder as placeholderText } from '@codemirror/view'
 import { Prec } from '@codemirror/state'
@@ -37,7 +36,8 @@ const highlight = syntaxHighlighting(HighlightStyle.define([
   { tag: t.invalid, color: 'var(--brick)' },
 ]))
 
-const LANGS = { JAVA: java, PYTHON: python, CPP: cpp }
+// Old C++ attempts in the history fall back to Java highlighting, which reads close enough.
+const LANGS = { JAVA: java, PYTHON: python }
 
 // Real code editor (CodeMirror 6): syntax highlighting, line numbers, bracket matching, auto-indent,
 // folding, search (Ctrl/Cmd+F) and multiple cursors. Tab indents; Escape then Tab leaves the editor.
